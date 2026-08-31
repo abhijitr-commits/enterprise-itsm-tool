@@ -12,6 +12,57 @@ const authRoutes = require("./routes/authRoutes");
 const incidentRoutes = require("./routes/incidentRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 
+/*************************************************************
+ * Auto-seed on boot — runs automatically every time the server
+ * starts (safe/idempotent). This exists so a free host with no
+ * shell/console access (e.g. Render's free tier) still ends up
+ * with Permissions, an SLA Matrix, and one Administrator login,
+ * with zero manual "run this command" steps required.
+ *
+ * - Permissions and SLA Matrix are always upserted (cheap, safe
+ *   to repeat, and picks up new actions as more modules ship).
+ * - The Administrator account is created ONLY if the User
+ *   collection is completely empty, so it never overwrites real
+ *   accounts/passwords created later.
+ *************************************************************/
+async function autoSeed() {
+  const Permission = require("./models/Permission");
+  const SLAMatrix = require("./models/SLAMatrix");
+  const User = require("./models/User");
+  const { DEFAULT_PERMISSIONS_MAP } = require("./config/permissions");
+  const { PRIORITY, ROLE, COMPANY_EMAIL_DOMAIN } = require("./config/constants");
+
+  for (const [action, allowedRoles] of Object.entries(DEFAULT_PERMISSIONS_MAP)) {
+    await Permission.updateOne({ action }, { $set: { allowedRoles } }, { upsert: true });
+  }
+
+  const DEFAULT_INCIDENT_SLA_HOURS = {
+    [PRIORITY.CRITICAL]: { response: 1, resolution: 4 },
+    [PRIORITY.HIGH]: { response: 2, resolution: 8 },
+    [PRIORITY.MEDIUM]: { response: 4, resolution: 24 },
+    [PRIORITY.LOW]: { response: 8, resolution: 72 },
+  };
+  for (const [priority, hours] of Object.entries(DEFAULT_INCIDENT_SLA_HOURS)) {
+    await SLAMatrix.updateOne(
+      { module: "Incident", priority },
+      { $set: { responseTimeHours: hours.response, resolutionTimeHours: hours.resolution } },
+      { upsert: true }
+    );
+  }
+
+  const userCount = await User.countDocuments();
+  if (userCount === 0) {
+    const email = process.env.SEED_ADMIN_EMAIL || `admin@${COMPANY_EMAIL_DOMAIN}`;
+    const password = process.env.SEED_ADMIN_PASSWORD || "ChangeMe123!";
+    const admin = new User({ name: "Administrator", email, role: ROLE.ADMIN });
+    await admin.setPassword(password);
+    await admin.save();
+    console.log(`[auto-seed] First run: created Administrator login -> ${email} / ${password} (change this password after logging in)`);
+  } else {
+    console.log(`[auto-seed] Permissions + SLA Matrix refreshed. Users already exist (${userCount}) — admin account not touched.`);
+  }
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -26,6 +77,7 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 
 async function start() {
   await connectDB();
+  await autoSeed();
 
   app.use(
     session({
