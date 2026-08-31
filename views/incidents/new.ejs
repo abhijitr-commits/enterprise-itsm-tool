@@ -1,0 +1,47 @@
+<%- include('../partials/header', { title: 'New Incident' }) %>
+
+<div class="page-header">
+  <h1>New Incident</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/incidents">
+  <div class="form-grid">
+    <label>Employee Name
+      <input type="text" name="employeeName" value="<%= form.employeeName || '' %>" required />
+    </label>
+    <label>Department
+      <input type="text" name="department" value="<%= form.department || '' %>" required />
+    </label>
+    <label>Location
+      <input type="text" name="location" value="<%= form.location || '' %>" required />
+    </label>
+    <label>Category
+      <input type="text" name="category" value="<%= form.category || '' %>" required />
+    </label>
+    <label>Priority
+      <select name="priority" required>
+        <option value="">Select…</option>
+        <% Object.values(PRIORITY).forEach(function(p){ %>
+          <option value="<%= p %>" <%= form.priority === p ? 'selected' : '' %>><%= p %></option>
+        <% }) %>
+      </select>
+    </label>
+  </div>
+  <label>Subject
+    <input type="text" name="subject" value="<%= form.subject || '' %>" required />
+  </label>
+  <label>Description
+    <textarea name="description" rows="5" required><%= form.description || '' %></textarea>
+  </label>
+  <label>Remarks (optional)
+    <textarea name="remarks" rows="2"><%= form.remarks || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/incidents">Cancel</a>
+    <button type="submit" class="btn btn-primary">Create Incident</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

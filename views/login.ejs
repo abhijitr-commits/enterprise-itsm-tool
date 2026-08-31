@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign in · Enterprise ITSM</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="centered-page">
+  <form class="login-card" method="post" action="/login">
+    <h1>Enterprise ITSM</h1>
+    <p class="subtitle">Sign in to continue</p>
+    <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+    <label>Email
+      <input type="email" name="email" required autofocus />
+    </label>
+    <label>Password
+      <input type="password" name="password" required />
+    </label>
+    <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+  </form>
+</body>
+</html>
