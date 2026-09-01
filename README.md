@@ -1,4 +1,4 @@
-# Enterprise ITSM Tool — Node.js + MongoDB (migration complete: Phase 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8)
+# Enterprise ITSM Tool — Node.js + MongoDB (migration complete: Phase 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9)
 
 This is the Node.js/Express + MongoDB migration of the Enterprise ITSM
 Tool off Google Apps Script + Google Sheets. It replaces the Sheets-based
@@ -181,6 +181,21 @@ Joining Date confirmation, and a Welcome Kit sub-checklist) that
 auto-completes the matching checklist tasks when saved. See
 MIGRATION.md for why these four were missed the first time around.
 
+**Phase 9 scope** (adds — genuinely new, not a port of anything in the
+original 116 files, built for the service-robotics company running
+this app): calibration/maintenance scheduling on Assets (an interval,
+a "Log Maintenance" action, and a due-date panel), a Fleet Reliability
+(MTBF) report driven by an optional "Related Asset" field on
+Incidents, a Safety Incident / Near-Miss reporting module (separate
+from Complaints so severity and injury data get their own tracking
+and reporting), and Equipment Booking folded into the existing Room
+Booking module (a test bench or dev robot unit books exactly like a
+conference room). A much larger scope the company also named —
+Logistics, Sales, Technical, Software, Designing, Store, Finance,
+Production, Management, and others — is intentionally left for a
+separate, scoped follow-up rather than guessed at in this phase; see
+MIGRATION.md.
+
 ## Stack (100% free tier)
 
 - **Backend**: Node.js + Express
@@ -301,6 +316,10 @@ Railway.app works the same way if you prefer it over Render.
 | `RecordEngine.gs` → `getAuditTrailForRecord()` | `src/utils/recordExtras.js` + `views/partials/auditTrail.ejs` | Same oldest-first `AuditLog` read, now displayed on the same six modules' detail pages — no new writes, `logAudit()` was already called everywhere since Phase 1 |
 | `RecordEngine.gs` → `globalSearch()` | `src/utils/globalSearch.js` + `src/controllers/searchController.js` + `views/search/results.ejs` (`/search`) | Same 9 modules (Incidents/Requests/Problems/Changes/Assets/CMDB/Knowledge/Employees/Purchases), same per-module field matching and 25-result cap; Purchase results link to the Purchase Register list (no individual detail page exists for Purchases in this app) |
 | `PreOnboardingDetailEngine.gs` (checklist half: `confirmJoiningDate()`/`saveWelcomeKitProgress()`/`savePreOnboardingContactInfo()`) | `src/models/PreOnboardingDetail.js` + additions to `src/controllers/checklistController.js` + `views/onboarding/pre-onboarding-detail.ejs` | Same 6-item Welcome Kit sub-checklist and Joining Date confirmation, each auto-completing the matching Pre-Onboarding checklist task; the candidate-document-vault half of this same original file still needs Drive/email and stays deferred |
+| *(Phase 9 — new, not a port)* Calibration/Maintenance Scheduling | `Asset` model additions (`hardwareType`/`maintenanceIntervalDays`/`lastMaintenanceDate`/`nextMaintenanceDue`) + `assetController.logMaintenance()` | No original equivalent — the Asset Register had no maintenance schedule concept; built for robotics hardware that needs periodic calibration |
+| *(Phase 9 — new, not a port)* Fleet Reliability (MTBF) Report | `Incident.relatedAsset` field + `reportController.assetReliabilityReport()` | No original equivalent; groups Incidents by the equipment they were filed against |
+| *(Phase 9 — new, not a port)* Safety Incident / Near-Miss Reporting | `src/models/SafetyIncident.js` + `src/controllers/safetyController.js` + `views/safety/*` (`/safety`) | No original equivalent; modeled on `Complaint`'s open-submit/Admin-Manager-manage shape, kept separate so severity/injury data isn't diluted into general complaints |
+| *(Phase 9 — new, not a port)* Equipment Booking | `Room.resourceType` field (Room/Equipment) | No original equivalent; reuses Conference Room Booking's exact model, conflict-check logic, and views for shared lab/robotics equipment |
 
 ## Original source, kept for reference
 
