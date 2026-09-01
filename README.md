@@ -1,4 +1,4 @@
-# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4A + 4B + 4C + 4D)
+# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4 complete)
 
 This is the Node.js/Express + MongoDB migration of the Enterprise ITSM
 Tool off Google Apps Script + Google Sheets. It replaces the Sheets-based
@@ -66,10 +66,32 @@ certificates on completion. My Profile's Trainings section and My
 Work's approval queue are both now wired to real data from this
 module.
 
-The rest of the HR suite (Benefits/Wellness, Policy Acknowledgment,
-Letters/Employee Documents) and the IT-ops modules are **not yet
-ported** — see `MIGRATION.md` for the phased roadmap and what's
-needed for each.
+**Phase 4E scope** (adds, and completes the HR suite): Benefits
+Enrollment (HR-managed, self-viewable on My Profile); Wellness
+Programs, an anonymous Pulse Survey, and a Kudos peer-recognition
+wall; IT Policy publishing + employee acknowledgment with a
+compliance report; Offer Letters, Appointment Letters, and an
+auto-generated No Dues Certificate on resignation completion (all
+three as printable pages, using HR-editable templates); and
+per-employee Document storage (ID proofs, certificates) — stored
+directly in this app's own MongoDB database rather than a separate
+file-hosting account, so there's nothing new to sign up for (see
+`MIGRATION.md` for the reasoning and the resulting 3MB-per-file cap).
+
+**Phase 4F scope** (adds, completing the HR suite): an HR Hub landing
+page tiling every HR module into one entry point (People / Time Off /
+Employee Lifecycle / Growth / Culture / Compliance &amp; Documents,
+gated the same way the sidebar already is); an Executive Summary KPI
+dashboard (open/critical incidents, pending-approvals breakdown,
+upcoming warranty + contract expiries, headcount, pending resignations,
+highest-workload department — Administrator/Manager only); and a
+Contract Expiry report (Contract-type employees due within 30 days,
+split Expired vs. Expiring Soon) that had been deferred from Phase 2
+until the Employee Directory existed. **This completes Phase 4 — all
+20 HR-suite modules (4A–4F) are now migrated.**
+
+Only the IT-ops modules (Phase 5) remain — see `MIGRATION.md` for the
+phased roadmap.
 
 ## Stack (100% free tier)
 
@@ -160,6 +182,14 @@ Railway.app works the same way if you prefer it over Render.
 | `PMSEngine.gs` | `src/controllers/performanceController.js` | Same Goals (ownership-checked progress updates) + Reviews (self-acknowledge); creation is HR-team gated |
 | `SuccessionEngine.gs` | `src/controllers/successionController.js` | Admin/Manager only; "view_reports" permission-key bug fixed with a new `succession_manage` key (see MIGRATION.md) |
 | `LMSEngine.gs` | `src/controllers/trainingController.js` | Same catalog + enrollment + auto-issued-certificate-on-completion chain; certificates are a printable page, not a generated file |
+| `BenefitsEngine.gs` | `src/controllers/benefitsController.js` | Same enrollment tracking, HR-team gated throughout |
+| `WellnessEngine.gs` | `src/controllers/wellnessController.js` | Same Programs/Pulse Survey (anonymous)/Kudos three-in-one |
+| `PolicyAcknowledgmentEngine.gs` | `src/controllers/policyController.js` | Same publish/acknowledge/compliance-report flow, IT-team gated for publishing |
+| `LetterEngine.gs` | `src/controllers/lettersController.js` | Same template-merge logic; generated letters are saved + printable instead of emailed (no email provider — see MIGRATION.md) |
+| `EmployeeDocumentEngine.gs` | `src/controllers/employeeDocumentController.js` | Files stored in MongoDB instead of a Google Drive folder — no new third-party account needed (see MIGRATION.md); 3MB/file cap |
+| `HR.gs` / `HR.html` (no backend logic — pure client-side tab shell) | `src/controllers/hrHubController.js` + `views/hr/index.ejs` | Confirmed there was nothing to port beyond a landing page; built as a link-tiling hub reusing the Admin Console's tile CSS |
+| `ReportEngine.gs` → `getExecutiveSummarySafe()` | `src/controllers/executiveSummaryController.js` | Same KPI roll-up, reuses `reportController.js`'s workload/warranty/contract-expiry helpers instead of recomputing them |
+| `ReportEngine.gs` → `getContractExpiryReport()` | `src/controllers/reportController.js` (`contractExpiryReport()`) | Same 30-day Expired/Expiring-Soon split, added to the Reports page once the Employee Directory existed |
 
 ## Original source, kept for reference
 
