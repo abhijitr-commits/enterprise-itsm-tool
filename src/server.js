@@ -29,6 +29,8 @@ const orgChartRoutes = require("./routes/orgChartRoutes");
 const leaveRoutes = require("./routes/leaveRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const shiftRoutes = require("./routes/shiftRoutes");
+const recruitmentRoutes = require("./routes/recruitmentRoutes");
+const referralRoutes = require("./routes/referralRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 
 /*************************************************************
@@ -132,6 +134,8 @@ async function start() {
   app.use("/leave", leaveRoutes);
   app.use("/attendance", attendanceRoutes);
   app.use("/shifts", shiftRoutes);
+  app.use("/recruitment", recruitmentRoutes);
+  app.use("/referrals", referralRoutes);
 
   app.use((req, res) => res.status(404).render("errors/404"));
 

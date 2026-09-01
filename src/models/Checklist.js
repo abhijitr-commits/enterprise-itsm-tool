@@ -9,6 +9,7 @@ const mongoose = require("mongoose");
  * Employee | Department | Task | Category | Status | Due Date | Completed Date.
  */
 const CHECKLIST_TYPE = {
+  PRE_ONBOARDING: "Pre-Onboarding",
   ONBOARDING: "Onboarding",
   OFFBOARDING: "Offboarding",
   ADMIN_ONBOARDING: "Admin Onboarding",

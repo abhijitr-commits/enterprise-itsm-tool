@@ -11,6 +11,7 @@ const { CHECKLIST_TYPE } = require("../models/Checklist");
 const { createChecklistIfMissing } = require("../utils/checklists");
 
 const TYPE_BY_SLUG = {
+  "pre-onboarding": CHECKLIST_TYPE.PRE_ONBOARDING,
   onboarding: CHECKLIST_TYPE.ONBOARDING,
   offboarding: CHECKLIST_TYPE.OFFBOARDING,
   "admin-onboarding": CHECKLIST_TYPE.ADMIN_ONBOARDING,
