@@ -1,0 +1,35 @@
+<%- include('../partials/header', { title: 'Succession Planning' }) %>
+
+<div class="page-header">
+  <h1>Succession Planning</h1>
+  <a class="btn btn-primary" href="/succession/new">+ New Succession Plan</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="alert alert-info">
+  This is sensitive HR data — visible to Administrators and Managers only.
+</div>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>ID</th><th>Position</th><th>Current Holder</th><th>Department</th><th>Successor 1</th><th>Successor 2</th><th>Last Updated</th><th></th></tr></thead>
+    <tbody>
+      <% plans.forEach(function(p) { %>
+        <tr>
+          <td><%= p.planId %></td>
+          <td><%= p.position %></td>
+          <td><%= p.currentHolder %></td>
+          <td><%= p.department || '—' %></td>
+          <td><%= p.successor1 || '—' %><% if (p.successor1Readiness) { %> <span class="badge badge-status-open"><%= p.successor1Readiness %></span><% } %></td>
+          <td><%= p.successor2 || '—' %><% if (p.successor2Readiness) { %> <span class="badge badge-status-open"><%= p.successor2Readiness %></span><% } %></td>
+          <td><%= p.lastUpdated ? new Date(p.lastUpdated).toLocaleDateString() : '—' %></td>
+          <td><a class="btn btn-secondary" href="/succession/<%= p._id %>/edit">Edit</a></td>
+        </tr>
+      <% }) %>
+      <% if (plans.length === 0) { %><tr><td colspan="8" class="empty-row">No succession plans yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

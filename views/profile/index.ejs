@@ -82,7 +82,41 @@
 
       <div class="panel">
         <div class="panel-header"><h2>My Trainings</h2></div>
-        <p class="hint">Not available yet — coming in the Learning &amp; Development module.</p>
+        <table class="table">
+          <thead><tr><th>Course</th><th>Status</th><th>Completed</th></tr></thead>
+          <tbody>
+            <% myTrainings.forEach(function(t) { %>
+              <tr>
+                <td><%= t.courseTitle %></td>
+                <td><span class="badge <%= t.status === 'Completed' ? 'badge-status-resolved' : 'badge-status-open' %>"><%= t.status %></span></td>
+                <td><%= t.completionDate ? new Date(t.completionDate).toLocaleDateString() : '—' %></td>
+              </tr>
+            <% }) %>
+            <% if (myTrainings.length === 0) { %>
+              <tr><td colspan="3" class="empty-row">No training enrollments yet.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+        <a class="btn btn-secondary" href="/training/courses">Browse Training Catalog</a>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>My Certificates</h2></div>
+        <table class="table">
+          <thead><tr><th>Course</th><th>Issued</th><th></th></tr></thead>
+          <tbody>
+            <% myCertificates.forEach(function(c) { %>
+              <tr>
+                <td><%= c.courseTitle %></td>
+                <td><%= new Date(c.issuedDate).toLocaleDateString() %></td>
+                <td><a class="btn btn-secondary" href="/training/certificates/<%= c.certificateId %>">View / Print</a></td>
+              </tr>
+            <% }) %>
+            <% if (myCertificates.length === 0) { %>
+              <tr><td colspan="3" class="empty-row">No certificates earned yet.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

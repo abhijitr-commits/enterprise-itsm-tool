@@ -1,0 +1,64 @@
+<%- include('../partials/header', { title: 'Training Enrollments' }) %>
+
+<div class="page-header">
+  <h1>Training Enrollments</h1>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<div class="panel">
+  <div class="panel-header"><h2>Enroll an Employee</h2></div>
+  <form method="post" action="/training/enrollments" class="form-panel">
+    <div class="form-grid">
+      <label>Employee (name)
+        <input type="text" name="employee" required />
+      </label>
+      <label>Course
+        <select name="courseId" required>
+          <option value="">Select…</option>
+          <% courses.forEach(function(c) { %>
+            <option value="<%= c.courseId %>"><%= c.title %> (<%= c.type %>)</option>
+          <% }) %>
+        </select>
+      </label>
+    </div>
+    <button type="submit" class="btn btn-primary">Enroll</button>
+  </form>
+</div>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>ID</th><th>Employee</th><th>Course</th><th>Enrolled</th><th>Status</th><th>Completed</th><th></th></tr></thead>
+    <tbody>
+      <% enrollments.forEach(function(e) { %>
+        <tr>
+          <td><%= e.enrollmentId %></td>
+          <td><%= e.employee %></td>
+          <td><%= e.courseTitle %></td>
+          <td><%= new Date(e.enrollmentDate).toLocaleDateString() %></td>
+          <td><span class="badge <%= e.status === 'Completed' ? 'badge-status-resolved' : e.status === 'Withdrawn' ? 'badge-status-closed' : 'badge-status-open' %>"><%= e.status %></span></td>
+          <td><%= e.completionDate ? new Date(e.completionDate).toLocaleDateString() : '—' %></td>
+          <td>
+            <% if (e.status === 'Enrolled') { %>
+              <form method="post" action="/training/enrollments/<%= e._id %>/status" class="filter-bar">
+                <input type="hidden" name="status" value="Completed" />
+                <input type="text" name="scoreNotes" placeholder="Score/Notes (optional)" />
+                <button type="submit" class="btn btn-secondary">Mark Completed</button>
+              </form>
+              <form method="post" action="/training/enrollments/<%= e._id %>/status" style="display:inline">
+                <input type="hidden" name="status" value="Withdrawn" />
+                <button type="submit" class="btn btn-danger">Withdraw</button>
+              </form>
+            <% } else { %>
+              <%= e.scoreNotes || '—' %>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (enrollments.length === 0) { %><tr><td colspan="7" class="empty-row">No enrollments yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

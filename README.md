@@ -1,4 +1,4 @@
-# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4A + 4B + 4C)
+# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4A + 4B + 4C + 4D)
 
 This is the Node.js/Express + MongoDB migration of the Enterprise ITSM
 Tool off Google Apps Script + Google Sheets. It replaces the Sheets-based
@@ -56,9 +56,20 @@ Rejected, with "Hired" auto-starting a Pre-Onboarding checklist) and
 Employee Referrals (any employee can refer a candidate; the
 recruitment team tracks status and reward payout).
 
-The rest of the HR suite (Performance/Learning, Benefits/Wellness,
-and the IT-ops modules) are **not yet ported** — see `MIGRATION.md`
-for the phased roadmap and what's needed for each.
+**Phase 4D scope** (adds): Performance Goals (with progress tracking)
+and formal Performance Reviews (rating + written feedback,
+acknowledged by the employee); Succession Planning (key roles, their
+current holder, and up to two rated successors — Admin/Manager only,
+genuinely sensitive HR data); and a Learning & Development tracker —
+a training catalog, enrollments, and auto-issued printable
+certificates on completion. My Profile's Trainings section and My
+Work's approval queue are both now wired to real data from this
+module.
+
+The rest of the HR suite (Benefits/Wellness, Policy Acknowledgment,
+Letters/Employee Documents) and the IT-ops modules are **not yet
+ported** — see `MIGRATION.md` for the phased roadmap and what's
+needed for each.
 
 ## Stack (100% free tier)
 
@@ -146,6 +157,9 @@ Railway.app works the same way if you prefer it over Render.
 | `LeaveEngine.gs` | `src/controllers/leaveController.js` + `src/utils/leaveBalances.js` | Same 4-way balance calc (Casual/Sick/Earned/Unpaid); `leaveType` tightened to an enum since the balance math needs exact strings |
 | `AttendanceEngine.gs`, `ShiftEngine.gs` | `src/controllers/attendanceController.js` + `shiftController.js` | Same honor-system check-in/out and date-range roster |
 | `ATSEngine.gs`, `ReferralEngine.gs` | `src/controllers/recruitmentController.js` + `referralController.js` | Same pipeline + "Hired" → Pre-Onboarding checklist; referral→candidate permission bug fixed (see MIGRATION.md) |
+| `PMSEngine.gs` | `src/controllers/performanceController.js` | Same Goals (ownership-checked progress updates) + Reviews (self-acknowledge); creation is HR-team gated |
+| `SuccessionEngine.gs` | `src/controllers/successionController.js` | Admin/Manager only; "view_reports" permission-key bug fixed with a new `succession_manage` key (see MIGRATION.md) |
+| `LMSEngine.gs` | `src/controllers/trainingController.js` | Same catalog + enrollment + auto-issued-certificate-on-completion chain; certificates are a printable page, not a generated file |
 
 ## Original source, kept for reference
 

@@ -1,0 +1,43 @@
+<%- include('../partials/header', { title: 'Add Course' }) %>
+
+<div class="page-header">
+  <h1>Add a Course</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/training/courses">
+  <div class="form-grid">
+    <label>Title
+      <input type="text" name="title" value="<%= form.title || '' %>" required />
+    </label>
+    <label>Type
+      <select name="type" required>
+        <option value="">Select…</option>
+        <option value="Online" <%= form.type === 'Online' ? 'selected' : '' %>>Online</option>
+        <option value="Offline" <%= form.type === 'Offline' ? 'selected' : '' %>>Offline</option>
+      </select>
+    </label>
+    <label>Category
+      <input type="text" name="category" placeholder="General" value="<%= form.category || '' %>" />
+    </label>
+    <label>Duration (Hours)
+      <input type="number" name="durationHours" min="0" value="<%= form.durationHours || '' %>" />
+    </label>
+    <label>Provider
+      <input type="text" name="provider" value="<%= form.provider || '' %>" />
+    </label>
+    <label>Link / Location
+      <input type="text" name="linkOrLocation" value="<%= form.linkOrLocation || '' %>" />
+    </label>
+  </div>
+  <label>Description
+    <textarea name="description" rows="3"><%= form.description || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/training/courses">Cancel</a>
+    <button type="submit" class="btn btn-primary">Add Course</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

@@ -48,6 +48,10 @@
         <a href="/attendance" class="nav-link">Attendance</a>
         <a href="/shifts" class="nav-link">Shifts &amp; Roster</a>
         <a href="/resignations" class="nav-link">Resignations</a>
+        <a href="/performance/goals" class="nav-link">Goals</a>
+        <a href="/performance/reviews" class="nav-link">Reviews</a>
+        <a href="/training/courses" class="nav-link">Training Catalog</a>
+        <a href="/training/certificates" class="nav-link">My Certificates</a>
         <% if (isHRTeamUser) { %>
           <a href="/onboarding/pre-onboarding" class="nav-link">Pre-Onboarding</a>
           <a href="/onboarding/onboarding" class="nav-link">Onboarding</a>
@@ -55,6 +59,10 @@
           <a href="/recruitment" class="nav-link">Recruitment</a>
         <% } %>
         <a href="/referrals" class="nav-link">Referrals</a>
+        <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
+          <a href="/succession" class="nav-link">Succession Planning</a>
+          <a href="/training/enrollments" class="nav-link">Training Enrollments</a>
+        <% } %>
         <% if (isAdminTeamUser) { %>
           <a href="/onboarding/admin-onboarding" class="nav-link">Admin Onboarding</a>
           <a href="/onboarding/admin-offboarding" class="nav-link">Admin Offboarding</a>

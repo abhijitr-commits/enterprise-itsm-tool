@@ -1,0 +1,30 @@
+<%- include('../partials/header', { title: 'Set a Goal' }) %>
+
+<div class="page-header">
+  <h1>Set a Performance Goal</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/performance/goals">
+  <div class="form-grid">
+    <label>Employee (name)
+      <input type="text" name="employee" value="<%= form.employee || '' %>" required />
+    </label>
+    <label>Goal Title
+      <input type="text" name="goalTitle" value="<%= form.goalTitle || '' %>" required />
+    </label>
+    <label>Target Date
+      <input type="date" name="targetDate" value="<%= form.targetDate || '' %>" />
+    </label>
+  </div>
+  <label>Description
+    <textarea name="description" rows="3"><%= form.description || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/performance/goals">Cancel</a>
+    <button type="submit" class="btn btn-primary">Create Goal</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

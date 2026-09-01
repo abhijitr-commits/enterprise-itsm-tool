@@ -1,0 +1,40 @@
+<%- include('../partials/header', { title: 'Certificate — ' + cert.courseTitle }) %>
+
+<style>
+  .certificate-card {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 48px;
+    border: 6px double #37474F;
+    text-align: center;
+    background: #fff;
+  }
+  .certificate-card h1 { font-size: 1.1rem; letter-spacing: 2px; text-transform: uppercase; color: #37474F; }
+  .certificate-card h2 { font-size: 2rem; margin: 24px 0 4px; }
+  .certificate-card .course-title { font-size: 1.4rem; font-weight: bold; margin: 16px 0; }
+  .certificate-card .cert-meta { color: #666; margin-top: 24px; font-size: 0.9rem; }
+  @media print {
+    .sidebar, .page-header, .no-print { display: none !important; }
+    .app-shell { display: block !important; }
+    .certificate-card { border-color: #000; margin: 0 auto; }
+  }
+</style>
+
+<div class="page-header no-print">
+  <h1>Certificate</h1>
+  <button class="btn btn-primary" onclick="window.print()">Print / Save as PDF</button>
+</div>
+
+<div class="certificate-card">
+  <h1>Enterprise ITSM Tool — Certificate of Completion</h1>
+  <p>This certifies that</p>
+  <h2><%= cert.employee %></h2>
+  <p>has successfully completed</p>
+  <div class="course-title"><%= cert.courseTitle %></div>
+  <div class="cert-meta">
+    Certificate ID: <%= cert.certificateId %><br />
+    Issued: <%= new Date(cert.issuedDate).toLocaleDateString() %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
