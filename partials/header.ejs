@@ -94,7 +94,7 @@
         <a href="/purchases" class="nav-link">Purchase Register</a>
         <a href="/stock" class="nav-link">Stock / Inventory</a>
         <a href="/licenses" class="nav-link">Software Licenses</a>
-        <a href="/rooms/bookings" class="nav-link">Room Booking</a>
+        <a href="/rooms/bookings" class="nav-link">Room / Equipment Booking</a>
         <a href="/complaints/mine" class="nav-link">My Complaints</a>
         <a href="/expenses/mine" class="nav-link">My Expense Claims</a>
         <a href="/maintenance" class="nav-link">Maintenance Announcements</a>
@@ -111,6 +111,13 @@
         <% } %>
         <% if (isITTeamUser || isAdminTeamUser) { %>
           <a href="/requirements" class="nav-link">Requirement Requests</a>
+        <% } %>
+      <% } %>
+      <% if (currentUser) { %>
+        <div class="nav-section-label">Safety</div>
+        <a href="/safety/mine" class="nav-link">My Safety Reports</a>
+        <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
+          <a href="/safety" class="nav-link">All Safety Incidents</a>
         <% } %>
       <% } %>
       <% if (currentUser) { %>

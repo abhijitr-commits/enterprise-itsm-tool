@@ -12,11 +12,12 @@
 
 <div class="panel">
   <table class="table">
-    <thead><tr><th>Booking ID</th><th>Room</th><th>Date</th><th>Time</th><th>Booked By</th><th>Purpose</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>Booking ID</th><th>Type</th><th>Room / Equipment</th><th>Date</th><th>Time</th><th>Booked By</th><th>Purpose</th><th>Status</th><th></th></tr></thead>
     <tbody>
       <% bookings.forEach(function(b) { %>
         <tr>
           <td><%= b.bookingId %></td>
+          <td><span class="badge"><%= b.resourceType %></span></td>
           <td><%= b.roomName %></td>
           <td><%= b.date %></td>
           <td><%= b.startTime %> – <%= b.endTime %></td>
@@ -32,7 +33,7 @@
           </td>
         </tr>
       <% }) %>
-      <% if (bookings.length === 0) { %><tr><td colspan="8" class="empty-row">No bookings yet.</td></tr><% } %>
+      <% if (bookings.length === 0) { %><tr><td colspan="9" class="empty-row">No bookings yet.</td></tr><% } %>
     </tbody>
   </table>
 </div>
