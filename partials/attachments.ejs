@@ -1,0 +1,25 @@
+<%
+  // Shared partial — include with locals: attachments (array), moduleKey
+  // (route-prefix key, e.g. "incidents"), recordId, canUpload (bool).
+  // Used by incidents/detail.ejs, requests/detail.ejs, problems/detail.ejs,
+  // changes/detail.ejs, assets/detail.ejs, cmdb/detail.ejs.
+%>
+<div class="panel">
+  <div class="panel-header"><h2>Attachments</h2></div>
+  <div class="comment-list">
+    <% (attachments || []).forEach(function(a) { %>
+      <div class="comment">
+        <div class="comment-meta"><%= new Date(a.uploadDate).toLocaleString() %> · <%= a.uploadedBy || 'Unknown' %><% if (a.size) { %> · <%= (a.size / 1024).toFixed(0) %> KB<% } %></div>
+        <div class="comment-text"><a href="/attachments/<%= a.attachmentId %>/download" target="_blank" rel="noopener"><%= a.fileName %></a></div>
+      </div>
+    <% }) %>
+    <% if ((attachments || []).length === 0) { %><p class="empty-row">No attachments yet.</p><% } %>
+  </div>
+  <% if (canUpload) { %>
+    <form method="post" action="/attachments/<%= moduleKey %>/<%= recordId %>" enctype="multipart/form-data" class="comment-form">
+      <input type="file" name="file" required />
+      <button type="submit" class="btn btn-secondary btn-block">Upload Attachment</button>
+      <p class="hint">Max 3MB per file.</p>
+    </form>
+  <% } %>
+</div>

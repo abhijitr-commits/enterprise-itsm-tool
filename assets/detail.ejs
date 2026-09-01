@@ -79,6 +79,9 @@
       <% if (history.length === 0) { %><p class="empty-row">No history yet.</p><% } %>
     </div>
   </div>
+
+  <%- include('../partials/attachments', { attachments, moduleKey, recordId: asset._id, canUpload }) %>
+  <%- include('../partials/auditTrail', { auditEntries }) %>
 </div>
 
 <%- include('../partials/footer') %>

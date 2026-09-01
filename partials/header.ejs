@@ -19,6 +19,11 @@
         const canSee = (key) => mv[key] !== false;
       %>
       <a href="/" class="nav-link">Dashboard</a>
+      <% if (currentUser) { %>
+        <form method="get" action="/search" class="sidebar-search">
+          <input type="text" name="q" placeholder="Search everything…" />
+        </form>
+      <% } %>
       <% if (canSee('incidents')) { %><a href="/incidents" class="nav-link">Incidents</a><% } %>
       <% if (canSee('requests')) { %><a href="/requests" class="nav-link">Service Requests</a><% } %>
       <% if (canSee('problems')) { %><a href="/problems" class="nav-link">Problems</a><% } %>

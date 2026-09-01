@@ -27,6 +27,9 @@
   <div class="panel">
     <div class="panel-header">
       <h2><%= group.employee %> <span class="hint"><%= group.department || '' %></span></h2>
+      <% if (slug === 'pre-onboarding') { %>
+        <a class="btn btn-secondary" href="/onboarding/pre-onboarding/<%= encodeURIComponent(group.employee) %>/detail">Pre-Onboarding Details</a>
+      <% } %>
     </div>
     <table class="table">
       <thead><tr><th>Task</th><th>Category</th><th>Status</th><th>Completed</th><th></th></tr></thead>

@@ -1,0 +1,78 @@
+<%- include('../partials/header', { title: employeeName + ' — Pre-Onboarding Detail' }) %>
+
+<div class="page-header">
+  <h1>Pre-Onboarding Detail — <%= employeeName %></h1>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/onboarding/pre-onboarding">Back to Checklist</a>
+  </div>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="detail-grid">
+  <form class="panel form-panel" method="post" action="/onboarding/pre-onboarding/<%= encodeURIComponent(employeeName) %>/detail/contact">
+    <div class="panel-header"><h2>Contact &amp; Offer Info</h2></div>
+    <div class="form-grid">
+      <label>Candidate Email
+        <input type="email" name="candidateEmail" value="<%= detail.candidateEmail || '' %>" />
+      </label>
+      <label>Designation
+        <input type="text" name="designation" value="<%= detail.designation || '' %>" />
+      </label>
+      <label>BGV Vendor Email
+        <input type="email" name="bgvVendorEmail" value="<%= detail.bgvVendorEmail || '' %>" />
+      </label>
+      <label>BGV Status
+        <select name="bgvStatus">
+          <% Object.values(BGV_STATUS).forEach(function(s) { %>
+            <option value="<%= s %>" <%= detail.bgvStatus === s ? 'selected' : '' %>><%= s %></option>
+          <% }) %>
+        </select>
+      </label>
+      <label>IT Provisioning Status
+        <select name="itProvisioningStatus">
+          <% Object.values(IT_PROVISIONING_STATUS).forEach(function(s) { %>
+            <option value="<%= s %>" <%= detail.itProvisioningStatus === s ? 'selected' : '' %>><%= s %></option>
+          <% }) %>
+        </select>
+      </label>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save Contact Info</button>
+    </div>
+  </form>
+
+  <div>
+    <div class="panel form-panel">
+      <div class="panel-header"><h2>Joining Date</h2></div>
+      <p><strong>Confirmed date:</strong> <%= detail.joiningDate ? new Date(detail.joiningDate).toLocaleDateString() : 'Not yet confirmed' %></p>
+      <form method="post" action="/onboarding/pre-onboarding/<%= encodeURIComponent(employeeName) %>/detail/joining-date" class="form-grid">
+        <label>Joining Date
+          <input type="date" name="joiningDate" value="<%= detail.joiningDate ? new Date(detail.joiningDate).toISOString().slice(0,10) : '' %>" required />
+        </label>
+        <div class="form-actions" style="align-self:end">
+          <button type="submit" class="btn btn-secondary">Confirm Joining Date</button>
+        </div>
+      </form>
+      <p class="hint">Confirming automatically marks "Joining Date Confirmed" done on the checklist.</p>
+    </div>
+
+    <div class="panel form-panel">
+      <div class="panel-header"><h2>Welcome Kit</h2></div>
+      <form method="post" action="/onboarding/pre-onboarding/<%= encodeURIComponent(employeeName) %>/detail/welcome-kit">
+        <% WELCOME_KIT_ITEMS.forEach(function(item) { %>
+          <label class="checkbox-label">
+            <input type="checkbox" name="items" value="<%= item %>" <%= (detail.welcomeKitItems || []).includes(item) ? 'checked' : '' %> />
+            <%= item %>
+          </label>
+        <% }) %>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-secondary">Save Welcome Kit Progress</button>
+        </div>
+      </form>
+      <p class="hint">Checking all <%= WELCOME_KIT_ITEMS.length %> items automatically marks "Welcome Kit Prepared" done on the checklist.</p>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

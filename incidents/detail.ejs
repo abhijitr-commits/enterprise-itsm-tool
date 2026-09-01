@@ -88,6 +88,9 @@
       <button type="submit" class="btn btn-secondary btn-block">Add Comment</button>
     </form>
   </div>
+
+  <%- include('../partials/attachments', { attachments, moduleKey, recordId: incident._id, canUpload }) %>
+  <%- include('../partials/auditTrail', { auditEntries }) %>
 </div>
 
 <%- include('../partials/footer') %>
