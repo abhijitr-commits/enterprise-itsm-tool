@@ -103,6 +103,16 @@ const DEFAULT_PERMISSIONS_MAP = {
   // Wellness & Engagement (Phase 4E)
   wellness_manage: [ROLE.ADMIN, ROLE.MANAGER],
   kudos_give: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+
+  // --- Phase 5 (IT operations & facilities) ---
+  // IT Helpdesk, Asset Allocation, and IT Clearance are NOT in this map —
+  // same pattern as the HR suite, gated by requireITTeam() (Administrator,
+  // or Manager + Department="IT") in teamAccess.js instead, since those
+  // genuinely need an IT person. Access Requests submission is the one
+  // "anyone logged in" exception (Phase 5A) — same tier as
+  // resignation_submit/leave_create, matching the original's own comment
+  // that it "reuses the anyone-logged-in permission tier."
+  access_requests_submit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
 };
 
 const ALL_ROLES_LIST = Object.values(ROLE);

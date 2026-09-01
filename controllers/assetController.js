@@ -177,6 +177,49 @@ async function returnAsset(req, res) {
   res.redirect(`/assets/${asset._id}`);
 }
 
+/**
+ * Internal — no req/res, no permission check of its own (callers are
+ * already gated). Port of the "actually calls issueAsset()" behavior
+ * ITAssetAllocationEngine.gs relies on: this is what makes an IT Asset
+ * Allocation (Phase 5A) real instead of a checkbox — the asset
+ * genuinely becomes assigned, with full Asset History logging, exactly
+ * like the button-driven issueAsset() above.
+ */
+async function issueAssetInternal(assetId, assignedTo, actorId) {
+  const asset = await Asset.findOne({ assetId });
+  if (!asset) return { success: false, message: `Asset ${assetId} not found.` };
+
+  const previousHolder = asset.assignedTo || "Unassigned";
+  asset.assignedTo = assignedTo;
+  asset.status = ASSET_STATUS.IN_SERVICE;
+  await asset.save();
+
+  await logAssetHistory(asset.assetId, "Issued", previousHolder, assignedTo, "");
+  await logAudit({ user: actorId, action: "Issue", entityType: "Asset", entityId: asset._id, details: `To: ${assignedTo}` });
+
+  return { success: true, message: `${assetId} issued to ${assignedTo}.` };
+}
+
+/**
+ * Internal counterpart to issueAssetInternal() — used by IT Clearance
+ * (Phase 5A) to genuinely return every asset a resignee had assigned,
+ * the same way returnAsset() above does from the Asset detail page.
+ */
+async function returnAssetInternal(assetId, actorId) {
+  const asset = await Asset.findOne({ assetId });
+  if (!asset) return { success: false, message: `Asset ${assetId} not found.` };
+
+  const previousHolder = asset.assignedTo || "Unassigned";
+  asset.assignedTo = "";
+  asset.status = ASSET_STATUS.IN_STORAGE;
+  await asset.save();
+
+  await logAssetHistory(asset.assetId, "Returned", previousHolder, "Unassigned", "");
+  await logAudit({ user: actorId, action: "Return", entityType: "Asset", entityId: asset._id, details: `From: ${previousHolder}` });
+
+  return { success: true, message: `${assetId} returned.` };
+}
+
 async function decommissionAsset(req, res) {
   const asset = await Asset.findById(req.params.id);
   if (!asset) return res.status(404).render("errors/404");
@@ -206,4 +249,6 @@ module.exports = {
   issueAsset,
   returnAsset,
   decommissionAsset,
+  issueAssetInternal,
+  returnAssetInternal,
 };

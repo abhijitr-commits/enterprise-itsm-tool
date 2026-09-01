@@ -101,32 +101,47 @@ async function showResignation(req, res) {
   });
 }
 
+/**
+ * Internal — port of updateResignationClearanceInternal(). Takes an
+ * already-loaded Resignation doc (not an ID) so both the HR-gated route
+ * below AND IT Clearance's own IT-team-gated screen (Phase 5A,
+ * itClearanceController.js) can update the same record and get the
+ * same "all clearances done -> auto-complete" behavior, without
+ * itClearanceController needing HR-team access itself.
+ */
+async function updateClearanceInternal(resignation, type, status, actorId) {
+  if (!CLEARANCE_TYPES.includes(type)) throw new Error(`Unknown clearance type: ${type}`);
+
+  resignation.clearances[type] = status;
+  await resignation.save();
+
+  await logAudit({
+    user: actorId,
+    action: "Clearance Update",
+    entityType: "Resignation",
+    entityId: resignation._id,
+    details: `${type} -> ${status}`,
+  });
+
+  const allCleared = CLEARANCE_TYPES.every((t) => resignation.clearances[t] === "Cleared");
+
+  let message = `${type.toUpperCase()} clearance updated to ${status}`;
+  if (allCleared && resignation.status !== "Completed") {
+    await completeResignation(resignation, actorId);
+    message += " — all clearances complete, resignation finalized automatically.";
+  }
+
+  return { message, allCleared };
+}
+
 async function updateClearance(req, res) {
   try {
     const { type, status } = req.body;
-    if (!CLEARANCE_TYPES.includes(type)) throw new Error(`Unknown clearance type: ${type}`);
 
     const resignation = await Resignation.findById(req.params.id);
     if (!resignation) return res.status(404).render("errors/404");
 
-    resignation.clearances[type] = status;
-    await resignation.save();
-
-    await logAudit({
-      user: req.user._id,
-      action: "Clearance Update",
-      entityType: "Resignation",
-      entityId: resignation._id,
-      details: `${type} -> ${status}`,
-    });
-
-    const allCleared = CLEARANCE_TYPES.every((t) => resignation.clearances[t] === "Cleared");
-
-    let message = `${type.toUpperCase()} clearance updated to ${status}`;
-    if (allCleared && resignation.status !== "Completed") {
-      await completeResignation(resignation, req.user._id);
-      message += " — all clearances complete, resignation finalized automatically.";
-    }
+    const { message } = await updateClearanceInternal(resignation, type, status, req.user._id);
 
     res.redirect(`/resignations/${resignation._id}?message=${encodeURIComponent(message)}`);
   } catch (err) {
@@ -206,4 +221,6 @@ module.exports = {
   updateClearance,
   showExitInterviewForm,
   submitExitInterview,
+  updateClearanceInternal,
+  CLEARANCE_TYPES,
 };
