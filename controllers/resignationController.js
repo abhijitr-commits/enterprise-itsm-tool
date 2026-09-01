@@ -18,15 +18,23 @@
  * (only HR/IT/Admin do — see teamAccess.js). Once IT Clearance
  * (Phase 5) exists it can post to this same endpoint from its own
  * IT-team-gated screen.
+ *
+ * As of Phase 4E, completing a resignation also generates a No Dues
+ * Certificate (see lettersController.js's generateNoDuesCertificateInternal)
+ * — the original emailed it automatically at this same point; here it's
+ * saved as a Letter record the employee and HR can view/print, same
+ * "record instead of emailing" substitution as everywhere else.
  *************************************************************/
 const Resignation = require("../models/Resignation");
 const ExitInterview = require("../models/ExitInterview");
+const Letter = require("../models/Letter");
 const Employee = require("../models/Employee");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { createChecklistIfMissing } = require("../utils/checklists");
 const { CHECKLIST_TYPE } = require("../models/Checklist");
 const { deactivateUserAccess } = require("../utils/provisioning");
+const { generateNoDuesCertificateInternal } = require("./lettersController");
 
 const CLEARANCE_TYPES = ["it", "finance", "hr", "manager", "admin"];
 
@@ -79,11 +87,15 @@ async function showResignation(req, res) {
   const resignation = await Resignation.findById(req.params.id).lean();
   if (!resignation) return res.status(404).render("errors/404");
 
-  const exitInterview = await ExitInterview.findOne({ resignationId: resignation.resignationId }).lean();
+  const [exitInterview, noDuesLetter] = await Promise.all([
+    ExitInterview.findOne({ resignationId: resignation.resignationId }).lean(),
+    Letter.findOne({ relatedId: resignation.resignationId, type: Letter.LETTER_TYPE.NO_DUES }).lean(),
+  ]);
 
   res.render("resignations/detail", {
     resignation,
     exitInterview,
+    noDuesLetter,
     CLEARANCE_TYPES,
     message: req.query.message || null,
   });
@@ -146,6 +158,8 @@ async function completeResignation(resignation, actorId) {
     entityId: resignation._id,
     details: "All clearances complete — employee status set to Left.",
   });
+
+  await generateNoDuesCertificateInternal(resignation, actorId);
 }
 
 function showExitInterviewForm(req, res) {

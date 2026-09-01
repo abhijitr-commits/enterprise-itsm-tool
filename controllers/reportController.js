@@ -1,13 +1,16 @@
 /*************************************************************
- * reportController.js — port of ReportEngine.gs, scoped to the
- * modules migrated so far (Incidents, Service Requests, Assets).
- * The HR-dependent reports in the original (Headcount, Attrition,
- * Training Completion, Contract Expiry, Executive Summary) need
- * the HR suite from Phase 4 first — see MIGRATION.md.
+ * reportController.js — port of ReportEngine.gs. Contract Expiry
+ * (needs the Employee Directory) and the Executive Summary (needs
+ * Employees + Resignations + Leave, on top of everything Reports
+ * already covers) were deferred until the HR suite existed — both
+ * are wired up as of Phase 4F. Headcount/Attrition/Training-
+ * Completion reports the original also had aren't ported yet (no
+ * direct equivalent function existed to port from — see MIGRATION.md).
  *************************************************************/
 const Incident = require("../models/Incident");
 const ServiceRequest = require("../models/ServiceRequest");
 const Asset = require("../models/Asset");
+const Employee = require("../models/Employee");
 const { STATUS } = require("../config/constants");
 
 function slaComplianceReport(incidents) {
@@ -121,11 +124,33 @@ function assetWarrantyReport(assets) {
     .sort((a, b) => new Date(a.warrantyExpiry) - new Date(b.warrantyExpiry));
 }
 
+/** Port of getContractExpiryReport() — Contract employees whose contractEndDate is within 30 days (including already-expired ones). */
+function contractExpiryReport(employees) {
+  const now = new Date();
+  const thirtyDaysOut = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+  return employees
+    .filter((e) => e.employmentType === "Contract" && e.contractEndDate && new Date(e.contractEndDate) <= thirtyDaysOut)
+    .map((e) => {
+      const endDate = new Date(e.contractEndDate);
+      return {
+        employeeId: e.employeeId,
+        name: e.name,
+        department: e.department,
+        designation: e.designation,
+        contractEndDate: endDate.toLocaleDateString(),
+        urgency: endDate < now ? "Expired" : "Expiring Soon",
+      };
+    })
+    .sort((a, b) => new Date(a.contractEndDate) - new Date(b.contractEndDate));
+}
+
 async function showReports(req, res) {
-  const [incidents, requests, assets] = await Promise.all([
+  const [incidents, requests, assets, employees] = await Promise.all([
     Incident.find().lean(),
     ServiceRequest.find().lean(),
     Asset.find().lean(),
+    Employee.find().lean(),
   ]);
 
   res.render("reports/index", {
@@ -135,7 +160,13 @@ async function showReports(req, res) {
     aging: ticketAgingReport(incidents),
     workload: departmentWorkloadReport(incidents, requests),
     warranty: assetWarrantyReport(assets),
+    contracts: contractExpiryReport(employees),
   });
 }
 
-module.exports = { showReports };
+module.exports = {
+  showReports,
+  departmentWorkloadReport,
+  assetWarrantyReport,
+  contractExpiryReport,
+};
