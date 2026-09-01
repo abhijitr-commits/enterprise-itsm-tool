@@ -1,0 +1,42 @@
+<%- include('../partials/header', { title: 'All Complaints' }) %>
+
+<div class="page-header">
+  <h1>All Complaints</h1>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>Complaint ID</th><th>Complainant</th><th>Department</th><th>Category</th><th>Subject</th><th>Status</th><th>Assigned To</th><% if (canManage) { %><th></th><% } %></tr></thead>
+    <tbody>
+      <% complaints.forEach(function(c) { %>
+        <tr>
+          <td><%= c.complaintId %></td>
+          <td><%= c.complainant %></td>
+          <td><%= c.department || '—' %></td>
+          <td><%= c.category %></td>
+          <td><%= c.subject %></td>
+          <td><span class="badge <%= c.status === 'Open' ? 'badge-status-open' : (c.status === 'Resolved' || c.status === 'Closed' ? 'badge-status-resolved' : 'badge-status-in-progress') %>"><%= c.status %></span></td>
+          <td><%= c.assignedTo || '—' %></td>
+          <% if (canManage) { %>
+            <td>
+              <form method="post" action="/complaints/<%= c._id %>/status" class="filter-bar">
+                <select name="status">
+                  <% Object.values(COMPLAINT_STATUS).forEach(function(s) { %>
+                    <option value="<%= s %>" <%= c.status === s ? 'selected' : '' %>><%= s %></option>
+                  <% }) %>
+                </select>
+                <input type="text" name="assignedTo" placeholder="Assign to" value="<%= c.assignedTo || '' %>" style="width:110px;" />
+                <button type="submit" class="btn btn-secondary">Update</button>
+              </form>
+            </td>
+          <% } %>
+        </tr>
+      <% }) %>
+      <% if (complaints.length === 0) { %><tr><td colspan="<%= canManage ? 8 : 7 %>" class="empty-row">No complaints yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

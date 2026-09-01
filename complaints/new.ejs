@@ -1,0 +1,32 @@
+<%- include('../partials/header', { title: 'File a Complaint' }) %>
+
+<div class="page-header">
+  <h1>File a Complaint</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<p class="hint">Not category-locked — file any kind of complaint (facilities, behavior, HR, general grievance, etc.).</p>
+
+<form class="panel form-panel" method="post" action="/complaints">
+  <div class="form-grid">
+    <label>Department
+      <input type="text" name="department" value="<%= form.department || '' %>" />
+    </label>
+    <label>Category
+      <input type="text" name="category" value="<%= form.category || '' %>" placeholder="General" />
+    </label>
+  </div>
+  <label>Subject
+    <input type="text" name="subject" value="<%= form.subject || '' %>" required />
+  </label>
+  <label>Description
+    <textarea name="description" rows="4" required><%= form.description || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/complaints/mine">Cancel</a>
+    <button type="submit" class="btn btn-primary">Submit Complaint</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>
