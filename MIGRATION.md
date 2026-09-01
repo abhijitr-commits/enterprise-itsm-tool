@@ -72,9 +72,12 @@ Deliberately deferred within 4A, both because they depend on infrastructure this
 
 Deferred within 4B, same email-provider reasoning as everywhere else: notifying a manager by email when leave is submitted, and notifying the employee by email on the decision (both recorded in the audit log instead), and Security.gs's approval-delegation mechanic (a Manager/Admin going on leave can name a delegate who temporarily inherits their approval rights) — the "Delegate To" field is captured and stored on the leave request, but doesn't do anything yet server-side.
 
-### Phase 4C — Recruitment & referrals
+### Phase 4C — Recruitment & referrals (done)
 
-`ATSEngine` + `Recruitment`, `ReferralEngine` — hiring pipeline + employee referrals. The original's automatic hand-off from ATS "Hired" stage into Pre-Onboarding stays deferred alongside `PreOnboardingDetailEngine.gs` above.
+- `ATSEngine.gs` → `src/models/JobPosting.js` + `Candidate.js`, `src/controllers/recruitmentController.js`, `views/recruitment/*` — job postings + a candidate pipeline (Applied → Screening → Interview → Offer → Hired/Rejected). Moving a candidate to "Hired" automatically starts their Pre-Onboarding checklist, same as the original — which meant picking that checklist type back up: it turned out to belong to `OnboardingEngine.gs` itself (not the deferred `PreOnboardingDetailEngine.gs`), so it's now a 5th `CHECKLIST_TYPE` alongside the four from Phase 4A. Only the checklist (task tracking) is ported — the actual work behind each task (emailing a background-check vendor, emailing IT, a Welcome Kit sub-checklist) still needs `PreOnboardingDetailEngine.gs`'s email/document infrastructure and stays deferred.
+- `ReferralEngine.gs` → `src/models/Referral.js`, `src/controllers/referralController.js`, `views/referrals/*` — any employee can refer a candidate for an open posting; the recruitment team tracks status and reward payout. **Bug fix vs. the original**: `addCandidate()` there unconditionally required `recruitment_manage`, but `submitReferral()` (open to every role) called it directly to drop the referred candidate into the pipeline — so in the original, anyone without `recruitment_manage` submitting a referral would hit a permission error *after* their referral was already recorded, a confusing half-success. This port splits that into an ungated internal function (used by both the referral flow and the guarded "add a candidate" route) plus the permission check only on the direct route — the same internal/public split already used for onboarding checklists.
+
+Deferred alongside `PreOnboardingDetailEngine.gs` (see Phase 4A): the automatic hand-off details (BGV/IT-provisioning emails) that would normally follow a "Hired" stage change.
 
 ### Phase 4D — Performance & growth
 

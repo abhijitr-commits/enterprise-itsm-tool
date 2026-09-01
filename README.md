@@ -1,4 +1,4 @@
-# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4A + 4B)
+# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4A + 4B + 4C)
 
 This is the Node.js/Express + MongoDB migration of the Enterprise ITSM
 Tool off Google Apps Script + Google Sheets. It replaces the Sheets-based
@@ -50,9 +50,15 @@ biometric), and Shifts &amp; Roster (shift definitions plus a
 date-range roster). My Profile's Leave Balance and My Work's Leave
 Approvals, both placeholders in 4A, are now wired to real data.
 
-The rest of the HR suite (Recruitment, Performance/Learning, Benefits/
-Wellness, and the IT-ops modules) are **not yet ported** — see
-`MIGRATION.md` for the phased roadmap and what's needed for each.
+**Phase 4C scope** (adds): Recruitment (job postings + a candidate
+pipeline through Applied → Screening → Interview → Offer → Hired/
+Rejected, with "Hired" auto-starting a Pre-Onboarding checklist) and
+Employee Referrals (any employee can refer a candidate; the
+recruitment team tracks status and reward payout).
+
+The rest of the HR suite (Performance/Learning, Benefits/Wellness,
+and the IT-ops modules) are **not yet ported** — see `MIGRATION.md`
+for the phased roadmap and what's needed for each.
 
 ## Stack (100% free tier)
 
@@ -139,6 +145,7 @@ Railway.app works the same way if you prefer it over Render.
 | `Security.gs`'s `isHRTeam()`/`isITTeam()`/`isAdminTeam()` | `src/utils/teamAccess.js` | Department + Role gating, alongside the Phase 3 Permission Matrix |
 | `LeaveEngine.gs` | `src/controllers/leaveController.js` + `src/utils/leaveBalances.js` | Same 4-way balance calc (Casual/Sick/Earned/Unpaid); `leaveType` tightened to an enum since the balance math needs exact strings |
 | `AttendanceEngine.gs`, `ShiftEngine.gs` | `src/controllers/attendanceController.js` + `shiftController.js` | Same honor-system check-in/out and date-range roster |
+| `ATSEngine.gs`, `ReferralEngine.gs` | `src/controllers/recruitmentController.js` + `referralController.js` | Same pipeline + "Hired" → Pre-Onboarding checklist; referral→candidate permission bug fixed (see MIGRATION.md) |
 
 ## Original source, kept for reference
 

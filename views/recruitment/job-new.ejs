@@ -1,0 +1,27 @@
+<%- include('../partials/header', { title: 'New Job Posting' }) %>
+
+<div class="page-header">
+  <h1>New Job Posting</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/recruitment">
+  <div class="form-grid">
+    <label>Title
+      <input type="text" name="title" value="<%= form.title || '' %>" required />
+    </label>
+    <label>Department
+      <input type="text" name="department" value="<%= form.department || '' %>" required />
+    </label>
+  </div>
+  <label>Description
+    <textarea name="description" rows="4"><%= form.description || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/recruitment">Cancel</a>
+    <button type="submit" class="btn btn-primary">Create Job Posting</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

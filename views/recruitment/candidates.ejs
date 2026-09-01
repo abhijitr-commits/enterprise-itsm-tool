@@ -1,0 +1,53 @@
+<%- include('../partials/header', { title: job.title + ' — Candidates' }) %>
+
+<div class="page-header">
+  <h1><%= job.title %> <span class="hint"><%= job.department %> · <%= job.status %></span></h1>
+  <a class="btn btn-secondary" href="/recruitment">All Job Postings</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <div class="panel-header"><h2>Add Candidate</h2></div>
+  <form method="post" action="/recruitment/<%= job.jobId %>/candidates" class="form-panel">
+    <div class="form-grid">
+      <label>Name <input type="text" name="name" required /></label>
+      <label>Email <input type="email" name="email" /></label>
+      <label>Phone <input type="text" name="phone" /></label>
+      <label>Resume Link <input type="url" name="resumeLink" /></label>
+    </div>
+    <label>Notes <textarea name="notes" rows="2"></textarea></label>
+    <button type="submit" class="btn btn-primary">Add Candidate</button>
+  </form>
+</div>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Stage</th><th>Applied</th><th>Notes</th><th></th></tr></thead>
+    <tbody>
+      <% candidates.forEach(function(c) { %>
+        <tr>
+          <td><%= c.candidateId %></td>
+          <td><%= c.name %></td>
+          <td><%= c.email || '—' %></td>
+          <td><span class="badge badge-status-open"><%= c.stage %></span></td>
+          <td><%= new Date(c.appliedDate).toLocaleDateString() %></td>
+          <td><%= c.notes || '—' %></td>
+          <td>
+            <form method="post" action="/recruitment/candidates/<%= c._id %>/stage" class="filter-bar">
+              <select name="stage">
+                <% STAGES.forEach(function(s) { %>
+                  <option value="<%= s %>" <%= c.stage === s ? 'selected' : '' %>><%= s %></option>
+                <% }) %>
+              </select>
+              <button type="submit" class="btn btn-secondary">Update</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (candidates.length === 0) { %><tr><td colspan="7" class="empty-row">No candidates for this posting yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

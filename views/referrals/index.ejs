@@ -1,0 +1,66 @@
+<%- include('../partials/header', { title: 'Referrals' }) %>
+
+<div class="page-header">
+  <h1>Employee Referrals</h1>
+  <a class="btn btn-primary" href="/referrals/new">+ Refer a Candidate</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <div class="panel-header"><h2>My Referrals</h2></div>
+  <table class="table">
+    <thead><tr><th>ID</th><th>Candidate</th><th>Job</th><th>Status</th><th>Reward</th><th>Submitted</th></tr></thead>
+    <tbody>
+      <% myReferrals.forEach(function(r) { %>
+        <tr>
+          <td><%= r.referralId %></td>
+          <td><%= r.candidateName %></td>
+          <td><%= r.jobTitle %></td>
+          <td><span class="badge badge-status-open"><%= r.status %></span></td>
+          <td><span class="badge <%= r.rewardStatus === 'Paid' ? 'badge-status-resolved' : 'badge-status-open' %>"><%= r.rewardStatus %></span></td>
+          <td><%= new Date(r.submittedDate).toLocaleDateString() %></td>
+        </tr>
+      <% }) %>
+      <% if (myReferrals.length === 0) { %><tr><td colspan="6" class="empty-row">You haven't referred anyone yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<% if (canManage) { %>
+<div class="panel">
+  <div class="panel-header"><h2>All Referrals</h2></div>
+  <table class="table">
+    <thead><tr><th>ID</th><th>Referrer</th><th>Candidate</th><th>Job</th><th>Status</th><th>Reward</th><th></th></tr></thead>
+    <tbody>
+      <% allReferrals.forEach(function(r) { %>
+        <tr>
+          <td><%= r.referralId %></td>
+          <td><%= r.referrer %></td>
+          <td><%= r.candidateName %></td>
+          <td><%= r.jobTitle %></td>
+          <td>
+            <form method="post" action="/referrals/<%= r._id %>" class="filter-bar">
+              <select name="status">
+                <% REFERRAL_STATUS.forEach(function(s) { %>
+                  <option value="<%= s %>" <%= r.status === s ? 'selected' : '' %>><%= s %></option>
+                <% }) %>
+              </select>
+              <select name="rewardStatus">
+                <% Object.values(REWARD_STATUS).forEach(function(rs) { %>
+                  <option value="<%= rs %>" <%= r.rewardStatus === rs ? 'selected' : '' %>><%= rs %></option>
+                <% }) %>
+              </select>
+              <button type="submit" class="btn btn-secondary">Update</button>
+            </form>
+          </td>
+          <td></td>
+        </tr>
+      <% }) %>
+      <% if (allReferrals.length === 0) { %><tr><td colspan="7" class="empty-row">No referrals yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
+<%- include('../partials/footer') %>

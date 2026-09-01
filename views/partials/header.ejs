@@ -49,9 +49,12 @@
         <a href="/shifts" class="nav-link">Shifts &amp; Roster</a>
         <a href="/resignations" class="nav-link">Resignations</a>
         <% if (isHRTeamUser) { %>
+          <a href="/onboarding/pre-onboarding" class="nav-link">Pre-Onboarding</a>
           <a href="/onboarding/onboarding" class="nav-link">Onboarding</a>
           <a href="/onboarding/offboarding" class="nav-link">Offboarding</a>
+          <a href="/recruitment" class="nav-link">Recruitment</a>
         <% } %>
+        <a href="/referrals" class="nav-link">Referrals</a>
         <% if (isAdminTeamUser) { %>
           <a href="/onboarding/admin-onboarding" class="nav-link">Admin Onboarding</a>
           <a href="/onboarding/admin-offboarding" class="nav-link">Admin Offboarding</a>
