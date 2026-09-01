@@ -1,0 +1,45 @@
+<%- include('../partials/header', { title: 'New Asset' }) %>
+
+<div class="page-header">
+  <h1>New Asset</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/assets">
+  <div class="form-grid">
+    <label>Asset Name
+      <input type="text" name="assetName" value="<%= form.assetName || '' %>" required />
+    </label>
+    <label>Type
+      <input type="text" name="type" value="<%= form.type || '' %>" required placeholder="e.g. Laptop, Monitor, Software License" />
+    </label>
+    <label>Serial Number
+      <input type="text" name="serialNumber" value="<%= form.serialNumber || '' %>" />
+    </label>
+    <label>Assigned To (optional)
+      <input type="text" name="assignedTo" value="<%= form.assignedTo || '' %>" placeholder="Leave blank if in storage" />
+    </label>
+    <label>Department
+      <input type="text" name="department" value="<%= form.department || '' %>" required />
+    </label>
+    <label>Location
+      <input type="text" name="location" value="<%= form.location || '' %>" required />
+    </label>
+    <label>Purchase Date
+      <input type="date" name="purchaseDate" value="<%= form.purchaseDate || '' %>" />
+    </label>
+    <label>Warranty Expiry
+      <input type="date" name="warrantyExpiry" value="<%= form.warrantyExpiry || '' %>" />
+    </label>
+    <label>Vendor
+      <input type="text" name="vendor" value="<%= form.vendor || '' %>" />
+    </label>
+  </div>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/assets">Cancel</a>
+    <button type="submit" class="btn btn-primary">Create Asset</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

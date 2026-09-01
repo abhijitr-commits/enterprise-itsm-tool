@@ -1,0 +1,111 @@
+<%- include('../partials/header', { title: change.changeId }) %>
+
+<div class="page-header">
+  <h1><%= change.changeId %> — <%= change.title %></h1>
+  <div class="header-actions">
+    <% if (change.cabStatus === APPROVAL.PENDING) { %>
+      <form method="post" action="/changes/<%= change._id %>/decide" onsubmit="return confirm('Approve this change (CAB)?')">
+        <input type="hidden" name="decision" value="Approved" />
+        <button class="btn btn-primary" type="submit">CAB Approve</button>
+      </form>
+      <form method="post" action="/changes/<%= change._id %>/decide" onsubmit="return confirm('Reject this change (CAB)?')">
+        <input type="hidden" name="decision" value="Rejected" />
+        <button class="btn btn-danger" type="submit">CAB Reject</button>
+      </form>
+    <% } %>
+  </div>
+</div>
+
+<% if (justCreated) { %><div class="alert alert-success">Change request submitted for CAB approval.</div><% } %>
+
+<div class="detail-grid">
+  <div>
+    <form class="panel form-panel" method="post" action="/changes/<%= change._id %>">
+      <% if (change.cabStatus !== APPROVAL.PENDING) { %>
+        <div class="alert alert-info">This change has already been <%= change.cabStatus.toLowerCase() %> by CAB — use the implementation controls below instead of editing these fields.</div>
+      <% } %>
+      <div class="form-grid">
+        <label>Risk Level
+          <select name="riskLevel" <%= change.cabStatus !== APPROVAL.PENDING ? 'disabled' : '' %>>
+            <option value="Low" <%= change.riskLevel === 'Low' ? 'selected' : '' %>>Low</option>
+            <option value="Medium" <%= change.riskLevel === 'Medium' ? 'selected' : '' %>>Medium</option>
+            <option value="High" <%= change.riskLevel === 'High' ? 'selected' : '' %>>High</option>
+          </select>
+        </label>
+        <label>Planned Date
+          <input type="date" name="plannedDate" value="<%= new Date(change.plannedDate).toISOString().slice(0,10) %>" <%= change.cabStatus !== APPROVAL.PENDING ? 'disabled' : '' %> />
+        </label>
+      </div>
+      <label>Title
+        <input type="text" name="title" value="<%= change.title %>" required <%= change.cabStatus !== APPROVAL.PENDING ? 'disabled' : '' %> />
+      </label>
+      <label>Description
+        <textarea name="description" rows="4" required <%= change.cabStatus !== APPROVAL.PENDING ? 'disabled' : '' %>><%= change.description %></textarea>
+      </label>
+      <% if (change.cabStatus === APPROVAL.PENDING) { %>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      <% } %>
+    </form>
+
+    <% if (change.cabStatus === APPROVAL.APPROVED) { %>
+      <div class="panel form-panel">
+        <div class="panel-header"><h2>Implementation</h2></div>
+        <form method="post" action="/changes/<%= change._id %>/implementation-status" class="form-grid">
+          <label>Implementation Status
+            <select name="implementationStatus">
+              <% Object.values(IMPL).forEach(function(i){ %>
+                <option value="<%= i %>" <%= change.implementationStatus === i ? 'selected' : '' %>><%= i %></option>
+              <% }) %>
+            </select>
+          </label>
+          <div class="form-actions" style="align-self:end">
+            <button type="submit" class="btn btn-secondary">Update Status</button>
+          </div>
+        </form>
+        <% if (change.implementationStatus !== 'Implemented' && change.implementationStatus !== 'Rolled Back') { %>
+          <form method="post" action="/changes/<%= change._id %>/close">
+            <label>Post-Implementation Review (PIR) Notes
+              <textarea name="pirNotes" rows="3"><%= change.pirNotes || '' %></textarea>
+            </label>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Close with PIR Notes</button>
+            </div>
+          </form>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>Details</h2></div>
+    <dl class="meta-list">
+      <dt>Created</dt><dd><%= new Date(change.createdDate).toLocaleString() %></dd>
+      <dt>Created By</dt><dd><%= change.createdBy %></dd>
+      <dt>Requested By</dt><dd><%= change.requestedBy %></dd>
+      <dt>Department</dt><dd><%= change.department %></dd>
+      <dt>CAB Status</dt><dd><span class="badge badge-approval-<%= change.cabStatus.toLowerCase().replace(/ /g,'-') %>"><%= change.cabStatus %></span></dd>
+      <dt>PIR Notes</dt><dd><%= change.pirNotes || '—' %></dd>
+      <dt>Closed</dt><dd><%= change.closedDate ? new Date(change.closedDate).toLocaleString() : '—' %></dd>
+    </dl>
+
+    <div class="panel-header"><h2>Comments</h2></div>
+    <div class="comment-list">
+      <% (change.comments || []).forEach(function(c) { %>
+        <div class="comment">
+          <div class="comment-meta"><%= new Date(c.createdAt).toLocaleString() %><% if (c.isInternal) { %> · internal<% } %></div>
+          <div class="comment-text"><%= c.text %></div>
+        </div>
+      <% }) %>
+      <% if ((change.comments || []).length === 0) { %><p class="empty-row">No comments yet.</p><% } %>
+    </div>
+    <form method="post" action="/changes/<%= change._id %>/comments" class="comment-form">
+      <textarea name="text" rows="2" placeholder="Add a comment…" required></textarea>
+      <label class="checkbox-label"><input type="checkbox" name="isInternal" /> Internal note</label>
+      <button type="submit" class="btn btn-secondary btn-block">Add Comment</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

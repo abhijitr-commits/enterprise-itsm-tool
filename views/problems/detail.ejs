@@ -1,0 +1,79 @@
+<%- include('../partials/header', { title: problem.problemId }) %>
+
+<div class="page-header">
+  <h1><%= problem.problemId %> — <%= problem.title %></h1>
+  <div class="header-actions">
+    <% if (problem.status !== 'Closed') { %>
+      <form method="post" action="/problems/<%= problem._id %>/close" onsubmit="return confirm('Close this problem?')">
+        <button class="btn btn-secondary" type="submit">Close Problem</button>
+      </form>
+    <% } %>
+  </div>
+</div>
+
+<% if (justCreated) { %><div class="alert alert-success">Problem created successfully.</div><% } %>
+
+<div class="detail-grid">
+  <form class="panel form-panel" method="post" action="/problems/<%= problem._id %>">
+    <div class="form-grid">
+      <label>Owner
+        <input type="text" name="owner" value="<%= problem.owner || '' %>" placeholder="Unassigned" />
+      </label>
+      <label>Status
+        <select name="status">
+          <% Object.values(STATUS).forEach(function(s){ %>
+            <option value="<%= s %>" <%= problem.status === s ? 'selected' : '' %>><%= s %></option>
+          <% }) %>
+        </select>
+      </label>
+      <label>Known Error?
+        <select name="knownError">
+          <option value="No" <%= problem.knownError === 'No' ? 'selected' : '' %>>No</option>
+          <option value="Yes" <%= problem.knownError === 'Yes' ? 'selected' : '' %>>Yes</option>
+        </select>
+      </label>
+      <label>Linked Incidents
+        <input type="text" name="linkedIncidents" value="<%= problem.linkedIncidents || '' %>" />
+      </label>
+    </div>
+    <label>Title
+      <input type="text" name="title" value="<%= problem.title %>" required />
+    </label>
+    <label>Description
+      <textarea name="description" rows="4" required><%= problem.description %></textarea>
+    </label>
+    <label>Root Cause
+      <textarea name="rootCause" rows="4" placeholder="Root cause analysis…"><%= problem.rootCause || '' %></textarea>
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+    </div>
+  </form>
+
+  <div class="panel">
+    <div class="panel-header"><h2>Details</h2></div>
+    <dl class="meta-list">
+      <dt>Created</dt><dd><%= new Date(problem.createdDate).toLocaleString() %></dd>
+      <dt>Created By</dt><dd><%= problem.createdBy %></dd>
+      <dt>Closed</dt><dd><%= problem.closedDate ? new Date(problem.closedDate).toLocaleString() : '—' %></dd>
+    </dl>
+
+    <div class="panel-header"><h2>Comments</h2></div>
+    <div class="comment-list">
+      <% (problem.comments || []).forEach(function(c) { %>
+        <div class="comment">
+          <div class="comment-meta"><%= new Date(c.createdAt).toLocaleString() %><% if (c.isInternal) { %> · internal<% } %></div>
+          <div class="comment-text"><%= c.text %></div>
+        </div>
+      <% }) %>
+      <% if ((problem.comments || []).length === 0) { %><p class="empty-row">No comments yet.</p><% } %>
+    </div>
+    <form method="post" action="/problems/<%= problem._id %>/comments" class="comment-form">
+      <textarea name="text" rows="2" placeholder="Add a comment…" required></textarea>
+      <label class="checkbox-label"><input type="checkbox" name="isInternal" /> Internal note</label>
+      <button type="submit" class="btn btn-secondary btn-block">Add Comment</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

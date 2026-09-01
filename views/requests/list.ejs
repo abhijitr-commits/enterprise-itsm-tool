@@ -1,0 +1,61 @@
+<%- include('../partials/header', { title: 'Service Requests' }) %>
+
+<div class="page-header">
+  <h1>Service Requests</h1>
+  <a class="btn btn-primary" href="/requests/new">+ New Request</a>
+</div>
+
+<form class="filter-bar" method="get" action="/requests">
+  <input type="text" name="q" placeholder="Search requests…" value="<%= query.q %>" />
+  <select name="approvalStatus">
+    <option value="">All approval statuses</option>
+    <% Object.values(APPROVAL).forEach(function(a){ %>
+      <option value="<%= a %>" <%= query.approvalStatus === a ? 'selected' : '' %>><%= a %></option>
+    <% }) %>
+  </select>
+  <select name="fulfillmentStatus">
+    <option value="">All fulfillment statuses</option>
+    <% Object.values(STATUS).forEach(function(s){ %>
+      <option value="<%= s %>" <%= query.fulfillmentStatus === s ? 'selected' : '' %>><%= s %></option>
+    <% }) %>
+  </select>
+  <button type="submit" class="btn btn-secondary">Filter</button>
+</form>
+
+<form method="post" action="/requests/bulk-decide" onsubmit="return confirm('Apply this decision to all checked requests?')">
+  <div class="panel">
+    <table class="table">
+      <thead>
+        <tr>
+          <th></th><th>ID</th><th>Requester</th><th>Department</th><th>Catalog Item</th>
+          <th>Approval</th><th>Fulfillment</th><th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% requests.forEach(function(r) { %>
+          <tr>
+            <td onclick="event.stopPropagation()"><input type="checkbox" name="ids" value="<%= r._id %>" /></td>
+            <td onclick="location.href='/requests/<%= r._id %>'"><%= r.requestId %></td>
+            <td onclick="location.href='/requests/<%= r._id %>'"><%= r.requester %></td>
+            <td onclick="location.href='/requests/<%= r._id %>'"><%= r.department %></td>
+            <td onclick="location.href='/requests/<%= r._id %>'"><%= r.catalogItem %></td>
+            <td onclick="location.href='/requests/<%= r._id %>'"><span class="badge badge-approval-<%= r.approvalStatus.toLowerCase().replace(/ /g,'-') %>"><%= r.approvalStatus %></span></td>
+            <td onclick="location.href='/requests/<%= r._id %>'"><span class="badge badge-status-<%= r.fulfillmentStatus.toLowerCase().replace(/ /g,'-') %>"><%= r.fulfillmentStatus %></span></td>
+            <td onclick="location.href='/requests/<%= r._id %>'"><%= new Date(r.createdDate).toLocaleDateString() %></td>
+          </tr>
+        <% }) %>
+        <% if (requests.length === 0) { %>
+          <tr><td colspan="8" class="empty-row">No service requests match your filters.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+  <% if (requests.length > 0) { %>
+    <div class="form-actions">
+      <button type="submit" name="decision" value="Approved" class="btn btn-primary">Approve Checked</button>
+      <button type="submit" name="decision" value="Rejected" class="btn btn-danger">Reject Checked</button>
+    </div>
+  <% } %>
+</form>
+
+<%- include('../partials/footer') %>

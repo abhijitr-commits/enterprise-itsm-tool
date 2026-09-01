@@ -1,0 +1,50 @@
+<%- include('../partials/header', { title: ci.ciId }) %>
+
+<div class="page-header">
+  <h1><%= ci.ciId %> — <%= ci.ciName %></h1>
+  <div class="header-actions">
+    <form method="post" action="/cmdb/<%= ci._id %>/delete" onsubmit="return confirm('Delete this configuration item permanently?')">
+      <button class="btn btn-danger" type="submit">Delete</button>
+    </form>
+  </div>
+</div>
+
+<% if (justCreated) { %><div class="alert alert-success">Configuration item created successfully.</div><% } %>
+
+<form class="panel form-panel" method="post" action="/cmdb/<%= ci._id %>">
+  <div class="form-grid">
+    <label>CI Name
+      <input type="text" name="ciName" value="<%= ci.ciName %>" required />
+    </label>
+    <label>Type
+      <input type="text" name="type" value="<%= ci.type %>" required />
+    </label>
+    <label>IP Address
+      <input type="text" name="ipAddress" value="<%= ci.ipAddress || '' %>" />
+    </label>
+    <label>Owner
+      <input type="text" name="owner" value="<%= ci.owner || '' %>" />
+    </label>
+    <label>Status
+      <select name="status">
+        <option value="Active" <%= ci.status === 'Active' ? 'selected' : '' %>>Active</option>
+        <option value="Inactive" <%= ci.status === 'Inactive' ? 'selected' : '' %>>Inactive</option>
+        <option value="Decommissioned" <%= ci.status === 'Decommissioned' ? 'selected' : '' %>>Decommissioned</option>
+      </select>
+    </label>
+    <label>VLAN
+      <input type="text" name="vlan" value="<%= ci.vlan || '' %>" />
+    </label>
+    <label>Subnet
+      <input type="text" name="subnet" value="<%= ci.subnet || '' %>" />
+    </label>
+  </div>
+  <label>Dependencies
+    <input type="text" name="dependencies" value="<%= ci.dependencies || '' %>" />
+  </label>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

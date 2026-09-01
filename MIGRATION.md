@@ -1,32 +1,31 @@
 # Migration roadmap — what's left
 
-Phase 1 (this app, done) ported **Config, Common, Security, and the
-Incident Register module** — 5 of the original 116 files. The rest of the
-original project is preserved in `../original-source/` (all 116 files,
-exactly as exported from Apps Script) so every future phase has the real
-logic to port from, not a guess.
+Phase 1 ported **Config, Common, Security, and the Incident Register
+module**. Phase 2 (done) ported **Service Requests (with approval
+workflow), Problems, Changes (with CAB approval), Assets, CMDB,
+Knowledge Base (with version history), and cross-module Reports** — 12
+of the original 116 files. The rest of the original project is preserved
+in `../original-source/` (all 116 files, exactly as exported from Apps
+Script) so every future phase has the real logic to port from, not a
+guess.
 
-The remaining files fall into five natural phases, in the order I'd
+The remaining files fall into four natural phases, in the order I'd
 recommend tackling them:
 
-## Phase 2 — Finish core ITSM
+## Phase 2 — Finish core ITSM (done)
 
-Same pattern as Incidents (a `*Engine.gs` file + its `.html`/`.js.html`
-view), so this phase is the fastest per file since the scaffolding
-(auth, permissions, SLA, audit log) already exists.
+- `ServiceRequestEngine.gs` → `src/models/ServiceRequest.js`, `src/controllers/serviceRequestController.js`, `src/routes/requestRoutes.js`, `views/requests/*` — approval workflow (single + bulk decide) included.
+- `ProblemEngine.gs` → `src/models/Problem.js`, `src/controllers/problemController.js`, `src/routes/problemRoutes.js`, `views/problems/*`.
+- `ChangeEngine.gs` → `src/models/Change.js`, `src/controllers/changeController.js`, `src/routes/changeRoutes.js`, `views/changes/*` — CAB approval + implementation status + PIR close included.
+- `AssetEngine.gs` → `src/models/Asset.js` + `AssetHistory.js`, `src/controllers/assetController.js`, `src/routes/assetRoutes.js`, `views/assets/*` — issue/return/decommission with history log included.
+- `CMDBEngine.gs` → `src/models/ConfigurationItem.js`, `src/controllers/cmdbController.js`, `src/routes/cmdbRoutes.js`, `views/cmdb/*`.
+- `KnowledgeEngine.gs` → `src/models/KnowledgeArticle.js`, `src/controllers/knowledgeController.js`, `src/routes/knowledgeRoutes.js`, `views/knowledge/*` — version history embedded per-article instead of a second collection.
+- `ReportEngine.gs` → `src/controllers/reportController.js`, `views/reports/index.ejs` — SLA Compliance, Monthly Volume, Engineer Performance, Ticket Aging, Department Workload, Asset Warranty Expiry. The HR-dependent reports (Headcount, Attrition, Training Completion, Contract Expiry, Executive Summary) need the Phase 4 HR suite first.
 
-- `ServiceRequestEngine.gs` + `ServiceRequest.html` / `.js.html` — includes approval workflow
-- `ProblemEngine.gs` + `ProblemRegister.html` / `.js.html`
-- `ChangeEngine.gs` + `ChangeRegister.html` / `.js.html` — includes change approval
-- `AssetEngine.gs` + `AssetRegister.html` / `.js.html`
-- `CMDBEngine.gs` + `CMDB.html` / `.js.html`
-- `KnowledgeEngine.gs` + `KnowledgeBase.html` / `.js.html` — includes version history
-- `ReportEngine.gs` + `Reports.html` / `.js.html`
-- `RecordEngine.gs`, `AttachmentEngine.gs` — shared record/attachment helpers used across modules
-- `EmailEngine.gs` — needs a real email provider now (Apps Script used `MailApp`/`GmailApp` for free; a free-tier transactional email API like Resend or Brevo replaces it)
-- `PublicIntake.html` + the public-form part of `IncidentEngine.gs` (honeypot + CAPTCHA + rate limit) — needs a CAPTCHA library (e.g. `hcaptcha` free tier) since there's no Apps Script `CacheService` equivalent built in
-
-Mongoose models for all of these already exist in `src/models/` (`ServiceRequest.js`, `Problem.js`, `Change.js`, `Asset.js`, `AssetHistory.js`, `ConfigurationItem.js`, `KnowledgeArticle.js`, `Vendor.js`) — only the routes/controllers/views need writing, following `incidentController.js` as the template.
+Not yet ported from the original Phase 2 scope — need infrastructure this app doesn't have yet:
+- `RecordEngine.gs`, `AttachmentEngine.gs` — shared record/attachment helpers (file upload storage isn't wired up yet; `multer` is installed but unused).
+- `EmailEngine.gs` — needs a real email provider now (Apps Script used `MailApp`/`GmailApp` for free; a free-tier transactional email API like Resend or Brevo replaces it). Approval/decision events are currently recorded in history + the audit log instead of emailing anyone.
+- `PublicIntake.html` + the public-form part of `IncidentEngine.gs` (honeypot + CAPTCHA + rate limit) — needs a CAPTCHA library (e.g. `hcaptcha` free tier).
 
 ## Phase 3 — Admin & identity
 

@@ -12,12 +12,13 @@
       <div class="brand">Enterprise ITSM</div>
       <a href="/" class="nav-link">Dashboard</a>
       <a href="/incidents" class="nav-link">Incidents</a>
-      <div class="nav-section-label">Coming in Phase 2</div>
-      <span class="nav-link disabled">Service Requests</span>
-      <span class="nav-link disabled">Problems</span>
-      <span class="nav-link disabled">Changes</span>
-      <span class="nav-link disabled">Assets / CMDB</span>
-      <span class="nav-link disabled">Knowledge Base</span>
+      <a href="/requests" class="nav-link">Service Requests</a>
+      <a href="/problems" class="nav-link">Problems</a>
+      <a href="/changes" class="nav-link">Changes</a>
+      <a href="/assets" class="nav-link">Assets</a>
+      <a href="/cmdb" class="nav-link">CMDB</a>
+      <a href="/knowledge" class="nav-link">Knowledge Base</a>
+      <a href="/reports" class="nav-link">Reports</a>
       <div class="sidebar-footer">
         <div class="user-chip"><%= currentUser.name %> <span class="role-badge"><%= currentUser.role %></span></div>
         <form method="post" action="/logout"><button class="link-button">Sign out</button></form>

@@ -1,0 +1,30 @@
+<%- include('../partials/header', { title: 'New Service Request' }) %>
+
+<div class="page-header">
+  <h1>New Service Request</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/requests">
+  <div class="form-grid">
+    <label>Requester
+      <input type="text" name="requester" value="<%= form.requester || '' %>" required />
+    </label>
+    <label>Department
+      <input type="text" name="department" value="<%= form.department || '' %>" required />
+    </label>
+    <label>Catalog Item
+      <input type="text" name="catalogItem" value="<%= form.catalogItem || '' %>" required placeholder="e.g. New Laptop, VPN Access, Software License" />
+    </label>
+  </div>
+  <label>Details
+    <textarea name="details" rows="5" required><%= form.details || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/requests">Cancel</a>
+    <button type="submit" class="btn btn-primary">Submit Request</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

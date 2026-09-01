@@ -1,0 +1,46 @@
+<%- include('../partials/header', { title: 'New CI' }) %>
+
+<div class="page-header">
+  <h1>New Configuration Item</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/cmdb">
+  <div class="form-grid">
+    <label>CI Name
+      <input type="text" name="ciName" value="<%= form.ciName || '' %>" required />
+    </label>
+    <label>Type
+      <input type="text" name="type" value="<%= form.type || '' %>" required placeholder="e.g. Server, Application, Database, Network Gear" />
+    </label>
+    <label>IP Address
+      <input type="text" name="ipAddress" value="<%= form.ipAddress || '' %>" />
+    </label>
+    <label>Owner
+      <input type="text" name="owner" value="<%= form.owner || '' %>" />
+    </label>
+    <label>Status
+      <select name="status">
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+        <option value="Decommissioned">Decommissioned</option>
+      </select>
+    </label>
+    <label>VLAN <span class="hint">(network devices only)</span>
+      <input type="text" name="vlan" value="<%= form.vlan || '' %>" />
+    </label>
+    <label>Subnet <span class="hint">(network devices only)</span>
+      <input type="text" name="subnet" value="<%= form.subnet || '' %>" />
+    </label>
+  </div>
+  <label>Dependencies <span class="hint">(comma-separated CI IDs)</span>
+    <input type="text" name="dependencies" value="<%= form.dependencies || '' %>" placeholder="e.g. CI-2026-000001, CI-2026-000003" />
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/cmdb">Cancel</a>
+    <button type="submit" class="btn btn-primary">Create CI</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

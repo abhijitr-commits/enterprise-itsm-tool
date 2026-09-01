@@ -1,10 +1,10 @@
-# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1)
+# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2)
 
-This is the Phase 1 migration of the Enterprise ITSM Tool off Google Apps
-Script + Google Sheets, onto a standalone Node.js/Express + MongoDB app.
-It replaces the Sheets-based storage (which has hard limits: 10M cells per
-spreadsheet, 6-minute Apps Script execution caps, and no real concurrent-
-write handling) with a real database that scales with your team.
+This is the Node.js/Express + MongoDB migration of the Enterprise ITSM
+Tool off Google Apps Script + Google Sheets. It replaces the Sheets-based
+storage (which has hard limits: 10M cells per spreadsheet, 6-minute Apps
+Script execution caps, and no real concurrent-write handling) with a real
+database that scales with your team.
 
 **Phase 1 scope**: authentication, roles/permissions, and the full
 Incident Register module (create, list, search/filter, update, close,
@@ -12,9 +12,17 @@ delete, bulk-close, comments, SLA due-date calculation with business-hours
 + holiday awareness) — ported field-for-field and logic-for-logic from the
 original `IncidentEngine.gs`, `Security.gs`, and `Common.gs`.
 
-Service Requests, Problems, Changes, Assets/CMDB, Knowledge Base, and the
-HR/IT-ops modules are **not yet ported** — see `MIGRATION.md` for the
-phased roadmap and what's needed for each.
+**Phase 2 scope** (adds): Service Requests (with manager approval
+workflow), Problems, Changes (with CAB approval + implementation status +
+post-implementation review), Assets (issue/return/decommission with a
+full history log), CMDB, Knowledge Base (with per-article version
+history), and cross-module Reports (SLA compliance, monthly volume,
+engineer performance, ticket aging, department workload, asset warranty
+expiry).
+
+The HR/IT-ops modules and the Admin Console (user management, permission
+matrix editor) are **not yet ported** — see `MIGRATION.md` for the phased
+roadmap and what's needed for each.
 
 ## Stack (100% free tier)
 

@@ -1,43 +1,47 @@
 const mongoose = require("mongoose");
-const { STATUS, PRIORITY, ID_PREFIX } = require("../config/constants");
+const { ID_PREFIX } = require("../config/constants");
 const { commentSchema, historyEntrySchema } = require("./shared/ticketFields");
+const { APPROVAL } = require("./ServiceRequest"); // CAB status reuses the same Pending/Approved/Rejected values
+
+/**
+ * Field-for-field port of the "Change Register" sheet's 12 columns
+ * (Change ID, Created Date, Title, Description, Risk Level, CAB Status,
+ * Planned Date, Implementation Status, PIR Notes, Closed Date,
+ * Requested By, Department).
+ */
+const IMPL = {
+  NOT_STARTED: "Not Started",
+  IN_PROGRESS: "In Progress",
+  IMPLEMENTED: "Implemented",
+  ROLLED_BACK: "Rolled Back",
+};
 
 const changeSchema = new mongoose.Schema(
   {
-    changeId: { type: String, unique: true, index: true }, // CHG-00001
+    changeId: { type: String, unique: true, index: true }, // CHG-YYYY-000001
 
     title: { type: String, required: true, trim: true },
-    description: { type: String, trim: true },
-    changeType: { type: String, enum: ["Standard", "Normal", "Emergency"], default: "Normal" },
-    riskLevel: { type: String, enum: ["Low", "Medium", "High"], default: "Low" },
+    description: { type: String, required: true, trim: true },
+    riskLevel: { type: String, enum: ["Low", "Medium", "High"], required: true },
+    cabStatus: { type: String, enum: Object.values(APPROVAL), default: APPROVAL.PENDING },
+    plannedDate: { type: Date, required: true },
+    implementationStatus: { type: String, enum: Object.values(IMPL), default: IMPL.NOT_STARTED },
+    pirNotes: { type: String, trim: true },
+    closedDate: { type: Date },
+    requestedBy: { type: String, required: true, trim: true },
+    department: { type: String, required: true, trim: true },
 
-    priority: { type: String, enum: Object.values(PRIORITY), default: PRIORITY.MEDIUM },
-    status: {
-      type: String,
-      enum: [...Object.values(STATUS), "Pending Approval", "Scheduled"],
-      default: "Pending Approval",
-    },
-
-    plannedStart: { type: Date },
-    plannedEnd: { type: Date },
-    actualStart: { type: Date },
-    actualEnd: { type: Date },
-    rollbackPlan: { type: String, trim: true },
-
-    linkedProblems: [{ type: mongoose.Schema.Types.ObjectId, ref: "Problem" }],
-    affectedAssets: [{ type: mongoose.Schema.Types.ObjectId, ref: "Asset" }],
-    affectedCIs: [{ type: mongoose.Schema.Types.ObjectId, ref: "ConfigurationItem" }],
-
-    requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    implementedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    approvedAt: { type: Date },
+    createdBy: { type: String, trim: true },
 
     comments: [commentSchema],
     history: [historyEntrySchema],
+    attachments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Attachment" }],
   },
-  { timestamps: true }
+  { timestamps: { createdAt: "createdDate", updatedAt: true } }
 );
+
+changeSchema.index({ cabStatus: 1, implementationStatus: 1 });
 
 module.exports = mongoose.model("Change", changeSchema);
 module.exports.PREFIX = ID_PREFIX.CHANGE;
+module.exports.IMPL = IMPL;

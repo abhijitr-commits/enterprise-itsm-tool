@@ -10,6 +10,13 @@ const connectDB = require("./config/db");
 const { attachUser } = require("./middleware/auth");
 const authRoutes = require("./routes/authRoutes");
 const incidentRoutes = require("./routes/incidentRoutes");
+const requestRoutes = require("./routes/requestRoutes");
+const problemRoutes = require("./routes/problemRoutes");
+const changeRoutes = require("./routes/changeRoutes");
+const assetRoutes = require("./routes/assetRoutes");
+const cmdbRoutes = require("./routes/cmdbRoutes");
+const knowledgeRoutes = require("./routes/knowledgeRoutes");
+const reportRoutes = require("./routes/reportRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 
 /*************************************************************
@@ -94,6 +101,13 @@ async function start() {
   app.use("/", authRoutes);
   app.use("/", dashboardRoutes);
   app.use("/incidents", incidentRoutes);
+  app.use("/requests", requestRoutes);
+  app.use("/problems", problemRoutes);
+  app.use("/changes", changeRoutes);
+  app.use("/assets", assetRoutes);
+  app.use("/cmdb", cmdbRoutes);
+  app.use("/knowledge", knowledgeRoutes);
+  app.use("/reports", reportRoutes);
 
   app.use((req, res) => res.status(404).render("errors/404"));
 

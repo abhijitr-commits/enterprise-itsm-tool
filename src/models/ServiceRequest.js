@@ -1,45 +1,44 @@
 const mongoose = require("mongoose");
-const { STATUS, PRIORITY, ID_PREFIX } = require("../config/constants");
+const { STATUS, ID_PREFIX } = require("../config/constants");
 const { commentSchema, historyEntrySchema } = require("./shared/ticketFields");
+
+/**
+ * Field-for-field port of the "Service Requests" sheet's 10 columns
+ * (Request ID, Created Date, Requester, Department, Catalog Item, Details,
+ * Approver, Approval Status, Fulfillment Status, Closed Date) — same
+ * plain-string approach as Incident.js so existing rows migrate 1:1.
+ */
+const APPROVAL = {
+  PENDING: "Pending Approval",
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
+};
 
 const serviceRequestSchema = new mongoose.Schema(
   {
-    requestId: { type: String, unique: true, index: true }, // REQ-00001
+    requestId: { type: String, unique: true, index: true }, // REQ-YYYY-000001
 
-    title: { type: String, required: true, trim: true },
-    description: { type: String, trim: true },
+    requester: { type: String, required: true, trim: true },
+    department: { type: String, required: true, trim: true },
+    catalogItem: { type: String, required: true, trim: true },
+    details: { type: String, required: true, trim: true },
 
-    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category" },
-    priority: { type: String, enum: Object.values(PRIORITY), default: PRIORITY.MEDIUM },
-    status: { type: String, enum: Object.values(STATUS), default: STATUS.OPEN },
+    approver: { type: String, trim: true }, // email of whoever decided
+    approvalStatus: { type: String, enum: Object.values(APPROVAL), default: APPROVAL.PENDING },
+    fulfillmentStatus: { type: String, enum: Object.values(STATUS), default: STATUS.OPEN },
 
-    requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    department: { type: mongoose.Schema.Types.ObjectId, ref: "Department" },
-
-    approvalRequired: { type: Boolean, default: false },
-    approvalStatus: {
-      type: String,
-      enum: ["Not Required", "Pending", "Approved", "Rejected"],
-      default: "Not Required",
-    },
-    approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    approvedAt: { type: Date },
-
-    responseDueAt: { type: Date },
-    resolutionDueAt: { type: Date },
-    resolvedAt: { type: Date },
-    closedAt: { type: Date },
-    slaBreached: { type: Boolean, default: false },
+    closedDate: { type: Date },
+    createdBy: { type: String, trim: true }, // email of whoever filed it
 
     comments: [commentSchema],
     history: [historyEntrySchema],
     attachments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Attachment" }],
   },
-  { timestamps: true }
+  { timestamps: { createdAt: "createdDate", updatedAt: true } }
 );
 
-serviceRequestSchema.index({ status: 1, priority: 1 });
+serviceRequestSchema.index({ fulfillmentStatus: 1, approvalStatus: 1 });
 
 module.exports = mongoose.model("ServiceRequest", serviceRequestSchema);
 module.exports.PREFIX = ID_PREFIX.REQUEST;
+module.exports.APPROVAL = APPROVAL;
