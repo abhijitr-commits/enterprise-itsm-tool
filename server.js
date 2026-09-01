@@ -48,6 +48,8 @@ const vendorRoutes = require("./routes/vendorRoutes");
 const vendorServiceRoutes = require("./routes/vendorServiceRoutes");
 const purchaseRoutes = require("./routes/purchaseRoutes");
 const requirementRoutes = require("./routes/requirementRoutes");
+const stockRoutes = require("./routes/stockRoutes");
+const licenseRoutes = require("./routes/licenseRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 
 /*************************************************************
@@ -170,6 +172,8 @@ async function start() {
   app.use("/vendor-service", vendorServiceRoutes);
   app.use("/purchases", purchaseRoutes);
   app.use("/requirements", requirementRoutes);
+  app.use("/stock", stockRoutes);
+  app.use("/licenses", licenseRoutes);
 
   app.use((req, res) => res.status(404).render("errors/404"));
 
