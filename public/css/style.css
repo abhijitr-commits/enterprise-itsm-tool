@@ -49,6 +49,18 @@ a { color: var(--primary); text-decoration: none; }
 .nav-link.disabled { color: #565c6c; cursor: default; }
 .nav-section-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #565c6c; margin: 18px 12px 6px; }
 .sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); }
+.sidebar-search { padding: 0 10px 14px; }
+.sidebar-search input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+.sidebar-search input::placeholder { color: #9098ac; }
 .user-chip { font-size: 13px; margin-bottom: 8px; padding: 0 10px; }
 .role-badge { display: inline-block; font-size: 10px; background: rgba(255,255,255,0.12); padding: 2px 6px; border-radius: 6px; margin-left: 4px; }
 .link-button { background: none; border: none; color: var(--sidebar-text); font-size: 13px; padding: 8px 10px; cursor: pointer; width: 100%; text-align: left; }

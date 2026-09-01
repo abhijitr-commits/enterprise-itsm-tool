@@ -1,4 +1,4 @@
-# Enterprise ITSM Tool — Node.js + MongoDB (migration complete: Phase 1 + 2 + 3 + 4 + 5 + 6 + 7)
+# Enterprise ITSM Tool — Node.js + MongoDB (migration complete: Phase 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8)
 
 This is the Node.js/Express + MongoDB migration of the Enterprise ITSM
 Tool off Google Apps Script + Google Sheets. It replaces the Sheets-based
@@ -166,6 +166,21 @@ successful submission alerts your configured Slack/Teams channel
 sent, since there's still no email provider. Linked from the sign-in
 page's footer.
 
+**Phase 8 scope** (adds, found by a full re-audit of the original 116
+files against this document — four genuine gaps, none of them
+previously documented): file attachments on Incidents, Service
+Requests, Problems, Changes, Assets, and CMDB (same MongoDB-instead-
+of-Drive pattern as Employee Documents, 3MB/file cap), shown on each
+record's detail page; an Audit Trail panel on those same six detail
+pages, finally surfacing the history `logAudit()` has been recording
+since Phase 1; a global search box in the sidebar covering Incidents,
+Requests, Problems, Changes, Assets, CMDB, Knowledge, Employees, and
+Purchases at once; and, on the Pre-Onboarding checklist, a per-
+candidate Detail page (Contact Info, BGV/IT Provisioning status,
+Joining Date confirmation, and a Welcome Kit sub-checklist) that
+auto-completes the matching checklist tasks when saved. See
+MIGRATION.md for why these four were missed the first time around.
+
 ## Stack (100% free tier)
 
 - **Backend**: Node.js + Express
@@ -259,7 +274,7 @@ Railway.app works the same way if you prefer it over Render.
 | `WellnessEngine.gs` | `src/controllers/wellnessController.js` | Same Programs/Pulse Survey (anonymous)/Kudos three-in-one |
 | `PolicyAcknowledgmentEngine.gs` | `src/controllers/policyController.js` | Same publish/acknowledge/compliance-report flow, IT-team gated for publishing |
 | `LetterEngine.gs` | `src/controllers/lettersController.js` | Same template-merge logic; generated letters are saved + printable instead of emailed (no email provider — see MIGRATION.md) |
-| `EmployeeDocumentEngine.gs` | `src/controllers/employeeDocumentController.js` | Files stored in MongoDB instead of a Google Drive folder — no new third-party account needed (see MIGRATION.md); 3MB/file cap |
+| `EmployeeDocumentEngine.html` | `src/controllers/employeeDocumentController.js` | Files stored in MongoDB instead of a Google Drive folder — no new third-party account needed (see MIGRATION.md); 3MB/file cap |
 | `HR.gs` / `HR.html` (no backend logic — pure client-side tab shell) | `src/controllers/hrHubController.js` + `views/hr/index.ejs` | Confirmed there was nothing to port beyond a landing page; built as a link-tiling hub reusing the Admin Console's tile CSS |
 | `ReportEngine.gs` → `getExecutiveSummarySafe()` | `src/controllers/executiveSummaryController.js` | Same KPI roll-up, reuses `reportController.js`'s workload/warranty/contract-expiry helpers instead of recomputing them |
 | `ReportEngine.gs` → `getContractExpiryReport()` | `src/controllers/reportController.js` (`contractExpiryReport()`) | Same 30-day Expired/Expiring-Soon split, added to the Reports page once the Employee Directory existed |
@@ -282,6 +297,10 @@ Railway.app works the same way if you prefer it over Render.
 | `AutomationEngine.gs` (onEdit trigger, user provisioning/deactivation) | *(superseded)* | Same provisioning/deactivation behavior already exists as `utils/provisioning.js`, called directly from the app-driven onboarding/offboarding/resignation flows — no sheet-edit trigger needed since there's no sheet |
 | `ITManagement.html` / `.js.html` (no backend logic — client-side tab shell) | `src/controllers/itHubController.js` + `views/it/index.ejs` | Same treatment as the HR Hub: a link-tiling landing page mirroring the original's own tab groups exactly; Room Booking/Complaints/Expenses/Stock/Purchase Register stay sidebar-only since none were ever part of this shell's own tabs |
 | `NotificationChannelEngine.gs`'s System Policies half (`getSystemPoliciesSafe()`/`saveSystemPolicy()`) | `src/controllers/systemPolicyController.js` + `views/system-policies/index.ejs` | Same 4 Setting-store keys (`AnnualLeaveQuota`/`MedicalLeaveQuota`/`UnpaidLeaveQuota`/`NoticePeriodDays`), HR-team gated same as the original; `leaveBalances.js` now reads these live instead of the fixed `LEAVE_QUOTAS` constant |
+| `AttachmentEngine.gs` | `src/models/Attachment.js` + `src/controllers/attachmentController.js` + `views/partials/attachments.ejs` | Files stored in MongoDB instead of a shared Drive folder — same reasoning as `EmployeeDocumentEngine.html` (see MIGRATION.md); 3MB/file cap; one generic upload/download pair shared by Incidents/Requests/Problems/Changes/Assets/CMDB via a `MODULE_CONFIG` map |
+| `RecordEngine.gs` → `getAuditTrailForRecord()` | `src/utils/recordExtras.js` + `views/partials/auditTrail.ejs` | Same oldest-first `AuditLog` read, now displayed on the same six modules' detail pages — no new writes, `logAudit()` was already called everywhere since Phase 1 |
+| `RecordEngine.gs` → `globalSearch()` | `src/utils/globalSearch.js` + `src/controllers/searchController.js` + `views/search/results.ejs` (`/search`) | Same 9 modules (Incidents/Requests/Problems/Changes/Assets/CMDB/Knowledge/Employees/Purchases), same per-module field matching and 25-result cap; Purchase results link to the Purchase Register list (no individual detail page exists for Purchases in this app) |
+| `PreOnboardingDetailEngine.gs` (checklist half: `confirmJoiningDate()`/`saveWelcomeKitProgress()`/`savePreOnboardingContactInfo()`) | `src/models/PreOnboardingDetail.js` + additions to `src/controllers/checklistController.js` + `views/onboarding/pre-onboarding-detail.ejs` | Same 6-item Welcome Kit sub-checklist and Joining Date confirmation, each auto-completing the matching Pre-Onboarding checklist task; the candidate-document-vault half of this same original file still needs Drive/email and stays deferred |
 
 ## Original source, kept for reference
 
