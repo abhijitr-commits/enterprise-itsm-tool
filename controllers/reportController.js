@@ -12,6 +12,7 @@ const ServiceRequest = require("../models/ServiceRequest");
 const Asset = require("../models/Asset");
 const Employee = require("../models/Employee");
 const Vendor = require("../models/Vendor");
+const SoftwareLicense = require("../models/SoftwareLicense");
 const { STATUS } = require("../config/constants");
 
 function slaComplianceReport(incidents) {
@@ -165,13 +166,33 @@ function amcExpiryReport(vendors) {
     .sort((a, b) => new Date(a.amcExpiry) - new Date(b.amcExpiry));
 }
 
+/** Port of getLicenseExpiryReport() (SoftwareLicenseEngine.gs) — same 90-day pattern as AMC/Warranty. Unlike those two, the original put no permission check on this function at all; it's still surfaced only via the reports_view-gated Reports page here, same as every other report on it. */
+function licenseExpiryReport(licenses) {
+  const now = new Date();
+  const ninetyDaysOut = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+
+  return licenses
+    .filter((l) => l.expiryDate && new Date(l.expiryDate) <= ninetyDaysOut)
+    .map((l) => {
+      const expiry = new Date(l.expiryDate);
+      return {
+        softwareName: l.softwareName,
+        vendor: l.vendor,
+        expiryDate: expiry.toLocaleDateString(),
+        urgency: expiry < now ? "Expired" : "Expiring Soon",
+      };
+    })
+    .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+}
+
 async function showReports(req, res) {
-  const [incidents, requests, assets, employees, vendors] = await Promise.all([
+  const [incidents, requests, assets, employees, vendors, licenses] = await Promise.all([
     Incident.find().lean(),
     ServiceRequest.find().lean(),
     Asset.find().lean(),
     Employee.find().lean(),
     Vendor.find().lean(),
+    SoftwareLicense.find().lean(),
   ]);
 
   res.render("reports/index", {
@@ -183,6 +204,7 @@ async function showReports(req, res) {
     warranty: assetWarrantyReport(assets),
     contracts: contractExpiryReport(employees),
     amcs: amcExpiryReport(vendors),
+    licenses: licenseExpiryReport(licenses),
   });
 }
 
@@ -192,4 +214,5 @@ module.exports = {
   assetWarrantyReport,
   contractExpiryReport,
   amcExpiryReport,
+  licenseExpiryReport,
 };
