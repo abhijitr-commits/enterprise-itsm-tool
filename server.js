@@ -61,6 +61,11 @@ const publicIntakeRoutes = require("./routes/publicIntakeRoutes");
 const attachmentRoutes = require("./routes/attachmentRoutes");
 const searchRoutes = require("./routes/searchRoutes");
 const safetyRoutes = require("./routes/safetyRoutes");
+const salesRoutes = require("./routes/salesRoutes");
+const workOrderRoutes = require("./routes/workOrderRoutes");
+const ecrRoutes = require("./routes/ecrRoutes");
+const shipmentRoutes = require("./routes/shipmentRoutes");
+const materialRequestRoutes = require("./routes/materialRequestRoutes");
 
 /*************************************************************
  * Auto-seed on boot — runs automatically every time the server
@@ -210,6 +215,11 @@ async function start() {
   app.use("/attachments", attachmentRoutes);
   app.use("/search", searchRoutes);
   app.use("/safety", safetyRoutes);
+  app.use("/sales", salesRoutes);
+  app.use("/work-orders", workOrderRoutes);
+  app.use("/engineering-changes", ecrRoutes);
+  app.use("/shipments", shipmentRoutes);
+  app.use("/material-requests", materialRequestRoutes);
 
   app.use((req, res) => res.status(404).render("errors/404"));
 
