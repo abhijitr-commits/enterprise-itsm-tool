@@ -1,0 +1,36 @@
+<%- include('../partials/header', { title: 'Search' }) %>
+
+<div class="page-header">
+  <h1>Search Results<% if (q) { %> for "<%= q %>"<% } %></h1>
+</div>
+
+<div class="panel">
+  <form method="get" action="/search" class="filter-bar">
+    <input type="text" name="q" value="<%= q %>" placeholder="Search across incidents, requests, problems, changes, assets, CMDB, knowledge, employees, purchases…" autofocus />
+    <button type="submit" class="btn btn-primary">Search</button>
+  </form>
+</div>
+
+<% if (tooShort) { %>
+  <div class="panel empty-row">Type at least 2 characters to search.</div>
+<% } else if (q && results.length === 0) { %>
+  <div class="panel empty-row">No matches for "<%= q %>".</div>
+<% } else if (results.length > 0) { %>
+  <div class="panel">
+    <table class="table">
+      <thead><tr><th>Module</th><th>Result</th><th>Status</th></tr></thead>
+      <tbody>
+        <% results.forEach(function(r) { %>
+          <tr>
+            <td><span class="badge"><%= r.module %></span></td>
+            <td><a href="<%= r.link %>"><%= r.label %></a></td>
+            <td><%= r.sub || '—' %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+    <% if (results.length >= 25) { %><p class="hint">Showing the first 25 matches — narrow your search for more precise results.</p><% } %>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>
