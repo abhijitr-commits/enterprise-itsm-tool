@@ -1,0 +1,47 @@
+<%- include('../partials/header', { title: 'Report a Safety Incident' }) %>
+
+<div class="page-header">
+  <h1>Report a Safety Incident</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<p class="hint">Use this for any physical safety event — a near-miss, an injury, or equipment (robots, actuators, test rigs) that behaved unexpectedly. This is separate from IT complaints so safety events get tracked and reported on their own.</p>
+
+<form class="panel form-panel" method="post" action="/safety">
+  <div class="form-grid">
+    <label>Department
+      <input type="text" name="department" value="<%= form.department || '' %>" />
+    </label>
+    <label>Location
+      <input type="text" name="location" value="<%= form.location || '' %>" placeholder="e.g. Lab 2, Test Floor" />
+    </label>
+    <label>Severity
+      <select name="severity" required>
+        <option value="">Select…</option>
+        <% Object.values(SAFETY_SEVERITY).forEach(function(s) { %>
+          <option value="<%= s %>" <%= form.severity === s ? 'selected' : '' %>><%= s %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Related Robot / Equipment (optional)
+      <input type="text" name="relatedAsset" value="<%= form.relatedAsset || '' %>" placeholder="Asset ID or name, if applicable" />
+    </label>
+  </div>
+  <label class="checkbox-label">
+    <input type="checkbox" name="injuryInvolved" <%= form.injuryInvolved ? 'checked' : '' %> />
+    An injury was involved
+  </label>
+  <label>What happened?
+    <textarea name="description" rows="5" required><%= form.description || '' %></textarea>
+  </label>
+  <label>Immediate action taken (optional)
+    <textarea name="immediateActionTaken" rows="2"><%= form.immediateActionTaken || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/safety/mine">Cancel</a>
+    <button type="submit" class="btn btn-primary">Submit Report</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,29 @@
+<%- include('../partials/header', { title: 'My Safety Reports' }) %>
+
+<div class="page-header">
+  <h1>My Safety Reports</h1>
+  <a class="btn btn-primary" href="/safety/new">+ Report a Safety Incident</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>ID</th><th>Severity</th><th>Location</th><th>Injury?</th><th>Status</th><th>Reported</th></tr></thead>
+    <tbody>
+      <% incidents.forEach(function(i) { %>
+        <tr>
+          <td><%= i.safetyIncidentId %></td>
+          <td><span class="badge <%= i.severity === 'Severe' ? 'badge-status-cancelled' : (i.severity === 'Near Miss' ? 'badge-status-open' : 'badge-status-in-progress') %>"><%= i.severity %></span></td>
+          <td><%= i.location || '—' %></td>
+          <td><%= i.injuryInvolved ? 'Yes' : 'No' %></td>
+          <td><span class="badge <%= i.status === 'Open' ? 'badge-status-open' : (i.status === 'Closed' ? 'badge-status-resolved' : 'badge-status-in-progress') %>"><%= i.status %></span></td>
+          <td><%= new Date(i.createdDate).toLocaleDateString() %></td>
+        </tr>
+      <% }) %>
+      <% if (incidents.length === 0) { %><tr><td colspan="6" class="empty-row">You haven't reported any safety incidents.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

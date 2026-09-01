@@ -1,0 +1,43 @@
+<%- include('../partials/header', { title: 'Safety Incidents' }) %>
+
+<div class="page-header">
+  <h1>Safety Incidents</h1>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>ID</th><th>Reporter</th><th>Department</th><th>Severity</th><th>Injury?</th><th>Related Asset</th><th>Status</th><th>Assigned To</th><% if (canManage) { %><th></th><% } %></tr></thead>
+    <tbody>
+      <% incidents.forEach(function(i) { %>
+        <tr>
+          <td><%= i.safetyIncidentId %></td>
+          <td><%= i.reporter %></td>
+          <td><%= i.department || '—' %></td>
+          <td><span class="badge <%= i.severity === 'Severe' ? 'badge-status-cancelled' : (i.severity === 'Near Miss' ? 'badge-status-open' : 'badge-status-in-progress') %>"><%= i.severity %></span></td>
+          <td><%= i.injuryInvolved ? 'Yes' : 'No' %></td>
+          <td><%= i.relatedAsset || '—' %></td>
+          <td><span class="badge <%= i.status === 'Open' ? 'badge-status-open' : (i.status === 'Closed' ? 'badge-status-resolved' : 'badge-status-in-progress') %>"><%= i.status %></span></td>
+          <td><%= i.assignedTo || '—' %></td>
+          <% if (canManage) { %>
+            <td>
+              <form method="post" action="/safety/<%= i._id %>/status" class="filter-bar">
+                <select name="status">
+                  <% Object.values(SAFETY_STATUS).forEach(function(s) { %>
+                    <option value="<%= s %>" <%= i.status === s ? 'selected' : '' %>><%= s %></option>
+                  <% }) %>
+                </select>
+                <input type="text" name="assignedTo" placeholder="Assign to" value="<%= i.assignedTo || '' %>" style="width:110px;" />
+                <button type="submit" class="btn btn-secondary">Update</button>
+              </form>
+            </td>
+          <% } %>
+        </tr>
+      <% }) %>
+      <% if (incidents.length === 0) { %><tr><td colspan="<%= canManage ? 9 : 8 %>" class="empty-row">No safety incidents reported.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>
