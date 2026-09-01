@@ -1,4 +1,4 @@
-# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4 + 5A + 5B + 5C)
+# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4 + 5A + 5B + 5C + 5D)
 
 This is the Node.js/Express + MongoDB migration of the Enterprise ITSM
 Tool off Google Apps Script + Google Sheets. It replaces the Sheets-based
@@ -120,8 +120,16 @@ panel on the Reports page, joining Asset Warranty, Contract Expiry, and
 Vendor AMC Expiry as the fourth proactive-expiry category from the
 original tool.
 
-Remaining IT-ops sub-phases (5D: Facilities &amp; General Ops, 5E:
-Final wiring) are tracked in `MIGRATION.md`.
+**Phase 5D scope** (adds): Room Booking with automatic double-booking
+conflict detection (the default 6-room list is seeded automatically on
+first boot, nothing to set up by hand); Complaints, a general
+(not category-locked) grievance workflow anyone can file; Maintenance
+Announcements from the IT team, posted to a list everyone sees; and
+Expense Claims with Admin/Manager approval and a reimbursed-marking
+step.
+
+Remaining IT-ops sub-phase (5E: Final wiring) is tracked in
+`MIGRATION.md`.
 
 ## Stack (100% free tier)
 
@@ -230,6 +238,10 @@ Railway.app works the same way if you prefer it over Render.
 | `RequirementEngine.gs` | `src/controllers/requirementController.js` | Same RFQ-style tracking; IT-or-Admin-team gated via a new combined middleware; vendor auto-email skipped (no email provider) |
 | `StockEngine.gs` | `src/controllers/stockController.js` | Same derived-not-stored current-stock calculation (Opening + IN − OUT); open read, Admin-team gated writes; low-stock alert email skipped, a badge + filter substitute |
 | `SoftwareLicenseEngine.gs` | `src/controllers/softwareLicenseController.js` | Same seats/cost/expiry tracking; open read, Admin-team gated writes; `getLicenseExpiryReport()` added to the Reports page |
+| `RoomBookingEngine.gs` | `src/controllers/roomBookingController.js` | Same overlap conflict check and booker-or-HR cancel rule; default room list now auto-seeded on boot; booking-confirmation email skipped |
+| `ComplaintEngine.gs` | `src/controllers/complaintController.js` | Same not-category-locked workflow; open list + `canManage`-gated actions (same pattern as Leave); Department Head email routing skipped |
+| `MaintenanceEngine.gs` | `src/controllers/maintenanceController.js` | Announcements are posted to a list page instead of broadcast by email; IT-team gated to create |
+| `ExpenseEngine.gs` | `src/controllers/expenseController.js` | Same claim/approve/reimburse lifecycle; open list + `canApprove`-gated actions; manager-routing email skipped |
 
 ## Original source, kept for reference
 
