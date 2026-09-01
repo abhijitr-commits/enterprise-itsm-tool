@@ -55,6 +55,39 @@ const DEFAULT_PERMISSIONS_MAP = {
   admin_manage_users: [ROLE.ADMIN],
   admin_manage_settings: [ROLE.ADMIN],
   admin_view_database: [ROLE.ADMIN],
+
+  // --- Phase 4 (HR suite) ---
+  // Employee Directory management, Onboarding/Offboarding automation,
+  // Performance Management, and Succession Planning are NOT in this map —
+  // same as the original, they're gated by requireHRTeam() (Administrator,
+  // or Manager + Department="HR") in src/utils/teamAccess.js instead of a
+  // per-role permission, since those need a real HR person, not just any
+  // Manager. See MIGRATION.md for which actions use which gate.
+
+  // Resignations — any employee can submit their own
+  resignation_submit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+
+  // Leave (Phase 4B)
+  leave_create: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  leave_approve: [ROLE.ADMIN, ROLE.MANAGER],
+
+  // Attendance / Shift (Phase 4B)
+  attendance_manage: [ROLE.ADMIN, ROLE.MANAGER],
+  shifts_manage: [ROLE.ADMIN, ROLE.MANAGER],
+
+  // Recruitment / ATS + Referrals (Phase 4C)
+  recruitment_manage: [ROLE.ADMIN, ROLE.MANAGER],
+  referrals_submit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  referrals_manage: [ROLE.ADMIN, ROLE.MANAGER],
+
+  // Learning & Development / Succession (Phase 4D — PMS/Succession stay
+  // requireHRTeam-gated like the original; LMS training assignment uses
+  // this permission)
+  training_manage: [ROLE.ADMIN, ROLE.MANAGER],
+
+  // Wellness & Engagement (Phase 4E)
+  wellness_manage: [ROLE.ADMIN, ROLE.MANAGER],
+  kudos_give: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
 };
 
 const ALL_ROLES_LIST = Object.values(ROLE);

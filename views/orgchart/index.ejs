@@ -1,0 +1,37 @@
+<%- include('../partials/header', { title: 'Org Chart' }) %>
+
+<div class="page-header">
+  <h1>Org Chart</h1>
+</div>
+
+<% if (!hasHierarchyData) { %>
+  <div class="alert alert-info">
+    No employee has "Reports To" filled in yet, so everyone below shows as
+    top-level. Add reporting lines from the Employee Directory to build a
+    real hierarchy.
+  </div>
+<% } %>
+
+<div class="panel">
+  <ul class="org-tree">
+    <% function renderNode(node) { %>
+      <li>
+        <div class="org-node">
+          <div class="org-node-name"><%= node.name %></div>
+          <div class="org-node-sub"><%= node.designation || '—' %> · <%= node.department %></div>
+        </div>
+        <% if (node.reports.length > 0) { %>
+          <ul>
+            <% node.reports.forEach(renderNode) %>
+          </ul>
+        <% } %>
+      </li>
+    <% } %>
+    <% tree.forEach(renderNode) %>
+    <% if (tree.length === 0) { %>
+      <li class="empty-row">No active employees in the directory yet.</li>
+    <% } %>
+  </ul>
+</div>
+
+<%- include('../partials/footer') %>

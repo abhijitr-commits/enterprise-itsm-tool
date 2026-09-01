@@ -1,0 +1,60 @@
+<%- include('../partials/header', { title: editing ? 'Edit Employee' : 'New Employee' }) %>
+
+<div class="page-header">
+  <h1><%= editing ? 'Edit Employee' : 'New Employee' %></h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="<%= editing ? '/employees/' + form._id : '/employees' %>">
+  <div class="form-grid">
+    <label>Name
+      <input type="text" name="name" value="<%= form.name || '' %>" required />
+    </label>
+    <label>Email
+      <input type="email" name="email" value="<%= form.email || '' %>" required />
+    </label>
+    <label>Department
+      <input type="text" name="department" value="<%= form.department || '' %>" required />
+    </label>
+    <label>Location
+      <input type="text" name="location" value="<%= form.location || '' %>" />
+    </label>
+    <label>Designation
+      <input type="text" name="designation" value="<%= form.designation || '' %>" />
+    </label>
+    <label>Reports To (employee name)
+      <input type="text" name="reportsTo" value="<%= form.reportsTo || '' %>" />
+    </label>
+    <label>Status
+      <select name="status">
+        <% Object.values(EMPLOYEE_STATUS).forEach(function(s){ %>
+          <option value="<%= s %>" <%= (form.status || 'New') === s ? 'selected' : '' %>><%= s %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Employment Type
+      <select name="employmentType" id="employmentType">
+        <% Object.values(EMPLOYMENT_TYPE).forEach(function(t){ %>
+          <option value="<%= t %>" <%= (form.employmentType || 'On-Roll') === t ? 'selected' : '' %>><%= t %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Contract End Date <span class="hint">(Contract type only)</span>
+      <input type="date" name="contractEndDate" value="<%= form.contractEndDate ? new Date(form.contractEndDate).toISOString().slice(0,10) : '' %>" />
+    </label>
+  </div>
+  <% if (!editing) { %>
+    <div class="alert alert-info">
+      Setting Status to "New" automatically creates onboarding Service
+      Requests, an Onboarding checklist, and a login for this person
+      (Viewer role by default — an Admin can upgrade it afterward).
+    </div>
+  <% } %>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/employees">Cancel</a>
+    <button type="submit" class="btn btn-primary"><%= editing ? 'Save Changes' : 'Add Employee' %></button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

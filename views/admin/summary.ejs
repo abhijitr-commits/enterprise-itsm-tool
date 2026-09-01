@@ -1,0 +1,58 @@
+<%- include('../partials/header', { title: 'Admin Console' }) %>
+
+<div class="page-header">
+  <h1>Admin Console</h1>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-value"><%= counts.users %></div>
+    <div class="stat-label">System Users</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value"><%= counts.incidents %></div>
+    <div class="stat-label">Incidents</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value"><%= counts.requests %></div>
+    <div class="stat-label">Service Requests</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value"><%= counts.problems %></div>
+    <div class="stat-label">Problems</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value"><%= counts.changes %></div>
+    <div class="stat-label">Changes</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value"><%= counts.assets %></div>
+    <div class="stat-label">Assets</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value"><%= counts.permissionCount %></div>
+    <div class="stat-label">Permission Actions</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <h2>Manage</h2>
+  </div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/admin/users">
+      <div class="admin-tile-title">User Management</div>
+      <div class="admin-tile-sub">Create logins, set role &amp; department, activate/deactivate, reset passwords.</div>
+    </a>
+    <a class="admin-tile" href="/admin/permissions">
+      <div class="admin-tile-title">Permission Matrix</div>
+      <div class="admin-tile-sub">Control which role can do what, per action, across every module.</div>
+    </a>
+    <a class="admin-tile" href="/masterdata/departments">
+      <div class="admin-tile-title">Master Data</div>
+      <div class="admin-tile-sub">Departments, Locations, Categories, and the SLA Matrix.</div>
+    </a>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -146,6 +146,13 @@ input, select, textarea { font-family: inherit; padding: 9px 11px; border: 1px s
 .matrix-table th, .matrix-table td { white-space: nowrap; }
 .matrix-cell { text-align: center; }
 
+.org-tree, .org-tree ul { list-style: none; padding-left: 24px; }
+.org-tree { padding-left: 0; }
+.org-tree li { position: relative; margin: 8px 0; }
+.org-node { display: inline-block; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; }
+.org-node-name { font-weight: 700; font-size: 13px; }
+.org-node-sub { font-size: 11px; color: var(--text-muted); }
+
 .centered-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); }
 .login-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 36px; width: 340px; display: flex; flex-direction: column; gap: 14px; }
 .login-card h1 { margin: 0; font-size: 20px; text-align: center; }

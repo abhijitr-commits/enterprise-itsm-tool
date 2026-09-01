@@ -1,4 +1,4 @@
-# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2)
+# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4A)
 
 This is the Node.js/Express + MongoDB migration of the Enterprise ITSM
 Tool off Google Apps Script + Google Sheets. It replaces the Sheets-based
@@ -20,9 +20,33 @@ history), and cross-module Reports (SLA compliance, monthly volume,
 engineer performance, ticket aging, department workload, asset warranty
 expiry).
 
-The HR/IT-ops modules and the Admin Console (user management, permission
-matrix editor) are **not yet ported** — see `MIGRATION.md` for the phased
-roadmap and what's needed for each.
+**Phase 3 scope** (adds): the Admin Console — user management (create
+logins, set role + department, activate/deactivate, reset passwords),
+a permission matrix editor (control which role can do what, per action,
+with a safety guard so Administrators can never lock themselves out),
+Master Data management (Departments, Locations, Categories, SLA
+Matrix — this is where you set your real SLA hours), and role-based
+sidebar visibility (a module's link disappears for a role once its
+permissions for that module are fully removed).
+
+Once you're logged in as an Administrator, the sidebar shows an
+**Admin** section (Admin Console / Users / Permissions / Master Data)
+that no other role sees.
+
+**Phase 4A scope** (adds, first slice of the HR suite): an Employee
+Directory (with the same "New" status → onboarding automation and
+"Left" status → offboarding automation as the original), Onboarding/
+Offboarding checklists (standard + facilities/admin versions),
+Resignations with 5-way clearance tracking and structured Exit
+Interviews, a self-service "My Profile" page, a personal "My Work"
+page (your tickets + your pending approvals), an Org Chart, and
+department-aware access (HR team / Admin team / IT team, alongside
+the existing role-based Permission Matrix).
+
+The rest of the HR suite (Leave/Attendance/Shift, Recruitment,
+Performance/Learning, Benefits/Wellness, and the IT-ops modules) are
+**not yet ported** — see `MIGRATION.md` for the phased roadmap and
+what's needed for each.
 
 ## Stack (100% free tier)
 
@@ -99,6 +123,14 @@ Railway.app works the same way if you prefer it over Render.
 | Public incident form + honeypot/CAPTCHA/rate-limit | *(not yet ported)* | See MIGRATION.md — needs a public route + a CAPTCHA library |
 | Email Queue + notifyUser() | *(not yet ported)* | See MIGRATION.md — needs an email provider (e.g. free-tier Resend/SendGrid) |
 | Approval delegation (leave-based) | *(not yet ported)* | Depends on the Leave module, which isn't migrated yet |
+| `AdminEngine.gs` (user mgmt + permission matrix) | `src/controllers/adminController.js` + `views/admin/*` | Same safety guard: Administrator can't lose `admin_manage_users`/`admin_manage_settings`; also guards against demoting/deactivating the last active Administrator |
+| `MasterDataEngine.gs` (departments/locations/categories/SLA matrix) | `src/controllers/masterDataController.js` + `views/masterdata/*` | Same generic config-driven CRUD idea, now Mongoose models instead of sheets |
+| `Navigation.gs`'s `moduleVisibility` | `src/middleware/moduleVisibility.js` | A sidebar link vanishes once a role's permissions for that module are all removed |
+| `Setup.gs`, `MakeMeAdmin.gs` | *(superseded)* | Auto-seed-on-boot + the Admin Console itself replace both |
+| `EmployeeEngine.gs` | `src/controllers/employeeController.js` + `views/employees/*` | Same New/Left status automation; login provisioning now generates a one-time temporary password instead of a passwordless row (see MIGRATION.md) |
+| `OnboardingEngine.gs` (checklists + resignations) | `src/controllers/checklistController.js` + `resignationController.js` | 4 checklist sheets collapsed into one `ChecklistItem` collection with a `type` field; same 5-way clearance auto-complete for resignations |
+| `ProfileEngine.gs`, `OrgChartEngine.gs`, `MyWorkEngine.gs` | `views/profile`, `views/orgchart`, `views/mywork` | Same aggregation logic; My Profile matches by email instead of by name |
+| `Security.gs`'s `isHRTeam()`/`isITTeam()`/`isAdminTeam()` | `src/utils/teamAccess.js` | Department + Role gating, alongside the Phase 3 Permission Matrix |
 
 ## Original source, kept for reference
 

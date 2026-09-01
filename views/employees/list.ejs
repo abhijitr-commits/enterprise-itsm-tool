@@ -1,0 +1,52 @@
+<%- include('../partials/header', { title: 'Employee Directory' }) %>
+
+<div class="page-header">
+  <h1>Employee Directory</h1>
+  <a class="btn btn-primary" href="/employees/new">+ New Employee</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+<% if (tempCredential) { %>
+  <div class="alert alert-info">
+    Login created for <strong><%= tempCredential.name %></strong> (<%= tempCredential.email %>) —
+    temporary password: <strong><%= tempCredential.password %></strong>.
+    Share this with them securely; there's no email provider set up yet to send it automatically.
+  </div>
+<% } %>
+
+<form class="filter-bar" method="get" action="/employees">
+  <input type="text" name="q" placeholder="Search employees…" value="<%= query.q %>" />
+  <select name="status">
+    <option value="">All statuses</option>
+    <% Object.values(EMPLOYEE_STATUS).forEach(function(s){ %>
+      <option value="<%= s %>" <%= query.status === s ? 'selected' : '' %>><%= s %></option>
+    <% }) %>
+  </select>
+  <button type="submit" class="btn btn-secondary">Filter</button>
+</form>
+
+<div class="panel">
+  <table class="table">
+    <thead>
+      <tr><th>ID</th><th>Name</th><th>Email</th><th>Department</th><th>Designation</th><th>Status</th><th>Type</th></tr>
+    </thead>
+    <tbody>
+      <% employees.forEach(function(e) { %>
+        <tr onclick="location.href='/employees/<%= e._id %>'">
+          <td><%= e.employeeId %></td>
+          <td><%= e.name %></td>
+          <td><%= e.email %></td>
+          <td><%= e.department %></td>
+          <td><%= e.designation || '—' %></td>
+          <td><span class="badge <%= e.status === 'Left' ? 'badge-status-closed' : (e.status === 'New' ? 'badge-approval-pending-approval' : 'badge-status-open') %>"><%= e.status %></span></td>
+          <td><%= e.employmentType %></td>
+        </tr>
+      <% }) %>
+      <% if (employees.length === 0) { %>
+        <tr><td colspan="7" class="empty-row">No employees match your filters.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

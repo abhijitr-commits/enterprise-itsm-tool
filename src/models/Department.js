@@ -3,7 +3,8 @@ const mongoose = require("mongoose");
 const departmentSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, unique: true, trim: true },
-    head: { type: mongoose.Schema.Types.ObjectId, ref: "Employee" },
+    head: { type: String, trim: true }, // plain text, matching every other module's field convention
+    location: { type: String, trim: true },
   },
   { timestamps: true }
 );

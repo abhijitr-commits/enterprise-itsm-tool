@@ -1,0 +1,33 @@
+<%- include('../partials/header', { title: 'User Management' }) %>
+
+<div class="page-header">
+  <h1>User Management</h1>
+  <a class="btn btn-primary" href="/admin/users/new">+ New User</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <table class="table">
+    <thead>
+      <tr><th>Name</th><th>Email</th><th>Department</th><th>Role</th><th>Status</th><th>Last Login</th></tr>
+    </thead>
+    <tbody>
+      <% users.forEach(function(u) { %>
+        <tr onclick="location.href='/admin/users/<%= u._id %>/edit'">
+          <td><%= u.name %></td>
+          <td><%= u.email %></td>
+          <td><%= u.department || '—' %></td>
+          <td><span class="badge badge-role"><%= u.role %></span></td>
+          <td><span class="badge <%= u.active ? 'badge-status-open' : 'badge-status-closed' %>"><%= u.active ? 'Active' : 'Inactive' %></span></td>
+          <td><%= u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString() : 'Never' %></td>
+        </tr>
+      <% }) %>
+      <% if (users.length === 0) { %>
+        <tr><td colspan="6" class="empty-row">No users yet.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

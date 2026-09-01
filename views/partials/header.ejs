@@ -10,15 +10,57 @@
   <div class="app-shell">
     <nav class="sidebar">
       <div class="brand">Enterprise ITSM</div>
+      <%
+        // Port of Navigation.gs's moduleVisibility: hides a link entirely
+        // when the signed-in user's role has zero permissions left for
+        // that module (see src/middleware/moduleVisibility.js). Undefined
+        // (e.g. no user yet) defaults every module to visible.
+        const mv = typeof moduleVisibility !== "undefined" ? moduleVisibility : {};
+        const canSee = (key) => mv[key] !== false;
+      %>
       <a href="/" class="nav-link">Dashboard</a>
-      <a href="/incidents" class="nav-link">Incidents</a>
-      <a href="/requests" class="nav-link">Service Requests</a>
-      <a href="/problems" class="nav-link">Problems</a>
-      <a href="/changes" class="nav-link">Changes</a>
-      <a href="/assets" class="nav-link">Assets</a>
-      <a href="/cmdb" class="nav-link">CMDB</a>
-      <a href="/knowledge" class="nav-link">Knowledge Base</a>
-      <a href="/reports" class="nav-link">Reports</a>
+      <% if (canSee('incidents')) { %><a href="/incidents" class="nav-link">Incidents</a><% } %>
+      <% if (canSee('requests')) { %><a href="/requests" class="nav-link">Service Requests</a><% } %>
+      <% if (canSee('problems')) { %><a href="/problems" class="nav-link">Problems</a><% } %>
+      <% if (canSee('changes')) { %><a href="/changes" class="nav-link">Changes</a><% } %>
+      <% if (canSee('assets')) { %><a href="/assets" class="nav-link">Assets</a><% } %>
+      <% if (canSee('cmdb')) { %><a href="/cmdb" class="nav-link">CMDB</a><% } %>
+      <% if (canSee('knowledge')) { %><a href="/knowledge" class="nav-link">Knowledge Base</a><% } %>
+      <% if (canSee('reports')) { %><a href="/reports" class="nav-link">Reports</a><% } %>
+      <%
+        // HR-team / Admin-team checks, same rule as src/utils/teamAccess.js:
+        // Administrator always qualifies; otherwise Manager + the matching
+        // department. Kept inline here since header.ejs has no access to
+        // that module directly — just display logic, the real gate is
+        // still server-side on every route.
+        const isHRTeamUser = currentUser && (currentUser.role === 'Administrator' ||
+          (currentUser.role === 'Manager' && String(currentUser.department || '').trim().toLowerCase() === 'hr'));
+        const isAdminTeamUser = currentUser && (currentUser.role === 'Administrator' ||
+          (currentUser.role === 'Manager' && String(currentUser.department || '').trim().toLowerCase() === 'administration'));
+      %>
+      <% if (currentUser) { %>
+        <div class="nav-section-label">HR</div>
+        <a href="/mywork" class="nav-link">My Work</a>
+        <a href="/profile" class="nav-link">My Profile</a>
+        <a href="/orgchart" class="nav-link">Org Chart</a>
+        <a href="/employees" class="nav-link">Employee Directory</a>
+        <a href="/resignations" class="nav-link">Resignations</a>
+        <% if (isHRTeamUser) { %>
+          <a href="/onboarding/onboarding" class="nav-link">Onboarding</a>
+          <a href="/onboarding/offboarding" class="nav-link">Offboarding</a>
+        <% } %>
+        <% if (isAdminTeamUser) { %>
+          <a href="/onboarding/admin-onboarding" class="nav-link">Admin Onboarding</a>
+          <a href="/onboarding/admin-offboarding" class="nav-link">Admin Offboarding</a>
+        <% } %>
+      <% } %>
+      <% if (currentUser && currentUser.role === 'Administrator') { %>
+        <div class="nav-section-label">Admin</div>
+        <a href="/admin" class="nav-link">Admin Console</a>
+        <a href="/admin/users" class="nav-link">Users</a>
+        <a href="/admin/permissions" class="nav-link">Permissions</a>
+        <a href="/masterdata/departments" class="nav-link">Master Data</a>
+      <% } %>
       <div class="sidebar-footer">
         <div class="user-chip"><%= currentUser.name %> <span class="role-badge"><%= currentUser.role %></span></div>
         <form method="post" action="/logout"><button class="link-button">Sign out</button></form>

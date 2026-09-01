@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema(
       enum: Object.values(ROLE),
       default: ROLE.VIEWER,
     },
-    department: { type: mongoose.Schema.Types.ObjectId, ref: "Department" },
+    department: { type: String, trim: true }, // plain text, matching every other module's department field
     active: { type: Boolean, default: true },
     lastLoginAt: { type: Date },
   },

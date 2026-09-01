@@ -1,0 +1,82 @@
+<%- include('../partials/header', { title: 'My Profile' }) %>
+
+<div class="page-header">
+  <h1>My Profile</h1>
+</div>
+
+<% if (!linked) { %>
+  <div class="alert alert-info">
+    Your login isn't linked to an Employee record yet (no Employee record
+    matches your email, <%= currentUser.email %>). Ask HR to add you to the
+    Employee Directory to see your profile here.
+  </div>
+<% } else { %>
+  <div class="detail-grid">
+    <div>
+      <div class="panel">
+        <div class="panel-header"><h2><%= profile.name %></h2></div>
+        <dl class="meta-list">
+          <dt>Employee ID</dt><dd><%= profile.employeeId %></dd>
+          <dt>Email</dt><dd><%= profile.email %></dd>
+          <dt>Department</dt><dd><%= profile.department %></dd>
+          <dt>Location</dt><dd><%= profile.location || '—' %></dd>
+          <dt>Designation</dt><dd><%= profile.designation || '—' %></dd>
+          <dt>Status</dt><dd><%= profile.status %></dd>
+          <dt>Employment Type</dt><dd><%= profile.employmentType %></dd>
+          <dt>Reports To</dt><dd><%= profile.reportsTo || '— (top level)' %></dd>
+        </dl>
+      </div>
+
+      <% if (onboardingTasks.length > 0) { %>
+        <div class="panel">
+          <div class="panel-header"><h2>My Onboarding Checklist</h2></div>
+          <table class="table">
+            <thead><tr><th>Task</th><th>Category</th><th>Status</th></tr></thead>
+            <tbody>
+              <% onboardingTasks.forEach(function(t) { %>
+                <tr>
+                  <td><%= t.task %></td>
+                  <td><%= t.category || '—' %></td>
+                  <td><span class="badge <%= t.status === 'Done' ? 'badge-status-resolved' : 'badge-status-open' %>"><%= t.status %></span></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+
+    <div>
+      <div class="panel">
+        <div class="panel-header"><h2>My Assets</h2></div>
+        <table class="table">
+          <thead><tr><th>Asset</th><th>Type</th><th>Status</th></tr></thead>
+          <tbody>
+            <% assets.forEach(function(a) { %>
+              <tr>
+                <td><%= a.assetName %></td>
+                <td><%= a.type %></td>
+                <td><span class="badge badge-status-open"><%= a.status %></span></td>
+              </tr>
+            <% }) %>
+            <% if (assets.length === 0) { %>
+              <tr><td colspan="3" class="empty-row">No assets currently assigned to you.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>Leave Balance</h2></div>
+        <p class="hint">Not available yet — coming in the Leave &amp; Attendance module.</p>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>My Trainings</h2></div>
+        <p class="hint">Not available yet — coming in the Learning &amp; Development module.</p>
+      </div>
+    </div>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>
