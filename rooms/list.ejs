@@ -1,0 +1,47 @@
+<%- include('../partials/header', { title: 'Conference Rooms' }) %>
+
+<div class="page-header">
+  <h1>Conference Rooms</h1>
+  <a class="btn btn-secondary" href="/rooms/bookings">Go to Bookings</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <div class="panel-header"><h2>Add a Room</h2></div>
+  <form class="form-panel" method="post" action="/rooms">
+    <div class="form-grid">
+      <label>Room Name
+        <input type="text" name="roomName" required />
+      </label>
+      <label>Location
+        <input type="text" name="location" />
+      </label>
+      <label>Capacity
+        <input type="number" name="capacity" min="1" />
+      </label>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Add Room</button>
+    </div>
+  </form>
+</div>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>Room ID</th><th>Room Name</th><th>Location</th><th>Capacity</th></tr></thead>
+    <tbody>
+      <% rooms.forEach(function(r) { %>
+        <tr>
+          <td><%= r.roomId %></td>
+          <td><%= r.roomName %></td>
+          <td><%= r.location || '—' %></td>
+          <td><%= r.capacity || '—' %></td>
+        </tr>
+      <% }) %>
+      <% if (rooms.length === 0) { %><tr><td colspan="4" class="empty-row">No rooms yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

@@ -87,6 +87,14 @@
         <a href="/purchases" class="nav-link">Purchase Register</a>
         <a href="/stock" class="nav-link">Stock / Inventory</a>
         <a href="/licenses" class="nav-link">Software Licenses</a>
+        <a href="/rooms/bookings" class="nav-link">Room Booking</a>
+        <a href="/complaints/mine" class="nav-link">My Complaints</a>
+        <a href="/expenses/mine" class="nav-link">My Expense Claims</a>
+        <a href="/maintenance" class="nav-link">Maintenance Announcements</a>
+        <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
+          <a href="/complaints" class="nav-link">All Complaints</a>
+          <a href="/expenses" class="nav-link">All Expense Claims</a>
+        <% } %>
         <% if (isITTeamUser) { %>
           <a href="/helpdesk" class="nav-link">IT Helpdesk</a>
           <a href="/asset-allocation" class="nav-link">Asset Allocation</a>

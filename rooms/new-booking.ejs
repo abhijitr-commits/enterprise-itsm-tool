@@ -1,0 +1,35 @@
+<%- include('../partials/header', { title: 'Book a Room' }) %>
+
+<div class="page-header">
+  <h1>Book a Room</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/rooms/bookings">
+  <div class="form-grid">
+    <label>Room
+      <select name="roomId" required>
+        <% rooms.forEach(function(r) { %><option value="<%= r.roomId %>"><%= r.roomName %><% if (r.location) { %> (<%= r.location %>)<% } %></option><% }) %>
+      </select>
+    </label>
+    <label>Date
+      <input type="date" name="date" required />
+    </label>
+    <label>Start Time
+      <input type="time" name="startTime" required />
+    </label>
+    <label>End Time
+      <input type="time" name="endTime" required />
+    </label>
+  </div>
+  <label>Purpose
+    <textarea name="purpose" rows="2"></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/rooms/bookings">Cancel</a>
+    <button type="submit" class="btn btn-primary">Book Room</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

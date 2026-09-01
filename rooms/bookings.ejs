@@ -1,0 +1,40 @@
+<%- include('../partials/header', { title: 'Room Bookings' }) %>
+
+<div class="page-header">
+  <h1>Room Bookings</h1>
+  <div style="display:flex; gap:8px;">
+    <% if (canManageRooms) { %><a class="btn btn-secondary" href="/rooms">Manage Rooms</a><% } %>
+    <a class="btn btn-primary" href="/rooms/bookings/new">+ Book a Room</a>
+  </div>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>Booking ID</th><th>Room</th><th>Date</th><th>Time</th><th>Booked By</th><th>Purpose</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      <% bookings.forEach(function(b) { %>
+        <tr>
+          <td><%= b.bookingId %></td>
+          <td><%= b.roomName %></td>
+          <td><%= b.date %></td>
+          <td><%= b.startTime %> – <%= b.endTime %></td>
+          <td><%= b.bookedBy %></td>
+          <td><%= b.purpose || '—' %></td>
+          <td><span class="badge <%= b.status === 'Cancelled' ? 'badge-status-cancelled' : 'badge-status-open' %>"><%= b.status %></span></td>
+          <td>
+            <% if (b.status !== 'Cancelled' && (canCancelAny || b.bookedBy.trim().toLowerCase() === currentUserName.trim().toLowerCase())) { %>
+              <form method="post" action="/rooms/bookings/<%= b._id %>/cancel">
+                <button type="submit" class="btn btn-secondary">Cancel</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (bookings.length === 0) { %><tr><td colspan="8" class="empty-row">No bookings yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>
