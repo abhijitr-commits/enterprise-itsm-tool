@@ -1,4 +1,4 @@
-# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4 + 5A)
+# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4 + 5A + 5B)
 
 This is the Node.js/Express + MongoDB migration of the Enterprise ITSM
 Tool off Google Apps Script + Google Sheets. It replaces the Sheets-based
@@ -102,9 +102,18 @@ backup, and only marks the resignation's IT clearance done once all
 three are complete); and Access Requests (password resets and system/
 application access — self-service submit for anyone, IT-team managed).
 
-Remaining IT-ops sub-phases (5B: Vendors &amp; Procurement, 5C:
-Inventory &amp; Licensing, 5D: Facilities &amp; General Ops, 5E: Final
-wiring) are tracked in `MIGRATION.md`.
+**Phase 5B scope** (adds): Vendor Management (a real vendor directory —
+category, AMC expiry, status — replacing an early placeholder that was
+never wired up); a Vendor AMC Expiry report on the Reports page; Vendor
+Service Tracking (logging and resolving service issues against real
+vendors, IT-team managed); a Purchase Register that can create a
+matching Asset Register entry automatically when a purchase is marked
+Received; and Requirement Requests, a lightweight RFQ workflow for the
+IT/Admin procurement teams.
+
+Remaining IT-ops sub-phases (5C: Inventory &amp; Licensing, 5D:
+Facilities &amp; General Ops, 5E: Final wiring) are tracked in
+`MIGRATION.md`.
 
 ## Stack (100% free tier)
 
@@ -207,6 +216,10 @@ Railway.app works the same way if you prefer it over Render.
 | `ITAssetAllocationEngine.gs` | `src/controllers/itAllocationController.js` | Same real allocation-against-the-Asset-Register workflow, via a new `issueAssetInternal()` extracted from `assetController.js` |
 | `ITClearanceEngine.gs` | `src/controllers/itClearanceController.js` | Same real return-against-the-Asset-Register + 3-checkbox clearance workflow, via a new `returnAssetInternal()` and `resignationController.js`'s `updateClearanceInternal()` |
 | `AccessRequestEngine.gs` | `src/controllers/accessRequestController.js` | Same self-service submit + IT-team-managed workflow; new `access_requests_submit` permission key for the "anyone logged in" submit tier |
+| `VendorEngine.gs` | `src/controllers/vendorController.js` | Rebuilt `Vendor` model with the real columns (Category, AMC Expiry, Status); open read, `vendors_create`/`vendors_edit` gated writes, same tiers as Assets |
+| `VendorServiceEngine.gs` | `src/controllers/vendorServiceController.js` | Same service-log-against-real-vendors workflow, IT-team gated |
+| `PurchaseEngine.gs` | `src/controllers/purchaseController.js` | Same PO tracking; marking "Received" with Create Asset checked genuinely creates an Asset Register entry, via a newly-exported `logAssetHistory()` |
+| `RequirementEngine.gs` | `src/controllers/requirementController.js` | Same RFQ-style tracking; IT-or-Admin-team gated via a new combined middleware; vendor auto-email skipped (no email provider) |
 
 ## Original source, kept for reference
 
