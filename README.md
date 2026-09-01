@@ -1,4 +1,4 @@
-# Enterprise ITSM Tool — Node.js + MongoDB (migration complete: Phase 1 + 2 + 3 + 4 + 5 + 6)
+# Enterprise ITSM Tool — Node.js + MongoDB (migration complete: Phase 1 + 2 + 3 + 4 + 5 + 6 + 7)
 
 This is the Node.js/Express + MongoDB migration of the Enterprise ITSM
 Tool off Google Apps Script + Google Sheets. It replaces the Sheets-based
@@ -156,6 +156,16 @@ genuinely grants a stand-in the same approval rights as the Manager/
 Admin who's on leave, for Leave/Service Request/Change approvals only,
 and never more than that person actually had.
 
+**Phase 7 scope** (adds): a public, no-login Incident submission form
+at `/support`, for people outside the organization (or without an
+account) — the same self-built spam protection as the original (a
+math-question CAPTCHA, a honeypot field, and a 20-per-10-minute rate
+limit — no paid CAPTCHA service, nothing new to sign up for). A
+successful submission alerts your configured Slack/Teams channel
+(Phase 5E's Integration Settings) instead of the email the original
+sent, since there's still no email provider. Linked from the sign-in
+page's footer.
+
 ## Stack (100% free tier)
 
 - **Backend**: Node.js + Express
@@ -228,7 +238,7 @@ Railway.app works the same way if you prefer it over Render.
 | `Security.gs` → `hasPermission()`/`requirePermission()` | `src/utils/permissions.js` | Same logic, Express middleware instead of a thrown Error |
 | Incident Register sheet (15 columns) | `Incident` model | Same fields, same names conceptually |
 | Audit Log sheet | `AuditLog` collection | Same write-on-every-action pattern |
-| Public incident form + honeypot/CAPTCHA/rate-limit | *(not yet ported)* | See MIGRATION.md — needs a public route + a CAPTCHA library |
+| `PublicIntake.html` + `Navigation.gs`'s public `doGet()` branch + `IncidentEngine.gs` → `createPublicIncident()` | `src/controllers/publicIntakeController.js` + `views/public/intake.ejs` (`/support`) | Same honeypot + math-CAPTCHA + rate-limit spam defense, self-built (no CAPTCHA service); manager-alert email replaced with a Slack/Teams post (Phase 5E) — see Phase 7 in MIGRATION.md |
 | Email Queue + notifyUser() | *(not yet ported)* | See MIGRATION.md — needs an email provider (e.g. free-tier Resend/SendGrid) |
 | `Security.gs` → `isDelegatedApprover()` | `src/utils/delegation.js` | Same scope: `changes_approve`/`leave_approve`/`requests_approve` only, and never more than the person on leave actually had — see Phase 6 in MIGRATION.md |
 | `AdminEngine.gs` (user mgmt + permission matrix) | `src/controllers/adminController.js` + `views/admin/*` | Same safety guard: Administrator can't lose `admin_manage_users`/`admin_manage_settings`; also guards against demoting/deactivating the last active Administrator |
