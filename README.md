@@ -1,4 +1,4 @@
-# Enterprise ITSM Tool — Node.js + MongoDB (migration complete: Phase 1 + 2 + 3 + 4 + 5)
+# Enterprise ITSM Tool — Node.js + MongoDB (migration complete: Phase 1 + 2 + 3 + 4 + 5 + 6)
 
 This is the Node.js/Express + MongoDB migration of the Enterprise ITSM
 Tool off Google Apps Script + Google Sheets. It replaces the Sheets-based
@@ -146,6 +146,16 @@ Contract Expiry. **This completes Phase 5 — all 18 IT-operations &amp;
 facilities modules (5A–5E) are now migrated, and with them, all 116
 files of the original Enterprise ITSM Tool.**
 
+**Phase 6 scope** (adds, closing the two items Phase 5E deliberately
+left open): a System Policies page for HR (Annual/Medical/Unpaid Leave
+Quotas and the Standard Notice Period, now editable instead of fixed
+constants — My Profile's Leave Balance and the Leave module both read
+these live); and leave-based Approval Delegation — the "Delegate To"
+field on a leave request (captured since Phase 4B but inert until now)
+genuinely grants a stand-in the same approval rights as the Manager/
+Admin who's on leave, for Leave/Service Request/Change approvals only,
+and never more than that person actually had.
+
 ## Stack (100% free tier)
 
 - **Backend**: Node.js + Express
@@ -220,7 +230,7 @@ Railway.app works the same way if you prefer it over Render.
 | Audit Log sheet | `AuditLog` collection | Same write-on-every-action pattern |
 | Public incident form + honeypot/CAPTCHA/rate-limit | *(not yet ported)* | See MIGRATION.md — needs a public route + a CAPTCHA library |
 | Email Queue + notifyUser() | *(not yet ported)* | See MIGRATION.md — needs an email provider (e.g. free-tier Resend/SendGrid) |
-| Approval delegation (leave-based) | *(not wired up)* | The Leave module (Phase 4B) captures the "Delegate To" field, but the delegate doesn't yet actually inherit approval rights server-side — see MIGRATION.md |
+| `Security.gs` → `isDelegatedApprover()` | `src/utils/delegation.js` | Same scope: `changes_approve`/`leave_approve`/`requests_approve` only, and never more than the person on leave actually had — see Phase 6 in MIGRATION.md |
 | `AdminEngine.gs` (user mgmt + permission matrix) | `src/controllers/adminController.js` + `views/admin/*` | Same safety guard: Administrator can't lose `admin_manage_users`/`admin_manage_settings`; also guards against demoting/deactivating the last active Administrator |
 | `MasterDataEngine.gs` (departments/locations/categories/SLA matrix) | `src/controllers/masterDataController.js` + `views/masterdata/*` | Same generic config-driven CRUD idea, now Mongoose models instead of sheets |
 | `Navigation.gs`'s `moduleVisibility` | `src/middleware/moduleVisibility.js` | A sidebar link vanishes once a role's permissions for that module are all removed |
@@ -261,6 +271,7 @@ Railway.app works the same way if you prefer it over Render.
 | `AutomationEngine.gs` → `sendExpiryAlerts()` | "Send Expiry Digest Now" button, `adminController.sendExpiryDigest` | Manual trigger instead of a daily cron (Render's free tier has none, and this project never creates a third-party account to fake one); posts to Slack/Teams instead of email |
 | `AutomationEngine.gs` (onEdit trigger, user provisioning/deactivation) | *(superseded)* | Same provisioning/deactivation behavior already exists as `utils/provisioning.js`, called directly from the app-driven onboarding/offboarding/resignation flows — no sheet-edit trigger needed since there's no sheet |
 | `ITManagement.html` / `.js.html` (no backend logic — client-side tab shell) | `src/controllers/itHubController.js` + `views/it/index.ejs` | Same treatment as the HR Hub: a link-tiling landing page mirroring the original's own tab groups exactly; Room Booking/Complaints/Expenses/Stock/Purchase Register stay sidebar-only since none were ever part of this shell's own tabs |
+| `NotificationChannelEngine.gs`'s System Policies half (`getSystemPoliciesSafe()`/`saveSystemPolicy()`) | `src/controllers/systemPolicyController.js` + `views/system-policies/index.ejs` | Same 4 Setting-store keys (`AnnualLeaveQuota`/`MedicalLeaveQuota`/`UnpaidLeaveQuota`/`NoticePeriodDays`), HR-team gated same as the original; `leaveBalances.js` now reads these live instead of the fixed `LEAVE_QUOTAS` constant |
 
 ## Original source, kept for reference
 
