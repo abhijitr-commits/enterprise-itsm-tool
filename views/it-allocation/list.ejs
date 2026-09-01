@@ -1,0 +1,47 @@
+<%- include('../partials/header', { title: 'IT Asset Allocation' }) %>
+
+<div class="page-header">
+  <h1>IT Asset Allocation</h1>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<p class="hint">Allocate real assets from the Asset Register to new joiners awaiting IT provisioning.</p>
+
+<div class="panel">
+  <div class="panel-header"><h2>Awaiting IT Provisioning</h2></div>
+  <table class="table">
+    <thead><tr><th>Candidate</th><th>Department</th><th></th></tr></thead>
+    <tbody>
+      <% pending.forEach(function(t) { %>
+        <tr>
+          <td><%= t.employee %></td>
+          <td><%= t.department || '—' %></td>
+          <td><a class="btn btn-secondary" href="/asset-allocation/new?employee=<%= encodeURIComponent(t.employee) %>&department=<%= encodeURIComponent(t.department || '') %>">Allocate Assets</a></td>
+        </tr>
+      <% }) %>
+      <% if (pending.length === 0) { %><tr><td colspan="3" class="empty-row">No one currently awaiting IT provisioning.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Allocation History</h2></div>
+  <table class="table">
+    <thead><tr><th>Allocation ID</th><th>Employee</th><th>Assets</th><th>Date</th><th>Allocated By</th></tr></thead>
+    <tbody>
+      <% history.forEach(function(a) { %>
+        <tr>
+          <td><%= a.allocationId %></td>
+          <td><%= a.employee %></td>
+          <td><%= a.assetIds.join(', ') %></td>
+          <td><%= new Date(a.allocationDate).toLocaleDateString() %></td>
+          <td><%= a.allocatedBy %></td>
+        </tr>
+      <% }) %>
+      <% if (history.length === 0) { %><tr><td colspan="5" class="empty-row">No allocations recorded yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

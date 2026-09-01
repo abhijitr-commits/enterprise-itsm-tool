@@ -1,0 +1,28 @@
+<%- include('../partials/header', { title: 'Pulse Survey Results' }) %>
+
+<div class="page-header">
+  <h1>Pulse Survey Results</h1>
+  <a class="btn btn-primary" href="/wellness/pulse/new">+ New Survey</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<% results.forEach(function(r) { %>
+  <div class="panel">
+    <div class="panel-header">
+      <h2><%= r.survey.question %> <span class="badge <%= r.survey.status === 'Open' ? 'badge-status-open' : 'badge-status-closed' %>"><%= r.survey.status %></span></h2>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-value"><%= r.average %></div><div class="stat-label">Average Rating</div></div>
+      <div class="stat-card"><div class="stat-value"><%= r.count %></div><div class="stat-label">Responses</div></div>
+    </div>
+    <% if (r.comments.length > 0) { %>
+      <ul>
+        <% r.comments.forEach(function(c) { %><li><%= c %></li><% }) %>
+      </ul>
+    <% } %>
+  </div>
+<% }) %>
+<% if (results.length === 0) { %><div class="panel"><p class="empty-row">No pulse surveys created yet.</p></div><% } %>
+
+<%- include('../partials/footer') %>

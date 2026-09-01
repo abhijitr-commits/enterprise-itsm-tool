@@ -1,0 +1,28 @@
+<%- include('../partials/header', { title: 'My Access Requests' }) %>
+
+<div class="page-header">
+  <h1>My Access Requests</h1>
+  <a class="btn btn-primary" href="/access-requests/new">+ New Access Request</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>Request ID</th><th>System</th><th>Type</th><th>Status</th><th>Requested</th></tr></thead>
+    <tbody>
+      <% requests.forEach(function(r) { %>
+        <tr>
+          <td><%= r.requestId %></td>
+          <td><%= r.system %></td>
+          <td><%= r.accessType %></td>
+          <td><span class="badge <%= r.status === 'Completed' ? 'badge-status-resolved' : (r.status === 'Rejected' ? 'badge-status-cancelled' : 'badge-status-open') %>"><%= r.status %></span></td>
+          <td><%= new Date(r.requestedDate).toLocaleDateString() %></td>
+        </tr>
+      <% }) %>
+      <% if (requests.length === 0) { %><tr><td colspan="5" class="empty-row">No access requests submitted yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

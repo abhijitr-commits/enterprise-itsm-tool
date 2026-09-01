@@ -42,6 +42,7 @@
               </select>
               <button type="submit" class="btn btn-secondary">Update</button>
             </form>
+            <a class="btn btn-secondary" href="/letters/offer/new?candidateId=<%= c.candidateId %>&candidateName=<%= encodeURIComponent(c.name) %>&candidateEmail=<%= encodeURIComponent(c.email || '') %>&department=<%= encodeURIComponent(job.department) %>">Offer Letter</a>
           </td>
         </tr>
       <% }) %>

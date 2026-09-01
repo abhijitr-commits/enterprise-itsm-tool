@@ -1,0 +1,30 @@
+<%- include('../partials/header', { title: 'Wellness Programs' }) %>
+
+<div class="page-header">
+  <h1>Wellness Programs</h1>
+  <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
+    <a class="btn btn-primary" href="/wellness/programs/new">+ Add Program</a>
+  <% } %>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>Title</th><th>Type</th><th>Date</th><th>Description</th><th>Status</th></tr></thead>
+    <tbody>
+      <% programs.forEach(function(p) { %>
+        <tr>
+          <td><%= p.title %></td>
+          <td><%= p.type %></td>
+          <td><%= p.date ? new Date(p.date).toLocaleDateString() : '—' %></td>
+          <td><%= p.description || '—' %></td>
+          <td><span class="badge <%= p.status === 'Completed' ? 'badge-status-resolved' : p.status === 'Cancelled' ? 'badge-status-cancelled' : 'badge-status-open' %>"><%= p.status %></span></td>
+        </tr>
+      <% }) %>
+      <% if (programs.length === 0) { %><tr><td colspan="5" class="empty-row">No wellness programs scheduled yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

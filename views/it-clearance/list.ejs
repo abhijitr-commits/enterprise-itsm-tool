@@ -1,0 +1,29 @@
+<%- include('../partials/header', { title: 'IT Clearance' }) %>
+
+<div class="page-header">
+  <h1>IT Clearance</h1>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<p class="hint">Employees awaiting IT clearance as part of their resignation offboarding.</p>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>Resignation ID</th><th>Employee</th><th>Department</th><th>Last Working Day</th><th></th></tr></thead>
+    <tbody>
+      <% pending.forEach(function(r) { %>
+        <tr>
+          <td><%= r.resignationId %></td>
+          <td><%= r.employee %></td>
+          <td><%= r.department || '—' %></td>
+          <td><%= new Date(r.lastWorkingDay).toLocaleDateString() %></td>
+          <td><a class="btn btn-secondary" href="/it-clearance/<%= r.resignationId %>">Process Clearance</a></td>
+        </tr>
+      <% }) %>
+      <% if (pending.length === 0) { %><tr><td colspan="5" class="empty-row">No one currently awaiting IT clearance.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,39 @@
+<%- include('../partials/header', { title: 'Access Requests' }) %>
+
+<div class="page-header">
+  <h1>Access Requests</h1>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>Request ID</th><th>Employee</th><th>System</th><th>Type</th><th>Justification</th><th>Status</th><th>Requested</th><th></th></tr></thead>
+    <tbody>
+      <% requests.forEach(function(r) { %>
+        <tr>
+          <td><%= r.requestId %></td>
+          <td><%= r.employee %></td>
+          <td><%= r.system %></td>
+          <td><%= r.accessType %></td>
+          <td><%= r.justification || '—' %></td>
+          <td><span class="badge <%= r.status === 'Completed' ? 'badge-status-resolved' : (r.status === 'Rejected' ? 'badge-status-cancelled' : 'badge-status-open') %>"><%= r.status %></span></td>
+          <td><%= new Date(r.requestedDate).toLocaleDateString() %></td>
+          <td>
+            <form method="post" action="/access-requests/<%= r._id %>/status" class="filter-bar">
+              <select name="status">
+                <% Object.values(ACCESS_REQUEST_STATUS).forEach(function(s) { %>
+                  <option value="<%= s %>" <%= r.status === s ? 'selected' : '' %>><%= s %></option>
+                <% }) %>
+              </select>
+              <button type="submit" class="btn btn-secondary">Update</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (requests.length === 0) { %><tr><td colspan="8" class="empty-row">No access requests yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

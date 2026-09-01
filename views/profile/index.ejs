@@ -11,6 +11,12 @@
     Employee Directory to see your profile here.
   </div>
 <% } else { %>
+  <% if (pendingPolicies.length > 0) { %>
+    <div class="alert alert-info">
+      You have <%= pendingPolicies.length %> IT polic<%= pendingPolicies.length === 1 ? 'y' : 'ies' %> awaiting your acknowledgment:
+      <% pendingPolicies.forEach(function(p, i) { %><a href="/policies"><%= p.policyName %></a><%= i < pendingPolicies.length - 1 ? ', ' : '' %><% }) %>.
+    </div>
+  <% } %>
   <div class="detail-grid">
     <div>
       <div class="panel">
@@ -117,6 +123,45 @@
             <% } %>
           </tbody>
         </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>My Benefits</h2></div>
+        <table class="table">
+          <thead><tr><th>Benefit</th><th>Plan</th><th>Status</th></tr></thead>
+          <tbody>
+            <% myBenefits.forEach(function(b) { %>
+              <tr>
+                <td><%= b.benefitType %></td>
+                <td><%= b.planName %></td>
+                <td><span class="badge <%= b.status === 'Active' ? 'badge-status-open' : 'badge-status-closed' %>"><%= b.status %></span></td>
+              </tr>
+            <% }) %>
+            <% if (myBenefits.length === 0) { %>
+              <tr><td colspan="3" class="empty-row">No benefit enrollments on record.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>My Documents</h2></div>
+        <table class="table">
+          <thead><tr><th>File</th><th>Type</th><th></th></tr></thead>
+          <tbody>
+            <% myDocuments.forEach(function(d) { %>
+              <tr>
+                <td><%= d.fileName %></td>
+                <td><%= d.docType %></td>
+                <td><a class="btn btn-secondary" href="/documents/file/<%= d.documentId %>" target="_blank">View</a></td>
+              </tr>
+            <% }) %>
+            <% if (myDocuments.length === 0) { %>
+              <tr><td colspan="3" class="empty-row">No documents uploaded yet.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+        <a class="btn btn-secondary" href="/documents">Manage My Documents</a>
       </div>
     </div>
   </div>

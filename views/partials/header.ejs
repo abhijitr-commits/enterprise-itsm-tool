@@ -81,6 +81,16 @@
         <% } %>
       <% } %>
       <% if (currentUser) { %>
+        <div class="nav-section-label">IT Operations</div>
+        <a href="/access-requests/mine" class="nav-link">My Access Requests</a>
+        <% if (isITTeamUser) { %>
+          <a href="/helpdesk" class="nav-link">IT Helpdesk</a>
+          <a href="/asset-allocation" class="nav-link">Asset Allocation</a>
+          <a href="/it-clearance" class="nav-link">IT Clearance</a>
+          <a href="/access-requests" class="nav-link">Access Requests (All)</a>
+        <% } %>
+      <% } %>
+      <% if (currentUser) { %>
         <div class="nav-section-label">Wellness &amp; Engagement</div>
         <a href="/wellness/programs" class="nav-link">Wellness Programs</a>
         <a href="/wellness/pulse" class="nav-link">Pulse Survey</a>

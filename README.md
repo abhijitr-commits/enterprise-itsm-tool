@@ -1,4 +1,4 @@
-# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4 complete)
+# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4 + 5A)
 
 This is the Node.js/Express + MongoDB migration of the Enterprise ITSM
 Tool off Google Apps Script + Google Sheets. It replaces the Sheets-based
@@ -90,8 +90,21 @@ split Expired vs. Expiring Soon) that had been deferred from Phase 2
 until the Employee Directory existed. **This completes Phase 4 — all
 20 HR-suite modules (4A–4F) are now migrated.**
 
-Only the IT-ops modules (Phase 5) remain — see `MIGRATION.md` for the
-phased roadmap.
+**Phase 5A scope** (adds, first slice of IT operations & facilities):
+an IT Helpdesk work-queue view (open/critical incident and pending
+request counts for the IT team, linking straight through to Incidents/
+Requests/Dashboard); a real IT Asset Allocation workflow (allocates
+actual assets from the Asset Register to new joiners awaiting IT
+provisioning, closing out their Pre-Onboarding checklist automatically);
+a real IT Clearance workflow for resignees (returns their actually-
+assigned assets, tracks access revocation/account deactivation/data
+backup, and only marks the resignation's IT clearance done once all
+three are complete); and Access Requests (password resets and system/
+application access — self-service submit for anyone, IT-team managed).
+
+Remaining IT-ops sub-phases (5B: Vendors &amp; Procurement, 5C:
+Inventory &amp; Licensing, 5D: Facilities &amp; General Ops, 5E: Final
+wiring) are tracked in `MIGRATION.md`.
 
 ## Stack (100% free tier)
 
@@ -190,6 +203,10 @@ Railway.app works the same way if you prefer it over Render.
 | `HR.gs` / `HR.html` (no backend logic — pure client-side tab shell) | `src/controllers/hrHubController.js` + `views/hr/index.ejs` | Confirmed there was nothing to port beyond a landing page; built as a link-tiling hub reusing the Admin Console's tile CSS |
 | `ReportEngine.gs` → `getExecutiveSummarySafe()` | `src/controllers/executiveSummaryController.js` | Same KPI roll-up, reuses `reportController.js`'s workload/warranty/contract-expiry helpers instead of recomputing them |
 | `ReportEngine.gs` → `getContractExpiryReport()` | `src/controllers/reportController.js` (`contractExpiryReport()`) | Same 30-day Expired/Expiring-Soon split, added to the Reports page once the Employee Directory existed |
+| `ITHelpdeskEngine.gs` | `src/controllers/helpdeskController.js` | Builds the summary view the engine's own code intended (open/critical/unassigned incidents, pending requests) — the shipped original's UI tab never actually called those functions, just linked out |
+| `ITAssetAllocationEngine.gs` | `src/controllers/itAllocationController.js` | Same real allocation-against-the-Asset-Register workflow, via a new `issueAssetInternal()` extracted from `assetController.js` |
+| `ITClearanceEngine.gs` | `src/controllers/itClearanceController.js` | Same real return-against-the-Asset-Register + 3-checkbox clearance workflow, via a new `returnAssetInternal()` and `resignationController.js`'s `updateClearanceInternal()` |
+| `AccessRequestEngine.gs` | `src/controllers/accessRequestController.js` | Same self-service submit + IT-team-managed workflow; new `access_requests_submit` permission key for the "anyone logged in" submit tier |
 
 ## Original source, kept for reference
 

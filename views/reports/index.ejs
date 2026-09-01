@@ -89,4 +89,21 @@
   </table>
 </div>
 
+<div class="panel">
+  <div class="panel-header"><h2>Contract Expiry (next 30 days)</h2></div>
+  <table class="table">
+    <thead><tr><th>ID</th><th>Name</th><th>Department</th><th>Designation</th><th>Contract End</th><th>Urgency</th></tr></thead>
+    <tbody>
+      <% contracts.forEach(function(c){ %>
+        <tr>
+          <td><%= c.employeeId %></td><td><%= c.name %></td><td><%= c.department %></td>
+          <td><%= c.designation || '—' %></td><td><%= c.contractEndDate %></td>
+          <td><span class="badge badge-approval-<%= c.urgency === 'Expired' ? 'rejected' : 'pending-approval' %>"><%= c.urgency %></span></td>
+        </tr>
+      <% }) %>
+      <% if (contracts.length === 0) { %><tr><td colspan="6" class="empty-row">No contracts expiring soon.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
 <%- include('../partials/footer') %>

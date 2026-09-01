@@ -49,6 +49,14 @@
         </form>
       <% }) %>
     </div>
+
+    <% if (noDuesLetter) { %>
+      <div class="panel">
+        <div class="panel-header"><h2>No Dues Certificate</h2></div>
+        <p class="hint">Generated automatically once every clearance was marked Cleared.</p>
+        <a class="btn btn-secondary" href="/letters/<%= noDuesLetter.letterId %>">View / Print</a>
+      </div>
+    <% } %>
   </div>
 </div>
 
