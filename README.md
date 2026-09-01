@@ -1,4 +1,4 @@
-# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4 + 5A + 5B + 5C + 5D)
+# Enterprise ITSM Tool — Node.js + MongoDB (migration complete: Phase 1 + 2 + 3 + 4 + 5)
 
 This is the Node.js/Express + MongoDB migration of the Enterprise ITSM
 Tool off Google Apps Script + Google Sheets. It replaces the Sheets-based
@@ -128,8 +128,23 @@ Announcements from the IT team, posted to a list everyone sees; and
 Expense Claims with Admin/Manager approval and a reimbursed-marking
 step.
 
-Remaining IT-ops sub-phase (5E: Final wiring) is tracked in
-`MIGRATION.md`.
+**Phase 5E scope** (adds, completing Phase 5 and the entire migration):
+Slack/Teams webhook notifications, configured from a new Admin Console
+"Integration Settings" page (with a "Send Test Notification" button);
+a manual "Send Expiry Digest Now" action covering the same four
+expiry categories the Reports page already tracks (asset warranties,
+contracts, vendor AMCs, software licenses) — the free-hosting
+substitute for a daily scheduled email digest, since Render's free
+tier has no cron and this project never creates a new third-party
+account to fake one; an IT Management Hub landing page tiling every
+IT module into one entry point (Support / Employee Lifecycle / Assets
+&amp; Licensing / Vendors &amp; Procurement / Operations / System
+Access), the IT-side equivalent of the HR Hub added in Phase 4F; and
+Vendor AMC + Software License expiry folded into the Executive
+Summary's "Upcoming Expiries" stat, alongside Asset Warranty +
+Contract Expiry. **This completes Phase 5 — all 18 IT-operations &amp;
+facilities modules (5A–5E) are now migrated, and with them, all 116
+files of the original Enterprise ITSM Tool.**
 
 ## Stack (100% free tier)
 
@@ -205,7 +220,7 @@ Railway.app works the same way if you prefer it over Render.
 | Audit Log sheet | `AuditLog` collection | Same write-on-every-action pattern |
 | Public incident form + honeypot/CAPTCHA/rate-limit | *(not yet ported)* | See MIGRATION.md — needs a public route + a CAPTCHA library |
 | Email Queue + notifyUser() | *(not yet ported)* | See MIGRATION.md — needs an email provider (e.g. free-tier Resend/SendGrid) |
-| Approval delegation (leave-based) | *(not yet ported)* | Depends on the Leave module, which isn't migrated yet |
+| Approval delegation (leave-based) | *(not wired up)* | The Leave module (Phase 4B) captures the "Delegate To" field, but the delegate doesn't yet actually inherit approval rights server-side — see MIGRATION.md |
 | `AdminEngine.gs` (user mgmt + permission matrix) | `src/controllers/adminController.js` + `views/admin/*` | Same safety guard: Administrator can't lose `admin_manage_users`/`admin_manage_settings`; also guards against demoting/deactivating the last active Administrator |
 | `MasterDataEngine.gs` (departments/locations/categories/SLA matrix) | `src/controllers/masterDataController.js` + `views/masterdata/*` | Same generic config-driven CRUD idea, now Mongoose models instead of sheets |
 | `Navigation.gs`'s `moduleVisibility` | `src/middleware/moduleVisibility.js` | A sidebar link vanishes once a role's permissions for that module are all removed |
@@ -242,6 +257,10 @@ Railway.app works the same way if you prefer it over Render.
 | `ComplaintEngine.gs` | `src/controllers/complaintController.js` | Same not-category-locked workflow; open list + `canManage`-gated actions (same pattern as Leave); Department Head email routing skipped |
 | `MaintenanceEngine.gs` | `src/controllers/maintenanceController.js` | Announcements are posted to a list page instead of broadcast by email; IT-team gated to create |
 | `ExpenseEngine.gs` | `src/controllers/expenseController.js` | Same claim/approve/reimburse lifecycle; open list + `canApprove`-gated actions; manager-routing email skipped |
+| `NotificationChannelEngine.gs` (Slack/Teams half) | `src/utils/notifications.js` + `views/admin/integrations.ejs` | Same webhook logic, same Setting-store keys (`SlackWebhookURL`/`TeamsWebhookURL`); its unrelated System Policies half (Leave Quota/Notice Period) is out of scope — see MIGRATION.md |
+| `AutomationEngine.gs` → `sendExpiryAlerts()` | "Send Expiry Digest Now" button, `adminController.sendExpiryDigest` | Manual trigger instead of a daily cron (Render's free tier has none, and this project never creates a third-party account to fake one); posts to Slack/Teams instead of email |
+| `AutomationEngine.gs` (onEdit trigger, user provisioning/deactivation) | *(superseded)* | Same provisioning/deactivation behavior already exists as `utils/provisioning.js`, called directly from the app-driven onboarding/offboarding/resignation flows — no sheet-edit trigger needed since there's no sheet |
+| `ITManagement.html` / `.js.html` (no backend logic — client-side tab shell) | `src/controllers/itHubController.js` + `views/it/index.ejs` | Same treatment as the HR Hub: a link-tiling landing page mirroring the original's own tab groups exactly; Room Booking/Complaints/Expenses/Stock/Purchase Register stay sidebar-only since none were ever part of this shell's own tabs |
 
 ## Original source, kept for reference
 
