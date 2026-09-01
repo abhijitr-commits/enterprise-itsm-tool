@@ -172,4 +172,20 @@
   </table>
 </div>
 
+<div class="panel">
+  <div class="panel-header"><h2>Finance &amp; Spend Overview (Purchase Orders + Expense Claims, by month)</h2></div>
+  <table class="table">
+    <thead><tr><th>Month</th><th>Purchase Spend</th><th>POs</th><th>Approved/Reimbursed Expenses</th><th>Claims</th><th>Total</th></tr></thead>
+    <tbody>
+      <% financeSpend.forEach(function(f){ %>
+        <tr>
+          <td><%= f.month %></td><td><%= f.purchaseAmount %></td><td><%= f.purchaseCount %></td>
+          <td><%= f.expenseAmount %></td><td><%= f.expenseCount %></td><td><%= f.totalAmount %></td>
+        </tr>
+      <% }) %>
+      <% if (financeSpend.length === 0) { %><tr><td colspan="6" class="empty-row">No purchase or expense data yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
 <%- include('../partials/footer') %>

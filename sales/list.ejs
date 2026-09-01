@@ -1,0 +1,41 @@
+<%- include('../partials/header', { title: 'Sales Orders' }) %>
+
+<div class="page-header">
+  <h1>Sales Orders</h1>
+  <a href="/sales/new" class="btn btn-primary">New Sales Order</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>SO ID</th><th>Date</th><th>Customer</th><th>Item</th><th>Qty</th><th>Amount</th><th>Expected Delivery</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      <% orders.forEach(function(o) { %>
+        <tr>
+          <td><%= o.salesOrderId %></td>
+          <td><%= new Date(o.createdDate).toLocaleDateString() %></td>
+          <td><%= o.customerName %></td>
+          <td><%= o.itemDescription %></td>
+          <td><%= o.quantity %></td>
+          <td><%= o.amount || '—' %></td>
+          <td><%= o.expectedDeliveryDate ? new Date(o.expectedDeliveryDate).toLocaleDateString() : '—' %></td>
+          <td><span class="badge <%= o.status === 'Delivered' ? 'badge-status-resolved' : (o.status === 'Cancelled' ? 'badge-status-cancelled' : 'badge-status-open') %>"><%= o.status %></span></td>
+          <td>
+            <form method="post" action="/sales/<%= o._id %>/status" class="filter-bar">
+              <select name="status">
+                <% Object.values(SALES_ORDER_STATUS).forEach(function(s) { %>
+                  <option value="<%= s %>" <%= o.status === s ? 'selected' : '' %>><%= s %></option>
+                <% }) %>
+              </select>
+              <button type="submit" class="btn btn-secondary">Update</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (orders.length === 0) { %><tr><td colspan="9" class="empty-row">No sales orders yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>
