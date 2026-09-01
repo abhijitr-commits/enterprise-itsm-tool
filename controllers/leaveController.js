@@ -10,8 +10,9 @@
  * email on submission, and the employee by email on decision — no
  * email provider yet (see MIGRATION.md), recorded in the audit log
  * instead. Approval delegation (Security.gs's isDelegatedApprover,
- * driven by the "Delegate To" field) is also not wired up yet — the
- * field is stored but doesn't do anything special server-side yet.
+ * driven by the "Delegate To" field) is now wired up — see
+ * utils/delegation.js — so `canApprove` below also covers a
+ * stand-in delegate, not just the Permission Matrix.
  *************************************************************/
 const LeaveRequest = require("../models/LeaveRequest");
 const { APPROVAL } = require("../models/ServiceRequest");
@@ -19,10 +20,11 @@ const { LEAVE_TYPE } = require("../config/constants");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
+const { isDelegatedApprover } = require("../utils/delegation");
 
 async function listLeave(req, res) {
   const leaveRequests = await LeaveRequest.find().sort({ appliedDate: -1 }).lean();
-  const canApprove = await hasPermission(req.user.role, "leave_approve");
+  const canApprove = (await hasPermission(req.user.role, "leave_approve")) || (await isDelegatedApprover(req.user, "leave_approve"));
 
   res.render("leave/list", {
     leaveRequests,
