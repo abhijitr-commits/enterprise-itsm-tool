@@ -125,6 +125,17 @@ const DEFAULT_PERMISSIONS_MAP = {
   vendors_edit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER],
   purchases_create: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
   purchases_edit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER],
+
+  // Facilities & General Ops (Phase 5D)
+  rooms_book: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  rooms_manage: [ROLE.ADMIN],
+  complaints_submit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  complaints_manage: [ROLE.ADMIN, ROLE.MANAGER],
+  expenses_submit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  expenses_approve: [ROLE.ADMIN, ROLE.MANAGER],
+  // Maintenance Announcements aren't in this map — IT-team gated
+  // (teamAccess.js) for creating, same as requireITTeam() in the
+  // original; reading is open to everyone signed in.
 };
 
 const ALL_ROLES_LIST = Object.values(ROLE);
