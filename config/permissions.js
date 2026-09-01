@@ -113,6 +113,18 @@ const DEFAULT_PERMISSIONS_MAP = {
   // resignation_submit/leave_create, matching the original's own comment
   // that it "reuses the anyone-logged-in permission tier."
   access_requests_submit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+
+  // Vendors & Procurement (Phase 5B) — same tier as Assets: everyone can
+  // create, Viewer can't edit. Vendor list/read has no key at all, same
+  // as the original's getAllVendors() — reading a vendor directory needs
+  // no special permission. Vendor Service Tracking and Requirement
+  // Requests aren't in this map either — IT-team/Admin-team gated
+  // (teamAccess.js) instead, matching the original's requireITTeam()/
+  // isITTeam()-or-isAdminTeam() checks.
+  vendors_create: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  vendors_edit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER],
+  purchases_create: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  purchases_edit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER],
 };
 
 const ALL_ROLES_LIST = Object.values(ROLE);

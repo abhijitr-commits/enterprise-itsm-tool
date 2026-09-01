@@ -11,6 +11,7 @@ const Incident = require("../models/Incident");
 const ServiceRequest = require("../models/ServiceRequest");
 const Asset = require("../models/Asset");
 const Employee = require("../models/Employee");
+const Vendor = require("../models/Vendor");
 const { STATUS } = require("../config/constants");
 
 function slaComplianceReport(incidents) {
@@ -145,12 +146,32 @@ function contractExpiryReport(employees) {
     .sort((a, b) => new Date(a.contractEndDate) - new Date(b.contractEndDate));
 }
 
+/** Port of getAMCExpiryReport() (VendorEngine.gs) — same pattern as Asset Warranty and Contract Expiry, 90-day window. */
+function amcExpiryReport(vendors) {
+  const now = new Date();
+  const ninetyDaysOut = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+
+  return vendors
+    .filter((v) => v.amcExpiry && new Date(v.amcExpiry) <= ninetyDaysOut)
+    .map((v) => {
+      const expiry = new Date(v.amcExpiry);
+      return {
+        vendorName: v.name,
+        category: v.category,
+        amcExpiry: expiry.toLocaleDateString(),
+        urgency: expiry < now ? "Expired" : "Expiring Soon",
+      };
+    })
+    .sort((a, b) => new Date(a.amcExpiry) - new Date(b.amcExpiry));
+}
+
 async function showReports(req, res) {
-  const [incidents, requests, assets, employees] = await Promise.all([
+  const [incidents, requests, assets, employees, vendors] = await Promise.all([
     Incident.find().lean(),
     ServiceRequest.find().lean(),
     Asset.find().lean(),
     Employee.find().lean(),
+    Vendor.find().lean(),
   ]);
 
   res.render("reports/index", {
@@ -161,6 +182,7 @@ async function showReports(req, res) {
     workload: departmentWorkloadReport(incidents, requests),
     warranty: assetWarrantyReport(assets),
     contracts: contractExpiryReport(employees),
+    amcs: amcExpiryReport(vendors),
   });
 }
 
@@ -169,4 +191,5 @@ module.exports = {
   departmentWorkloadReport,
   assetWarrantyReport,
   contractExpiryReport,
+  amcExpiryReport,
 };

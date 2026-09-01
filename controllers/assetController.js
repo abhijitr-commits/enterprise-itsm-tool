@@ -251,4 +251,5 @@ module.exports = {
   decommissionAsset,
   issueAssetInternal,
   returnAssetInternal,
+  logAssetHistory,
 };

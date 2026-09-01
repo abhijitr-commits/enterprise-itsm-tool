@@ -44,6 +44,10 @@ const helpdeskRoutes = require("./routes/helpdeskRoutes");
 const itAllocationRoutes = require("./routes/itAllocationRoutes");
 const itClearanceRoutes = require("./routes/itClearanceRoutes");
 const accessRequestRoutes = require("./routes/accessRequestRoutes");
+const vendorRoutes = require("./routes/vendorRoutes");
+const vendorServiceRoutes = require("./routes/vendorServiceRoutes");
+const purchaseRoutes = require("./routes/purchaseRoutes");
+const requirementRoutes = require("./routes/requirementRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 
 /*************************************************************
@@ -162,6 +166,10 @@ async function start() {
   app.use("/asset-allocation", itAllocationRoutes);
   app.use("/it-clearance", itClearanceRoutes);
   app.use("/access-requests", accessRequestRoutes);
+  app.use("/vendors", vendorRoutes);
+  app.use("/vendor-service", vendorServiceRoutes);
+  app.use("/purchases", purchaseRoutes);
+  app.use("/requirements", requirementRoutes);
 
   app.use((req, res) => res.status(404).render("errors/404"));
 
