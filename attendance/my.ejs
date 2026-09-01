@@ -1,0 +1,45 @@
+<%- include('../partials/header', { title: 'My Attendance' }) %>
+
+<div class="page-header">
+  <h1>My Attendance</h1>
+  <% if (canViewAll) { %><a class="btn btn-secondary" href="/attendance/all">View All Employees</a><% } %>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<div class="panel">
+  <div class="panel-header"><h2>Today</h2></div>
+  <% if (!todayRecord) { %>
+    <form method="post" action="/attendance/checkin">
+      <button type="submit" class="btn btn-primary">Check In</button>
+    </form>
+  <% } else if (!todayRecord.checkOut) { %>
+    <p>Checked in at <%= new Date(todayRecord.checkIn).toLocaleTimeString() %>.</p>
+    <form method="post" action="/attendance/checkout">
+      <button type="submit" class="btn btn-primary">Check Out</button>
+    </form>
+  <% } else { %>
+    <p>Checked in at <%= new Date(todayRecord.checkIn).toLocaleTimeString() %>, checked out at <%= new Date(todayRecord.checkOut).toLocaleTimeString() %> (<%= todayRecord.hours %> hours).</p>
+  <% } %>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>History</h2></div>
+  <table class="table">
+    <thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Hours</th></tr></thead>
+    <tbody>
+      <% records.forEach(function(r) { %>
+        <tr>
+          <td><%= r.date %></td>
+          <td><%= r.checkIn ? new Date(r.checkIn).toLocaleTimeString() : '—' %></td>
+          <td><%= r.checkOut ? new Date(r.checkOut).toLocaleTimeString() : '—' %></td>
+          <td><%= r.hours || '—' %></td>
+        </tr>
+      <% }) %>
+      <% if (records.length === 0) { %><tr><td colspan="4" class="empty-row">No attendance recorded yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,62 @@
+<%- include('../partials/header', { title: 'IT Clearance — ' + resignation.employee }) %>
+
+<div class="page-header">
+  <h1>IT Clearance — <%= resignation.employee %> <span class="hint"><%= resignation.resignationId %></span></h1>
+  <span class="badge <%= resignation.clearances.it === 'Cleared' ? 'badge-status-resolved' : 'badge-status-open' %>">IT: <%= resignation.clearances.it %></span>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/it-clearance/<%= resignation.resignationId %>">
+  <label>Assigned Assets</label>
+  <div class="panel" style="max-height:260px; overflow-y:auto;">
+    <% assignedAssets.forEach(function(a) { %>
+      <label style="display:block; padding:6px 0; font-weight:400;">
+        <input type="checkbox" name="assetsReturned" value="<%= a.assetId %>" />
+        <%= a.assetId %> — <%= a.assetName %> (<%= a.type %>)
+      </label>
+    <% }) %>
+    <% if (assignedAssets.length === 0) { %><p class="hint">No assets currently assigned to this employee.</p><% } %>
+  </div>
+
+  <label style="font-weight:400;"><input type="checkbox" name="accessRevoked" value="1" /> Email/VPN/System Access Revoked</label>
+  <label style="font-weight:400;"><input type="checkbox" name="accountsDeactivated" value="1" /> Company Accounts Deactivated</label>
+  <label style="font-weight:400;"><input type="checkbox" name="dataBackupCompleted" value="1" /> Data Backup/Transfer Completed</label>
+
+  <label>Notes
+    <textarea name="notes" rows="3"></textarea>
+  </label>
+
+  <div class="alert alert-info">
+    All three checkboxes must be checked for this to mark the Resignation's IT Clearance as "Cleared."
+  </div>
+
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/it-clearance">Cancel</a>
+    <button type="submit" class="btn btn-primary">Submit IT Clearance</button>
+  </div>
+</form>
+
+<% if (history.length > 0) { %>
+  <div class="panel">
+    <div class="panel-header"><h2>Clearance History</h2></div>
+    <table class="table">
+      <thead><tr><th>Clearance ID</th><th>Assets Returned</th><th>Access</th><th>Accounts</th><th>Backup</th><th>Date</th><th>By</th></tr></thead>
+      <tbody>
+        <% history.forEach(function(h) { %>
+          <tr>
+            <td><%= h.clearanceId %></td>
+            <td><%= h.assetsReturned.join(', ') || 'None assigned' %></td>
+            <td><%= h.accessRevoked ? 'Yes' : 'No' %></td>
+            <td><%= h.accountsDeactivated ? 'Yes' : 'No' %></td>
+            <td><%= h.dataBackupCompleted ? 'Yes' : 'No' %></td>
+            <td><%= new Date(h.completedDate).toLocaleDateString() %></td>
+            <td><%= h.completedBy %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

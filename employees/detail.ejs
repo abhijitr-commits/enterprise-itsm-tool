@@ -1,0 +1,27 @@
+<%- include('../partials/header', { title: employee.name }) %>
+
+<div class="page-header">
+  <h1><%= employee.name %> <span class="hint"><%= employee.employeeId %></span></h1>
+  <div>
+    <a class="btn btn-secondary" href="/documents/<%= encodeURIComponent(employee.name) %>">Documents</a>
+    <a class="btn btn-secondary" href="/letters/appointment/new?employeeId=<%= employee.employeeId %>&employeeName=<%= encodeURIComponent(employee.name) %>&department=<%= encodeURIComponent(employee.department) %>&designation=<%= encodeURIComponent(employee.designation || '') %>">Appointment Letter</a>
+    <a class="btn btn-secondary" href="/employees/<%= employee._id %>/edit">Edit</a>
+  </div>
+</div>
+
+<div class="panel">
+  <dl class="meta-list">
+    <dt>Email</dt><dd><%= employee.email %></dd>
+    <dt>Department</dt><dd><%= employee.department %></dd>
+    <dt>Location</dt><dd><%= employee.location || '—' %></dd>
+    <dt>Designation</dt><dd><%= employee.designation || '—' %></dd>
+    <dt>Status</dt><dd><span class="badge <%= employee.status === 'Left' ? 'badge-status-closed' : (employee.status === 'New' ? 'badge-approval-pending-approval' : 'badge-status-open') %>"><%= employee.status %></span></dd>
+    <dt>Employment Type</dt><dd><%= employee.employmentType %></dd>
+    <% if (employee.employmentType === 'Contract') { %>
+      <dt>Contract End Date</dt><dd><%= employee.contractEndDate ? new Date(employee.contractEndDate).toLocaleDateString() : '—' %></dd>
+    <% } %>
+    <dt>Reports To</dt><dd><%= employee.reportsTo || '— (top level)' %></dd>
+  </dl>
+</div>
+
+<%- include('../partials/footer') %>

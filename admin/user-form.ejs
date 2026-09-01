@@ -1,0 +1,42 @@
+<%- include('../partials/header', { title: editing ? 'Edit User' : 'New User' }) %>
+
+<div class="page-header">
+  <h1><%= editing ? 'Edit User' : 'New User' %></h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="<%= editing ? '/admin/users/' + form._id : '/admin/users' %>">
+  <div class="form-grid">
+    <label>Name
+      <input type="text" name="name" value="<%= form.name || '' %>" required />
+    </label>
+    <label>Email
+      <input type="email" name="email" value="<%= form.email || '' %>" required />
+    </label>
+    <label>Department
+      <input type="text" name="department" value="<%= form.department || '' %>" />
+    </label>
+    <label>Role
+      <select name="role" required>
+        <% Object.values(ROLE).forEach(function(r){ %>
+          <option value="<%= r %>" <%= form.role === r ? 'selected' : '' %>><%= r %></option>
+        <% }) %>
+      </select>
+    </label>
+  </div>
+  <label>
+    <%= editing ? 'New Password (leave blank to keep current)' : 'Password' %>
+    <input type="password" name="password" autocomplete="new-password" <%= editing ? '' : 'required' %> />
+  </label>
+  <label class="checkbox-label">
+    <input type="checkbox" name="active" <%= (editing ? form.active : true) ? 'checked' : '' %> />
+    Active — inactive users can't sign in
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/admin/users">Cancel</a>
+    <button type="submit" class="btn btn-primary"><%= editing ? 'Save Changes' : 'Create User' %></button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

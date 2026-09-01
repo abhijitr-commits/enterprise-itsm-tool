@@ -1,0 +1,56 @@
+<%- include('../partials/header', { title: type + ' Checklist' }) %>
+
+<div class="page-header">
+  <h1><%= type %> Checklist</h1>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="tab-bar">
+  <% tabs.forEach(function(t) { %>
+    <a class="tab <%= t.slug === slug ? 'tab-active' : '' %>" href="/onboarding/<%= t.slug %>"><%= t.label %></a>
+  <% }) %>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <h2>Start a New Checklist</h2>
+  </div>
+  <form method="post" action="/onboarding/<%= slug %>" class="filter-bar">
+    <input type="text" name="employee" placeholder="Employee name" required />
+    <input type="text" name="department" placeholder="Department" />
+    <button type="submit" class="btn btn-primary">Create</button>
+  </form>
+</div>
+
+<% groups.forEach(function(group) { %>
+  <div class="panel">
+    <div class="panel-header">
+      <h2><%= group.employee %> <span class="hint"><%= group.department || '' %></span></h2>
+    </div>
+    <table class="table">
+      <thead><tr><th>Task</th><th>Category</th><th>Status</th><th>Completed</th><th></th></tr></thead>
+      <tbody>
+        <% group.tasks.forEach(function(t) { %>
+          <tr>
+            <td><%= t.task %></td>
+            <td><%= t.category || '—' %></td>
+            <td><span class="badge <%= t.status === 'Done' ? 'badge-status-resolved' : 'badge-status-open' %>"><%= t.status %></span></td>
+            <td><%= t.completedDate ? new Date(t.completedDate).toLocaleDateString() : '—' %></td>
+            <td>
+              <form method="post" action="/onboarding/<%= slug %>/<%= t._id %>/toggle">
+                <input type="hidden" name="done" value="<%= t.status === 'Done' ? '0' : '1' %>" />
+                <button type="submit" class="btn btn-secondary"><%= t.status === 'Done' ? 'Mark Pending' : 'Mark Done' %></button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% }) %>
+<% if (groups.length === 0) { %>
+  <div class="panel empty-row">No <%= type.toLowerCase() %> checklists yet.</div>
+<% } %>
+
+<%- include('../partials/footer') %>

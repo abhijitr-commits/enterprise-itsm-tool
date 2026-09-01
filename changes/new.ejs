@@ -1,0 +1,41 @@
+<%- include('../partials/header', { title: 'New Change' }) %>
+
+<div class="page-header">
+  <h1>New Change Request</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/changes">
+  <div class="form-grid">
+    <label>Requested By
+      <input type="text" name="requestedBy" value="<%= form.requestedBy || '' %>" required />
+    </label>
+    <label>Department
+      <input type="text" name="department" value="<%= form.department || '' %>" required />
+    </label>
+    <label>Risk Level
+      <select name="riskLevel" required>
+        <option value="">Select…</option>
+        <option value="Low" <%= form.riskLevel === 'Low' ? 'selected' : '' %>>Low</option>
+        <option value="Medium" <%= form.riskLevel === 'Medium' ? 'selected' : '' %>>Medium</option>
+        <option value="High" <%= form.riskLevel === 'High' ? 'selected' : '' %>>High</option>
+      </select>
+    </label>
+    <label>Planned Date
+      <input type="date" name="plannedDate" value="<%= form.plannedDate || '' %>" required />
+    </label>
+  </div>
+  <label>Title
+    <input type="text" name="title" value="<%= form.title || '' %>" required />
+  </label>
+  <label>Description
+    <textarea name="description" rows="5" required><%= form.description || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/changes">Cancel</a>
+    <button type="submit" class="btn btn-primary">Submit for CAB Approval</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,49 @@
+<%- include('../partials/header', { title: 'Incidents' }) %>
+
+<div class="page-header">
+  <h1>Incident Register</h1>
+  <a class="btn btn-primary" href="/incidents/new">+ New Incident</a>
+</div>
+
+<form class="filter-bar" method="get" action="/incidents">
+  <input type="text" name="q" placeholder="Search incidents…" value="<%= query.q %>" />
+  <select name="status">
+    <option value="">All statuses</option>
+    <% Object.values(STATUS).forEach(function(s){ %>
+      <option value="<%= s %>" <%= query.status === s ? 'selected' : '' %>><%= s %></option>
+    <% }) %>
+  </select>
+  <select name="priority">
+    <option value="">All priorities</option>
+    <% Object.values(PRIORITY).forEach(function(p){ %>
+      <option value="<%= p %>" <%= query.priority === p ? 'selected' : '' %>><%= p %></option>
+    <% }) %>
+  </select>
+  <button type="submit" class="btn btn-secondary">Filter</button>
+</form>
+
+<div class="panel">
+  <table class="table">
+    <thead>
+      <tr><th>ID</th><th>Subject</th><th>Employee</th><th>Priority</th><th>Status</th><th>SLA Due</th><th>Engineer</th></tr>
+    </thead>
+    <tbody>
+      <% incidents.forEach(function(inc) { %>
+        <tr onclick="location.href='/incidents/<%= inc._id %>'">
+          <td><%= inc.incidentId %></td>
+          <td><%= inc.subject %></td>
+          <td><%= inc.employeeName %></td>
+          <td><span class="badge badge-priority-<%= inc.priority.toLowerCase() %>"><%= inc.priority %></span></td>
+          <td><span class="badge badge-status-<%= inc.status.toLowerCase().replace(/ /g,'-') %>"><%= inc.status %></span></td>
+          <td><%= inc.slaDue ? new Date(inc.slaDue).toLocaleString() : '—' %></td>
+          <td><%= inc.engineer || '—' %></td>
+        </tr>
+      <% }) %>
+      <% if (incidents.length === 0) { %>
+        <tr><td colspan="7" class="empty-row">No incidents match your filters.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

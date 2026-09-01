@@ -1,0 +1,29 @@
+<%- include('../partials/header', { title: letter.type + ' — ' + letter.recipientName }) %>
+
+<style>
+  .letter-card {
+    max-width: 700px;
+    margin: 24px auto;
+    padding: 40px;
+    border: 1px solid #ccc;
+    background: #fff;
+    white-space: pre-wrap;
+    line-height: 1.5;
+  }
+  @media print {
+    .sidebar, .page-header, .no-print { display: none !important; }
+    .app-shell { display: block !important; }
+    .letter-card { border: none; margin: 0 auto; }
+  }
+</style>
+
+<div class="page-header no-print">
+  <h1><%= letter.type %></h1>
+  <button class="btn btn-primary" onclick="window.print()">Print / Save as PDF</button>
+</div>
+
+<div class="hint no-print">Letter ID: <%= letter.letterId %> · Generated <%= new Date(letter.generatedDate).toLocaleDateString() %></div>
+
+<div class="letter-card"><%= letter.content %></div>
+
+<%- include('../partials/footer') %>

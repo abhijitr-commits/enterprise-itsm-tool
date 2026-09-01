@@ -1,0 +1,64 @@
+<%- include('../partials/header', { title: 'Leave Requests' }) %>
+
+<div class="page-header">
+  <h1>Leave Requests</h1>
+  <a class="btn btn-primary" href="/leave/new">+ Apply for Leave</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <form method="post" action="/leave/bulk-decide">
+    <table class="table">
+      <thead>
+        <tr>
+          <% if (canApprove) { %><th></th><% } %>
+          <th>ID</th><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th><th>Approver</th>
+          <% if (canApprove) { %><th></th><% } %>
+        </tr>
+      </thead>
+      <tbody>
+        <% leaveRequests.forEach(function(l) { %>
+          <tr>
+            <% if (canApprove) { %>
+              <td><% if (l.status === 'Pending Approval') { %><input type="checkbox" name="ids" value="<%= l._id %>" /><% } %></td>
+            <% } %>
+            <td><%= l.leaveId %></td>
+            <td><%= l.employee %></td>
+            <td><%= l.leaveType %></td>
+            <td><%= new Date(l.fromDate).toLocaleDateString() %></td>
+            <td><%= new Date(l.toDate).toLocaleDateString() %></td>
+            <td><%= l.days %></td>
+            <td><span class="badge badge-approval-<%= l.status.toLowerCase().replace(/ /g,'-') %>"><%= l.status %></span></td>
+            <td><%= l.approver || '—' %></td>
+            <% if (canApprove) { %>
+              <td>
+                <% if (l.status === 'Pending Approval') { %>
+                  <form method="post" action="/leave/<%= l._id %>/decide" style="display:inline">
+                    <input type="hidden" name="decision" value="Approved" />
+                    <button type="submit" class="btn btn-secondary">Approve</button>
+                  </form>
+                  <form method="post" action="/leave/<%= l._id %>/decide" style="display:inline">
+                    <input type="hidden" name="decision" value="Rejected" />
+                    <button type="submit" class="btn btn-danger">Reject</button>
+                  </form>
+                <% } %>
+              </td>
+            <% } %>
+          </tr>
+        <% }) %>
+        <% if (leaveRequests.length === 0) { %>
+          <tr><td colspan="9" class="empty-row">No leave requests yet.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+    <% if (canApprove) { %>
+      <div class="form-actions">
+        <button type="submit" name="decision" value="Approved" class="btn btn-secondary">Bulk Approve Selected</button>
+        <button type="submit" name="decision" value="Rejected" class="btn btn-danger">Bulk Reject Selected</button>
+      </div>
+    <% } %>
+  </form>
+</div>
+
+<%- include('../partials/footer') %>

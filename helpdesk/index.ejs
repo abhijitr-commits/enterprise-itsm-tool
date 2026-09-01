@@ -1,0 +1,46 @@
+<%- include('../partials/header', { title: 'IT Helpdesk' }) %>
+
+<style>a.stat-card { display: block; text-decoration: none; color: inherit; }</style>
+
+<div class="page-header">
+  <h1>IT Helpdesk &amp; Support</h1>
+</div>
+
+<p class="hint">
+  Incident and request data lives entirely in IT Service Management — this
+  is a filtered, prioritized view for IT staff to triage quickly, not a
+  duplicate ticketing system.
+</p>
+
+<div class="stat-grid">
+  <a class="stat-card" href="/incidents">
+    <div class="stat-value"><%= summary.openCount %></div>
+    <div class="stat-label">Open Incidents</div>
+  </a>
+  <a class="stat-card" href="/incidents?priority=Critical">
+    <div class="stat-value"><%= summary.criticalCount %></div>
+    <div class="stat-label">Critical (Open)</div>
+  </a>
+  <a class="stat-card" href="/incidents">
+    <div class="stat-value"><%= summary.unassignedCount %></div>
+    <div class="stat-label">Unassigned Incidents</div>
+  </a>
+  <a class="stat-card" href="/requests">
+    <div class="stat-value"><%= summary.pendingRequestsCount %></div>
+    <div class="stat-label">Pending Requests</div>
+  </a>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Go To</h2></div>
+  <div class="form-actions" style="justify-content:flex-start; gap:12px;">
+    <a class="btn btn-secondary" href="/incidents">Incident Management</a>
+    <a class="btn btn-secondary" href="/requests">Service Requests</a>
+    <a class="btn btn-secondary" href="/">ITSM Dashboard</a>
+    <a class="btn btn-secondary" href="/asset-allocation">Asset Allocation</a>
+    <a class="btn btn-secondary" href="/it-clearance">IT Clearance</a>
+    <a class="btn btn-secondary" href="/access-requests">Access Requests</a>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

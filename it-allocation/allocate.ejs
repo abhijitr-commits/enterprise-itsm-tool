@@ -1,0 +1,44 @@
+<%- include('../partials/header', { title: 'Allocate Assets' }) %>
+
+<div class="page-header">
+  <h1>Allocate Assets — <%= employee %></h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/asset-allocation">
+  <input type="hidden" name="employee" value="<%= employee %>" />
+  <div class="form-grid">
+    <label>Employee
+      <input type="text" value="<%= employee %>" disabled />
+    </label>
+    <label>Department
+      <input type="text" name="department" value="<%= department %>" />
+    </label>
+    <label>Designation
+      <input type="text" name="designation" value="<%= designation %>" />
+    </label>
+  </div>
+
+  <label>Available Assets</label>
+  <div class="panel" style="max-height:320px; overflow-y:auto;">
+    <% availableAssets.forEach(function(a) { %>
+      <label style="display:block; padding:6px 0; font-weight:400;">
+        <input type="checkbox" name="assetIds" value="<%= a.assetId %>" />
+        <%= a.assetId %> — <%= a.assetName %> (<%= a.type %>)
+      </label>
+    <% }) %>
+    <% if (availableAssets.length === 0) { %><p class="hint">No unassigned, in-service assets currently available.</p><% } %>
+  </div>
+
+  <label>Notes
+    <textarea name="notes" rows="3"></textarea>
+  </label>
+
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/asset-allocation">Cancel</a>
+    <button type="submit" class="btn btn-primary">Allocate Selected Assets</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

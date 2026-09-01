@@ -1,0 +1,26 @@
+<%- include('../partials/header', { title: 'All Attendance' }) %>
+
+<div class="page-header">
+  <h1>All Attendance</h1>
+  <a class="btn btn-secondary" href="/attendance">My Attendance</a>
+</div>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>Date</th><th>Employee</th><th>Check In</th><th>Check Out</th><th>Hours</th></tr></thead>
+    <tbody>
+      <% records.forEach(function(r) { %>
+        <tr>
+          <td><%= r.date %></td>
+          <td><%= r.employee %></td>
+          <td><%= r.checkIn ? new Date(r.checkIn).toLocaleTimeString() : '—' %></td>
+          <td><%= r.checkOut ? new Date(r.checkOut).toLocaleTimeString() : '—' %></td>
+          <td><%= r.hours || '—' %></td>
+        </tr>
+      <% }) %>
+      <% if (records.length === 0) { %><tr><td colspan="5" class="empty-row">No attendance recorded yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

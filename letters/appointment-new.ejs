@@ -1,0 +1,31 @@
+<%- include('../partials/header', { title: 'Generate Appointment Letter' }) %>
+
+<div class="page-header">
+  <h1>Generate an Appointment Letter</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/letters/appointment">
+  <input type="hidden" name="employeeId" value="<%= form.employeeId || '' %>" />
+  <div class="form-grid">
+    <label>Employee Name
+      <input type="text" name="employeeName" value="<%= form.employeeName || '' %>" required />
+    </label>
+    <label>Department
+      <input type="text" name="department" value="<%= form.department || '' %>" />
+    </label>
+    <label>Designation
+      <input type="text" name="designation" value="<%= form.designation || '' %>" />
+    </label>
+    <label>Joining Date
+      <input type="date" name="joiningDate" value="<%= form.joiningDate || '' %>" />
+    </label>
+  </div>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/letters">Cancel</a>
+    <button type="submit" class="btn btn-primary">Generate Appointment Letter</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

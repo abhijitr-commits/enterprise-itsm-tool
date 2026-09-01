@@ -1,0 +1,55 @@
+<%- include('../partials/header', { title: 'Permission Matrix' }) %>
+
+<div class="page-header">
+  <h1>Permission Matrix</h1>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+<div class="alert alert-info">
+  Tick which roles can perform each action. Administrator always keeps
+  "Manage Users" and "Manage Settings" — those two boxes are locked so the
+  Admin Console itself can never be locked out.
+</div>
+
+<form class="panel" method="post" action="/admin/permissions">
+  <div class="table-scroll">
+    <table class="table matrix-table">
+      <thead>
+        <tr>
+          <th>Action</th>
+          <% ALL_ROLES_LIST.forEach(function(role) { %>
+            <th><%= role %></th>
+          <% }) %>
+        </tr>
+      </thead>
+      <tbody>
+        <% matrix.forEach(function(row) { %>
+          <tr>
+            <td><%= row.action %></td>
+            <% ALL_ROLES_LIST.forEach(function(role) { %>
+              <%
+                const locked = role === ROLE.ADMIN && (row.action === 'admin_manage_settings' || row.action === 'admin_manage_users');
+                const checked = row.allowedRoles.includes(role);
+              %>
+              <td class="matrix-cell">
+                <input type="checkbox"
+                       name="roles_<%= row.action %>"
+                       value="<%= role %>"
+                       <%= checked ? 'checked' : '' %>
+                       <%= locked ? 'disabled' : '' %> />
+                <% if (locked) { %>
+                  <input type="hidden" name="roles_<%= row.action %>" value="<%= role %>" />
+                <% } %>
+              </td>
+            <% }) %>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Save Permission Matrix</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

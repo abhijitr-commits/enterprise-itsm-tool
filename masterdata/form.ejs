@@ -1,0 +1,31 @@
+<%- include('../partials/header', { title: (editing ? 'Edit' : 'Add') + ' · ' + table.label }) %>
+
+<div class="page-header">
+  <h1><%= editing ? 'Edit' : 'Add' %> <%= table.label.replace(/s$/, '') %></h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="<%= editing ? '/masterdata/' + tableKey + '/' + form._id : '/masterdata/' + tableKey %>">
+  <% table.fields.forEach(function(f) { %>
+    <label>
+      <%= f.label %>
+      <% if (f.type === 'select') { %>
+        <select name="<%= f.name %>" <%= f.required ? 'required' : '' %>>
+          <option value="">Select…</option>
+          <% f.options.forEach(function(opt) { %>
+            <option value="<%= opt %>" <%= form[f.name] === opt ? 'selected' : '' %>><%= opt %></option>
+          <% }) %>
+        </select>
+      <% } else { %>
+        <input type="<%= f.type %>" name="<%= f.name %>" value="<%= form[f.name] || '' %>" <%= f.required ? 'required' : '' %> />
+      <% } %>
+    </label>
+  <% }) %>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/masterdata/<%= tableKey %>">Cancel</a>
+    <button type="submit" class="btn btn-primary"><%= editing ? 'Save Changes' : 'Add' %></button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,61 @@
+<%- include('../partials/header', { title: 'Changes' }) %>
+
+<div class="page-header">
+  <h1>Change Register</h1>
+  <a class="btn btn-primary" href="/changes/new">+ New Change</a>
+</div>
+
+<form class="filter-bar" method="get" action="/changes">
+  <input type="text" name="q" placeholder="Search changes…" value="<%= query.q %>" />
+  <select name="cabStatus">
+    <option value="">All CAB statuses</option>
+    <% Object.values(APPROVAL).forEach(function(a){ %>
+      <option value="<%= a %>" <%= query.cabStatus === a ? 'selected' : '' %>><%= a %></option>
+    <% }) %>
+  </select>
+  <select name="implementationStatus">
+    <option value="">All implementation statuses</option>
+    <% Object.values(IMPL).forEach(function(i){ %>
+      <option value="<%= i %>" <%= query.implementationStatus === i ? 'selected' : '' %>><%= i %></option>
+    <% }) %>
+  </select>
+  <button type="submit" class="btn btn-secondary">Filter</button>
+</form>
+
+<form method="post" action="/changes/bulk-decide" onsubmit="return confirm('Apply this CAB decision to all checked changes?')">
+  <div class="panel">
+    <table class="table">
+      <thead>
+        <tr>
+          <th></th><th>ID</th><th>Title</th><th>Risk</th><th>CAB Status</th>
+          <th>Implementation</th><th>Planned Date</th><th>Requested By</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% changes.forEach(function(c) { %>
+          <tr>
+            <td onclick="event.stopPropagation()"><input type="checkbox" name="ids" value="<%= c._id %>" /></td>
+            <td onclick="location.href='/changes/<%= c._id %>'"><%= c.changeId %></td>
+            <td onclick="location.href='/changes/<%= c._id %>'"><%= c.title %></td>
+            <td onclick="location.href='/changes/<%= c._id %>'"><span class="badge badge-priority-<%= c.riskLevel.toLowerCase() %>"><%= c.riskLevel %></span></td>
+            <td onclick="location.href='/changes/<%= c._id %>'"><span class="badge badge-approval-<%= c.cabStatus.toLowerCase().replace(/ /g,'-') %>"><%= c.cabStatus %></span></td>
+            <td onclick="location.href='/changes/<%= c._id %>'"><%= c.implementationStatus %></td>
+            <td onclick="location.href='/changes/<%= c._id %>'"><%= new Date(c.plannedDate).toLocaleDateString() %></td>
+            <td onclick="location.href='/changes/<%= c._id %>'"><%= c.requestedBy %></td>
+          </tr>
+        <% }) %>
+        <% if (changes.length === 0) { %>
+          <tr><td colspan="8" class="empty-row">No changes match your filters.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+  <% if (changes.length > 0) { %>
+    <div class="form-actions">
+      <button type="submit" name="decision" value="Approved" class="btn btn-primary">Approve Checked</button>
+      <button type="submit" name="decision" value="Rejected" class="btn btn-danger">Reject Checked</button>
+    </div>
+  <% } %>
+</form>
+
+<%- include('../partials/footer') %>

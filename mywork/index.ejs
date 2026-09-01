@@ -1,0 +1,89 @@
+<%- include('../partials/header', { title: 'My Work' }) %>
+
+<div class="page-header">
+  <h1>My Work</h1>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-value"><%= snapshot.openIncidents %></div>
+    <div class="stat-label">My Open Incidents</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value"><%= snapshot.openRequests %></div>
+    <div class="stat-label">My Open Requests</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value"><%= pendingRequests.length + pendingChanges.length + pendingLeave.length + myPendingReviews.length %></div>
+    <div class="stat-label">Pending My Approval</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>My Tickets — Incidents</h2></div>
+  <table class="table">
+    <thead><tr><th>ID</th><th>Subject</th><th>Priority</th><th>Status</th></tr></thead>
+    <tbody>
+      <% myIncidents.forEach(function(i) { %>
+        <tr onclick="location.href='/incidents/<%= i._id %>'">
+          <td><%= i.incidentId %></td>
+          <td><%= i.subject %></td>
+          <td><span class="badge badge-priority-<%= i.priority.toLowerCase() %>"><%= i.priority %></span></td>
+          <td><span class="badge badge-status-<%= i.status.toLowerCase().replace(/ /g,'-') %>"><%= i.status %></span></td>
+        </tr>
+      <% }) %>
+      <% if (myIncidents.length === 0) { %><tr><td colspan="4" class="empty-row">No incidents involving you.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>My Tickets — Service Requests</h2></div>
+  <table class="table">
+    <thead><tr><th>ID</th><th>Catalog Item</th><th>Approval</th><th>Status</th></tr></thead>
+    <tbody>
+      <% myRequests.forEach(function(r) { %>
+        <tr onclick="location.href='/requests/<%= r._id %>'">
+          <td><%= r.requestId %></td>
+          <td><%= r.catalogItem %></td>
+          <td><span class="badge badge-approval-<%= r.approvalStatus.toLowerCase().replace(/ /g,'-') %>"><%= r.approvalStatus %></span></td>
+          <td><span class="badge badge-status-<%= r.fulfillmentStatus.toLowerCase().replace(/ /g,'-') %>"><%= r.fulfillmentStatus %></span></td>
+        </tr>
+      <% }) %>
+      <% if (myRequests.length === 0) { %><tr><td colspan="4" class="empty-row">No service requests from you.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<% if (pendingRequests.length > 0 || pendingChanges.length > 0 || pendingLeave.length > 0 || myPendingReviews.length > 0) { %>
+<div class="panel">
+  <div class="panel-header"><h2>Pending My Approval</h2></div>
+  <table class="table">
+    <thead><tr><th>Type</th><th>ID</th><th>Details</th></tr></thead>
+    <tbody>
+      <% pendingRequests.forEach(function(r) { %>
+        <tr onclick="location.href='/requests/<%= r._id %>'">
+          <td>Service Request</td><td><%= r.requestId %></td><td><%= r.catalogItem %></td>
+        </tr>
+      <% }) %>
+      <% pendingChanges.forEach(function(c) { %>
+        <tr onclick="location.href='/changes/<%= c._id %>'">
+          <td>Change</td><td><%= c.changeId %></td><td><%= c.title %></td>
+        </tr>
+      <% }) %>
+      <% pendingLeave.forEach(function(l) { %>
+        <tr onclick="location.href='/leave'">
+          <td>Leave</td><td><%= l.leaveId %></td><td><%= l.employee %> — <%= l.leaveType %> (<%= l.days %>d)</td>
+        </tr>
+      <% }) %>
+      <% myPendingReviews.forEach(function(r) { %>
+        <tr onclick="location.href='/performance/reviews'">
+          <td>Performance Review</td><td><%= r.reviewId %></td><td>Acknowledge your <%= r.reviewPeriod %> review</td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
+<%- include('../partials/footer') %>

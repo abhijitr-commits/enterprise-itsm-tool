@@ -1,0 +1,93 @@
+<%- include('../partials/header', { title: incident.incidentId }) %>
+
+<div class="page-header">
+  <h1><%= incident.incidentId %> — <%= incident.subject %></h1>
+  <div class="header-actions">
+    <% if (incident.status !== 'Closed') { %>
+      <form method="post" action="/incidents/<%= incident._id %>/close" onsubmit="return confirm('Close this incident?')">
+        <button class="btn btn-secondary" type="submit">Close Incident</button>
+      </form>
+    <% } %>
+    <form method="post" action="/incidents/<%= incident._id %>/delete" onsubmit="return confirm('Delete this incident permanently?')">
+      <button class="btn btn-danger" type="submit">Delete</button>
+    </form>
+  </div>
+</div>
+
+<% if (justCreated) { %><div class="alert alert-success">Incident created successfully.</div><% } %>
+
+<div class="detail-grid">
+  <form class="panel form-panel" method="post" action="/incidents/<%= incident._id %>">
+    <div class="form-grid">
+      <label>Employee Name
+        <input type="text" name="employeeName" value="<%= incident.employeeName %>" required />
+      </label>
+      <label>Department
+        <input type="text" name="department" value="<%= incident.department %>" required />
+      </label>
+      <label>Location
+        <input type="text" name="location" value="<%= incident.location %>" required />
+      </label>
+      <label>Category
+        <input type="text" name="category" value="<%= incident.category %>" required />
+      </label>
+      <label>Priority
+        <select name="priority">
+          <% Object.values(PRIORITY).forEach(function(p){ %>
+            <option value="<%= p %>" <%= incident.priority === p ? 'selected' : '' %>><%= p %></option>
+          <% }) %>
+        </select>
+      </label>
+      <label>Status
+        <select name="status">
+          <% Object.values(STATUS).forEach(function(s){ %>
+            <option value="<%= s %>" <%= incident.status === s ? 'selected' : '' %>><%= s %></option>
+          <% }) %>
+        </select>
+      </label>
+      <label>Engineer
+        <input type="text" name="engineer" value="<%= incident.engineer || '' %>" placeholder="Unassigned" />
+      </label>
+    </div>
+    <label>Subject
+      <input type="text" name="subject" value="<%= incident.subject %>" required />
+    </label>
+    <label>Description
+      <textarea name="description" rows="5" required><%= incident.description %></textarea>
+    </label>
+    <label>Remarks
+      <textarea name="remarks" rows="2"><%= incident.remarks || '' %></textarea>
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+    </div>
+  </form>
+
+  <div class="panel">
+    <div class="panel-header"><h2>Details</h2></div>
+    <dl class="meta-list">
+      <dt>Created</dt><dd><%= new Date(incident.createdDate).toLocaleString() %></dd>
+      <dt>Created By</dt><dd><%= incident.createdBy %></dd>
+      <dt>SLA Due</dt><dd><%= incident.slaDue ? new Date(incident.slaDue).toLocaleString() : '—' %></dd>
+      <dt>Closed</dt><dd><%= incident.closedDate ? new Date(incident.closedDate).toLocaleString() : '—' %></dd>
+    </dl>
+
+    <div class="panel-header"><h2>Comments</h2></div>
+    <div class="comment-list">
+      <% (incident.comments || []).forEach(function(c) { %>
+        <div class="comment">
+          <div class="comment-meta"><%= new Date(c.createdAt).toLocaleString() %><% if (c.isInternal) { %> · internal<% } %></div>
+          <div class="comment-text"><%= c.text %></div>
+        </div>
+      <% }) %>
+      <% if ((incident.comments || []).length === 0) { %><p class="empty-row">No comments yet.</p><% } %>
+    </div>
+    <form method="post" action="/incidents/<%= incident._id %>/comments" class="comment-form">
+      <textarea name="text" rows="2" placeholder="Add a comment…" required></textarea>
+      <label class="checkbox-label"><input type="checkbox" name="isInternal" /> Internal note</label>
+      <button type="submit" class="btn btn-secondary btn-block">Add Comment</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,29 @@
+<%- include('../partials/header', { title: 'New Access Request' }) %>
+
+<div class="page-header">
+  <h1>Submit Access Request</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/access-requests">
+  <label>System/Application
+    <input type="text" name="system" placeholder="e.g. CRM, VPN, Email" value="<%= form.system || '' %>" required />
+  </label>
+  <label>Access Type
+    <select name="accessType" required>
+      <% Object.values(ACCESS_REQUEST_TYPE).forEach(function(t) { %>
+        <option value="<%= t %>" <%= form.accessType === t ? 'selected' : '' %>><%= t %></option>
+      <% }) %>
+    </select>
+  </label>
+  <label>Justification
+    <textarea name="justification" rows="3"><%= form.justification || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/access-requests/mine">Cancel</a>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>
