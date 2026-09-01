@@ -1,0 +1,127 @@
+<%- include('../partials/header', { title: 'IT Management' }) %>
+
+<div class="page-header">
+  <h1>IT Management</h1>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Support</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/helpdesk">
+      <div class="admin-tile-title">IT Helpdesk &amp; Support</div>
+      <div class="admin-tile-sub">Open incidents/requests roll-up for the IT team.</div>
+    </a>
+    <a class="admin-tile" href="/access-requests/mine">
+      <div class="admin-tile-title">Access Requests</div>
+      <div class="admin-tile-sub">Submit a request for new access, a password reset, or a permission change.</div>
+    </a>
+    <% if (isIT) { %>
+      <a class="admin-tile" href="/access-requests">
+        <div class="admin-tile-title">Access Requests (All)</div>
+        <div class="admin-tile-sub">Review and action every access request submitted company-wide.</div>
+      </a>
+    <% } %>
+  </div>
+</div>
+
+<% if (isIT) { %>
+<div class="panel">
+  <div class="panel-header"><h2>Employee Lifecycle</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/asset-allocation">
+      <div class="admin-tile-title">IT Asset Allocation</div>
+      <div class="admin-tile-sub">Allocate assets to new hires from Pre-Onboarding.</div>
+    </a>
+    <a class="admin-tile" href="/it-clearance">
+      <div class="admin-tile-title">IT Clearance</div>
+      <div class="admin-tile-sub">Access revocation, account deactivation, and data backup sign-off on exit.</div>
+    </a>
+  </div>
+</div>
+<% } %>
+
+<div class="panel">
+  <div class="panel-header"><h2>Assets &amp; Licensing</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/assets">
+      <div class="admin-tile-title">Asset Management</div>
+      <div class="admin-tile-sub">The full asset register — issue, return, and retire hardware.</div>
+    </a>
+    <a class="admin-tile" href="/licenses">
+      <div class="admin-tile-title">Software Licensing</div>
+      <div class="admin-tile-sub">Seats, cost, and expiry for every software license.</div>
+    </a>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Vendors &amp; Procurement</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/vendors">
+      <div class="admin-tile-title">Vendors</div>
+      <div class="admin-tile-sub">The vendor directory — contact details, category, AMC status.</div>
+    </a>
+    <a class="admin-tile" href="/reports">
+      <div class="admin-tile-title">AMC Expiry</div>
+      <div class="admin-tile-sub">Vendor AMCs expiring in the next 90 days — part of the Reports page.</div>
+    </a>
+    <% if (isIT) { %>
+      <a class="admin-tile" href="/vendor-service">
+        <div class="admin-tile-title">Vendor Service Tracking</div>
+        <div class="admin-tile-sub">Log and track service issues raised with a vendor.</div>
+      </a>
+    <% } %>
+    <% if (isIT || isAdminTeam) { %>
+      <a class="admin-tile" href="/requirements">
+        <div class="admin-tile-title">Requirement Requests</div>
+        <div class="admin-tile-sub">New procurement requirements sent to a vendor.</div>
+      </a>
+    <% } %>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Operations</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/maintenance">
+      <div class="admin-tile-title">Maintenance Announcements</div>
+      <div class="admin-tile-sub">Scheduled downtime and maintenance notices.</div>
+    </a>
+  </div>
+</div>
+
+<% if (isAdministrator) { %>
+<div class="panel">
+  <div class="panel-header"><h2>System Access</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/admin/users">
+      <div class="admin-tile-title">User Management</div>
+      <div class="admin-tile-sub">Create logins, set role &amp; department, activate/deactivate, reset passwords.</div>
+    </a>
+    <a class="admin-tile" href="/admin/permissions">
+      <div class="admin-tile-title">Permission Matrix</div>
+      <div class="admin-tile-sub">Control which role can do what, per action, across every module.</div>
+    </a>
+    <a class="admin-tile" href="/admin/integrations">
+      <div class="admin-tile-title">Integration Settings</div>
+      <div class="admin-tile-sub">Slack/Teams webhooks, test notifications, and the on-demand expiry digest.</div>
+    </a>
+    <a class="admin-tile" href="/policies">
+      <div class="admin-tile-title">IT Policies</div>
+      <div class="admin-tile-sub">Review published IT policies, and publish new ones.</div>
+    </a>
+  </div>
+</div>
+<% } else { %>
+<div class="panel">
+  <div class="panel-header"><h2>Policies</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/policies">
+      <div class="admin-tile-title">IT Policies</div>
+      <div class="admin-tile-sub">Review and acknowledge published IT policies.</div>
+    </a>
+  </div>
+</div>
+<% } %>
+
+<%- include('../partials/footer') %>

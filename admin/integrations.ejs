@@ -1,0 +1,59 @@
+<%- include('../partials/header', { title: 'Integration Settings' }) %>
+
+<div class="page-header">
+  <h1>Integration Settings</h1>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<div class="panel form-panel">
+  <div class="panel-header"><h2>Slack &amp; Microsoft Teams Webhooks</h2></div>
+  <p class="admin-tile-sub" style="margin-bottom:16px;">
+    Sends notifications to Slack and/or Microsoft Teams via Incoming Webhooks. Nothing is hardcoded and no new
+    account is created by this app — an Administrator generates each webhook URL from a channel your company
+    already has, then pastes it in below. Leave either field blank to skip that channel entirely; nothing breaks
+    if only one (or neither) is configured.
+  </p>
+  <form method="post" action="/admin/integrations">
+    <div class="form-grid">
+      <label>Slack Webhook URL
+        <input type="url" name="slackWebhookUrl" value="<%= slackWebhookUrl %>" placeholder="https://hooks.slack.com/services/..." />
+      </label>
+      <label>Microsoft Teams Webhook URL
+        <input type="url" name="teamsWebhookUrl" value="<%= teamsWebhookUrl %>" placeholder="https://outlook.office.com/webhook/..." />
+      </label>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save Settings</button>
+    </div>
+  </form>
+  <details style="margin-top:16px;">
+    <summary>How do I get a webhook URL?</summary>
+    <p><strong>Slack:</strong> Apps → Incoming Webhooks → Add to Slack → choose a channel → copy the Webhook URL.</p>
+    <p><strong>Microsoft Teams:</strong> open the channel → ⋯ → Connectors → Incoming Webhook → configure → copy the Webhook URL.</p>
+  </details>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Test</h2></div>
+  <p class="admin-tile-sub" style="margin-bottom:16px;">Sends a one-off test message to every channel that's configured above.</p>
+  <form method="post" action="/admin/integrations/test">
+    <button type="submit" class="btn btn-secondary">Send Test Notification</button>
+  </form>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Expiry Digest</h2></div>
+  <p class="admin-tile-sub" style="margin-bottom:16px;">
+    Posts a one-time digest of everything expiring soon — contracts, asset warranties, vendor AMCs, and software
+    licenses (the same items on the Reports page) — to Slack/Teams. The original tool emailed this to HR
+    automatically every morning; the free hosting this app runs on has no scheduler, so this is sent on demand
+    instead.
+  </p>
+  <form method="post" action="/admin/integrations/send-digest">
+    <button type="submit" class="btn btn-secondary">Send Expiry Digest Now</button>
+  </form>
+</div>
+
+<%- include('../partials/footer') %>
