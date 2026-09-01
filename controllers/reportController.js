@@ -185,6 +185,73 @@ function licenseExpiryReport(licenses) {
     .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
 }
 
+/**
+ * Phase 9 addition — no equivalent in the original (its Asset Register
+ * had no maintenance schedule to report on). Same 90-day-window/
+ * "Expired vs Expiring Soon" shape as assetWarrantyReport() etc., but
+ * driven by `nextMaintenanceDue` instead of `warrantyExpiry`, and
+ * limited to assets that actually have a schedule set — an asset with
+ * no `maintenanceIntervalDays` was never given one and shouldn't show
+ * up as "expired."
+ */
+function maintenanceDueReport(assets) {
+  const now = new Date();
+  const ninetyDaysOut = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+
+  return assets
+    .filter((a) => a.nextMaintenanceDue && new Date(a.nextMaintenanceDue) <= ninetyDaysOut)
+    .map((a) => {
+      const due = new Date(a.nextMaintenanceDue);
+      return {
+        assetId: a.assetId,
+        assetName: a.assetName,
+        hardwareType: a.hardwareType,
+        department: a.department,
+        nextMaintenanceDue: due.toLocaleDateString(),
+        urgency: due < now ? "Overdue" : "Due Soon",
+      };
+    })
+    .sort((a, b) => new Date(a.nextMaintenanceDue) - new Date(b.nextMaintenanceDue));
+}
+
+/**
+ * Phase 9 addition — Fleet Reliability / MTBF report, no equivalent
+ * in the original. Groups Incidents by their optional `relatedAsset`
+ * free-text field (see models/Incident.js) and computes a simple Mean
+ * Time Between Failures in days: (last incident − first incident) /
+ * (count − 1), the standard MTBF definition when what's actually
+ * being counted is "how often does this specific piece of equipment
+ * generate a ticket" rather than true uptime telemetry (this app has
+ * no sensor feed to compute real uptime from — it only knows about
+ * tickets filed against equipment, same "derived from what's actually
+ * recorded" honesty as every other report on this page).
+ */
+function assetReliabilityReport(incidents) {
+  const byAsset = {};
+  incidents.forEach((r) => {
+    if (!r.relatedAsset) return;
+    if (!byAsset[r.relatedAsset]) byAsset[r.relatedAsset] = [];
+    byAsset[r.relatedAsset].push(new Date(r.createdDate));
+  });
+
+  return Object.entries(byAsset)
+    .map(([relatedAsset, dates]) => {
+      dates.sort((a, b) => a - b);
+      const count = dates.length;
+      const first = dates[0];
+      const last = dates[count - 1];
+      const mtbfDays = count > 1 ? Math.round((last - first) / (1000 * 60 * 60 * 24) / (count - 1)) : null;
+      return {
+        relatedAsset,
+        incidentCount: count,
+        firstIncident: first.toLocaleDateString(),
+        lastIncident: last.toLocaleDateString(),
+        mtbfDays,
+      };
+    })
+    .sort((a, b) => b.incidentCount - a.incidentCount);
+}
+
 async function showReports(req, res) {
   const [incidents, requests, assets, employees, vendors, licenses] = await Promise.all([
     Incident.find().lean(),
@@ -205,6 +272,8 @@ async function showReports(req, res) {
     contracts: contractExpiryReport(employees),
     amcs: amcExpiryReport(vendors),
     licenses: licenseExpiryReport(licenses),
+    maintenanceDue: maintenanceDueReport(assets),
+    fleetReliability: assetReliabilityReport(incidents),
   });
 }
 
@@ -215,4 +284,6 @@ module.exports = {
   contractExpiryReport,
   amcExpiryReport,
   licenseExpiryReport,
+  maintenanceDueReport,
+  assetReliabilityReport,
 };

@@ -6,12 +6,26 @@
  * validation) mirrors the original function-for-function.
  *************************************************************/
 const Incident = require("../models/Incident");
+const Asset = require("../models/Asset");
 const { STATUS, PRIORITY } = require("../config/constants");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { calculateSLADue } = require("../utils/sla");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
+
+/**
+ * Phase 9 helper — a light "Asset Name (Asset ID)" list for the
+ * optional Related Asset field's <datalist>, so filing an incident
+ * against a specific robot unit doesn't require memorizing its exact
+ * Asset ID. Not gated on any permission (same as the rest of the
+ * Incident form) — just a convenience list, matching against Asset
+ * happens by plain string, same as everywhere else in this app.
+ */
+async function listAssetNames() {
+  const assets = await Asset.find({ status: { $ne: "Decommissioned" } }).select("assetId assetName").sort({ assetName: 1 }).lean();
+  return assets.map((a) => `${a.assetName} (${a.assetId})`);
+}
 
 async function listIncidents(req, res) {
   const { q, status, priority } = req.query;
@@ -45,8 +59,9 @@ async function listIncidents(req, res) {
   });
 }
 
-function showNewForm(req, res) {
-  res.render("incidents/new", { PRIORITY, error: null, form: {} });
+async function showNewForm(req, res) {
+  const assetNames = await listAssetNames();
+  res.render("incidents/new", { PRIORITY, error: null, form: {}, assetNames });
 }
 
 async function createIncident(req, res) {
@@ -74,6 +89,7 @@ async function createIncident(req, res) {
       status: STATUS.OPEN,
       slaDue,
       remarks: data.remarks || "",
+      relatedAsset: data.relatedAsset || "",
       createdBy: req.user.email,
     });
 
@@ -87,7 +103,8 @@ async function createIncident(req, res) {
 
     res.redirect(`/incidents/${incident._id}?created=1`);
   } catch (err) {
-    res.status(400).render("incidents/new", { PRIORITY, error: err.message, form: req.body });
+    const assetNames = await listAssetNames();
+    res.status(400).render("incidents/new", { PRIORITY, error: err.message, form: req.body, assetNames });
   }
 }
 
@@ -95,10 +112,11 @@ async function showIncident(req, res) {
   const incident = await Incident.findById(req.params.id).lean();
   if (!incident) return res.status(404).render("errors/404");
 
-  const [attachments, auditEntries, canUpload] = await Promise.all([
+  const [attachments, auditEntries, canUpload, assetNames] = await Promise.all([
     getAttachmentsForRecord("incidents", incident._id),
     getAuditTrailForRecord(incident._id),
     hasPermission(req.user.role, "incidents_edit"),
+    listAssetNames(),
   ]);
 
   res.render("incidents/detail", {
@@ -110,6 +128,7 @@ async function showIncident(req, res) {
     auditEntries,
     canUpload,
     moduleKey: "incidents",
+    assetNames,
   });
 }
 
@@ -131,6 +150,7 @@ async function updateIncident(req, res) {
     incident.status = data.status || STATUS.OPEN;
     incident.engineer = data.engineer || "";
     incident.remarks = data.remarks || "";
+    incident.relatedAsset = data.relatedAsset || "";
 
     if (incident.status === STATUS.CLOSED && !incident.closedDate) {
       incident.closedDate = new Date();

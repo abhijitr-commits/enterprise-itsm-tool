@@ -136,6 +136,16 @@ const DEFAULT_PERMISSIONS_MAP = {
   // Maintenance Announcements aren't in this map — IT-team gated
   // (teamAccess.js) for creating, same as requireITTeam() in the
   // original; reading is open to everyone signed in.
+
+  // --- Phase 9 (Robotics-company additions) ---
+  // Safety Incident / Near-Miss reporting — same "anyone logged in
+  // submits, Admin/Manager manages" tier as Complaints/Expenses, since
+  // a physical-safety report around robotics equipment needs the same
+  // "open to everyone, investigated by management" shape as a general
+  // complaint, just tracked separately so severity/injury data doesn't
+  // get diluted by IT/facilities complaints.
+  safety_submit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  safety_manage: [ROLE.ADMIN, ROLE.MANAGER],
 };
 
 const ALL_ROLES_LIST = Object.values(ROLE);

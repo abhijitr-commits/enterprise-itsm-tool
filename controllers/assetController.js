@@ -8,7 +8,7 @@ const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 
-const { ASSET_STATUS } = Asset;
+const { ASSET_STATUS, HARDWARE_TYPE } = Asset;
 
 async function logAssetHistory(assetId, action, from, to, notes) {
   try {
@@ -39,7 +39,7 @@ async function listAssets(req, res) {
 }
 
 function showNewForm(req, res) {
-  res.render("assets/new", { error: null, form: {} });
+  res.render("assets/new", { error: null, form: {}, HARDWARE_TYPE });
 }
 
 async function createAsset(req, res) {
@@ -51,6 +51,8 @@ async function createAsset(req, res) {
 
     const assetId = await generateSequentialId("AST");
     const status = data.assignedTo ? ASSET_STATUS.IN_SERVICE : ASSET_STATUS.IN_STORAGE;
+    const hardwareType = Object.values(HARDWARE_TYPE).includes(data.hardwareType) ? data.hardwareType : HARDWARE_TYPE.IT_EQUIPMENT;
+    const maintenanceIntervalDays = data.maintenanceIntervalDays ? Number(data.maintenanceIntervalDays) : undefined;
 
     const asset = await Asset.create({
       assetId,
@@ -64,6 +66,8 @@ async function createAsset(req, res) {
       purchaseDate: data.purchaseDate ? new Date(data.purchaseDate) : undefined,
       warrantyExpiry: data.warrantyExpiry ? new Date(data.warrantyExpiry) : undefined,
       vendor: data.vendor || "",
+      hardwareType,
+      maintenanceIntervalDays,
       createdBy: req.user.email,
     });
 
@@ -98,6 +102,7 @@ async function showAsset(req, res) {
     asset,
     history,
     ASSET_STATUS,
+    HARDWARE_TYPE,
     justCreated: req.query.created === "1",
     attachments,
     auditEntries,
@@ -120,6 +125,8 @@ async function updateAsset(req, res) {
     asset.vendor = data.vendor || "";
     if (data.purchaseDate) asset.purchaseDate = new Date(data.purchaseDate);
     if (data.warrantyExpiry) asset.warrantyExpiry = new Date(data.warrantyExpiry);
+    if (Object.values(HARDWARE_TYPE).includes(data.hardwareType)) asset.hardwareType = data.hardwareType;
+    asset.maintenanceIntervalDays = data.maintenanceIntervalDays ? Number(data.maintenanceIntervalDays) : undefined;
 
     await asset.save();
 
@@ -251,6 +258,41 @@ async function decommissionAsset(req, res) {
   res.redirect(`/assets/${asset._id}`);
 }
 
+/**
+ * Phase 9 addition — no equivalent in the original. Logs a
+ * calibration/maintenance event against an asset with a schedule
+ * (`maintenanceIntervalDays` set) and rolls `nextMaintenanceDue`
+ * forward from the date logged, so reportController.js's Maintenance
+ * Due report always reflects the real last service date rather than
+ * a hand-edited due date that can drift from reality.
+ */
+async function logMaintenance(req, res) {
+  try {
+    const asset = await Asset.findById(req.params.id);
+    if (!asset) return res.status(404).render("errors/404");
+
+    const performedDate = req.body.performedDate ? new Date(req.body.performedDate) : new Date();
+    asset.lastMaintenanceDate = performedDate;
+    asset.nextMaintenanceDue = asset.maintenanceIntervalDays
+      ? new Date(performedDate.getTime() + asset.maintenanceIntervalDays * 24 * 60 * 60 * 1000)
+      : undefined;
+    await asset.save();
+
+    await logAssetHistory(asset.assetId, "Maintenance Logged", "", "", req.body.notes || "");
+    await logAudit({
+      user: req.user._id,
+      action: "Maintenance Logged",
+      entityType: "Asset",
+      entityId: asset._id,
+      details: asset.nextMaintenanceDue ? `Next due ${asset.nextMaintenanceDue.toISOString().slice(0, 10)}` : "No schedule set",
+    });
+
+    res.redirect(`/assets/${asset._id}`);
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+}
+
 module.exports = {
   listAssets,
   showNewForm,
@@ -263,4 +305,5 @@ module.exports = {
   issueAssetInternal,
   returnAssetInternal,
   logAssetHistory,
+  logMaintenance,
 };

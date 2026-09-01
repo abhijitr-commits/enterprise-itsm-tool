@@ -6,6 +6,7 @@
  * idempotent pattern as Permissions/SLA Matrix.
  *************************************************************/
 const Room = require("../models/Room");
+const { RESOURCE_TYPE } = Room;
 const RoomBooking = require("../models/RoomBooking");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
@@ -13,21 +14,23 @@ const { isHRTeam } = require("../utils/teamAccess");
 const { hasPermission } = require("../utils/permissions");
 
 async function listRooms(req, res) {
-  const rooms = await Room.find({ status: "Active" }).sort({ roomName: 1 }).lean();
-  res.render("rooms/list", { rooms, message: req.query.message || null });
+  const rooms = await Room.find({ status: "Active" }).sort({ resourceType: 1, roomName: 1 }).lean();
+  res.render("rooms/list", { rooms, RESOURCE_TYPE, message: req.query.message || null });
 }
 
 async function createRoom(req, res) {
   try {
     const data = req.body;
-    if (!data.roomName) throw new Error("Room Name is required.");
+    if (!data.roomName) throw new Error("Name is required.");
+
+    const resourceType = Object.values(RESOURCE_TYPE).includes(data.resourceType) ? data.resourceType : RESOURCE_TYPE.ROOM;
 
     const roomId = await generateSequentialId("ROOM");
-    await Room.create({ roomId, roomName: data.roomName, location: data.location || "", capacity: data.capacity || undefined });
+    await Room.create({ roomId, roomName: data.roomName, resourceType, location: data.location || "", capacity: data.capacity || undefined });
 
-    await logAudit({ user: req.user._id, action: "Create", entityType: "Room", details: data.roomName });
+    await logAudit({ user: req.user._id, action: "Create", entityType: "Room", details: `${data.roomName} (${resourceType})` });
 
-    res.redirect(`/rooms?message=${encodeURIComponent("Conference Room Added Successfully")}`);
+    res.redirect(`/rooms?message=${encodeURIComponent(`${resourceType} Added Successfully`)}`);
   } catch (err) {
     res.redirect(`/rooms?message=${encodeURIComponent(err.message)}`);
   }
@@ -35,14 +38,23 @@ async function createRoom(req, res) {
 
 async function listBookings(req, res) {
   const [rooms, bookings, canManageRooms] = await Promise.all([
-    Room.find({ status: "Active" }).sort({ roomName: 1 }).lean(),
+    Room.find({ status: "Active" }).sort({ resourceType: 1, roomName: 1 }).lean(),
     RoomBooking.find().sort({ date: -1, startTime: -1 }).lean(),
     hasPermission(req.user.role, "rooms_manage"),
   ]);
 
+  // Booking rows don't store resourceType themselves (they didn't
+  // before this phase either) — resolved here from the current Room
+  // list so the bookings table can still show a Room/Equipment badge
+  // per row without a schema change to RoomBooking.
+  const resourceTypeByRoomId = {};
+  rooms.forEach((r) => { resourceTypeByRoomId[r.roomId] = r.resourceType; });
+  bookings.forEach((b) => { b.resourceType = resourceTypeByRoomId[b.roomId] || RESOURCE_TYPE.ROOM; });
+
   res.render("rooms/bookings", {
     rooms,
     bookings,
+    RESOURCE_TYPE,
     currentUserName: req.user.name,
     canCancelAny: isHRTeam(req.user),
     canManageRooms,
@@ -51,7 +63,7 @@ async function listBookings(req, res) {
 }
 
 async function showNewBookingForm(req, res) {
-  const rooms = await Room.find({ status: "Active" }).sort({ roomName: 1 }).lean();
+  const rooms = await Room.find({ status: "Active" }).sort({ resourceType: 1, roomName: 1 }).lean();
   res.render("rooms/new-booking", { error: null, form: {}, rooms });
 }
 
