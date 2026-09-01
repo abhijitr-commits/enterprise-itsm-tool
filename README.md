@@ -1,4 +1,4 @@
-# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4A)
+# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4A + 4B)
 
 This is the Node.js/Express + MongoDB migration of the Enterprise ITSM
 Tool off Google Apps Script + Google Sheets. It replaces the Sheets-based
@@ -43,10 +43,16 @@ page (your tickets + your pending approvals), an Org Chart, and
 department-aware access (HR team / Admin team / IT team, alongside
 the existing role-based Permission Matrix).
 
-The rest of the HR suite (Leave/Attendance/Shift, Recruitment,
-Performance/Learning, Benefits/Wellness, and the IT-ops modules) are
-**not yet ported** — see `MIGRATION.md` for the phased roadmap and
-what's needed for each.
+**Phase 4B scope** (adds): Leave (apply/approve/reject, with the same
+four-way balance calculation as the original — Casual, Sick, Earned,
+and Unpaid), Attendance (self check-in/check-out, honor-system not
+biometric), and Shifts &amp; Roster (shift definitions plus a
+date-range roster). My Profile's Leave Balance and My Work's Leave
+Approvals, both placeholders in 4A, are now wired to real data.
+
+The rest of the HR suite (Recruitment, Performance/Learning, Benefits/
+Wellness, and the IT-ops modules) are **not yet ported** — see
+`MIGRATION.md` for the phased roadmap and what's needed for each.
 
 ## Stack (100% free tier)
 
@@ -131,6 +137,8 @@ Railway.app works the same way if you prefer it over Render.
 | `OnboardingEngine.gs` (checklists + resignations) | `src/controllers/checklistController.js` + `resignationController.js` | 4 checklist sheets collapsed into one `ChecklistItem` collection with a `type` field; same 5-way clearance auto-complete for resignations |
 | `ProfileEngine.gs`, `OrgChartEngine.gs`, `MyWorkEngine.gs` | `views/profile`, `views/orgchart`, `views/mywork` | Same aggregation logic; My Profile matches by email instead of by name |
 | `Security.gs`'s `isHRTeam()`/`isITTeam()`/`isAdminTeam()` | `src/utils/teamAccess.js` | Department + Role gating, alongside the Phase 3 Permission Matrix |
+| `LeaveEngine.gs` | `src/controllers/leaveController.js` + `src/utils/leaveBalances.js` | Same 4-way balance calc (Casual/Sick/Earned/Unpaid); `leaveType` tightened to an enum since the balance math needs exact strings |
+| `AttendanceEngine.gs`, `ShiftEngine.gs` | `src/controllers/attendanceController.js` + `shiftController.js` | Same honor-system check-in/out and date-range roster |
 
 ## Original source, kept for reference
 

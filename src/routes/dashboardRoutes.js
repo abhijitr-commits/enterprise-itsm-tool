@@ -4,11 +4,12 @@ const { requireLogin } = require("../middleware/auth");
 const Incident = require("../models/Incident");
 const ServiceRequest = require("../models/ServiceRequest");
 const Change = require("../models/Change");
+const LeaveRequest = require("../models/LeaveRequest");
 const { STATUS } = require("../config/constants");
 const { APPROVAL } = require("../models/ServiceRequest");
 
 router.get("/", requireLogin, async (req, res) => {
-  const [open, inProgress, breached, closedToday, pendingRequests, pendingChanges] = await Promise.all([
+  const [open, inProgress, breached, closedToday, pendingRequests, pendingChanges, pendingLeave] = await Promise.all([
     Incident.countDocuments({ status: STATUS.OPEN }),
     Incident.countDocuments({ status: STATUS.IN_PROGRESS }),
     Incident.countDocuments({ status: { $ne: STATUS.CLOSED }, slaDue: { $lt: new Date() } }),
@@ -18,6 +19,7 @@ router.get("/", requireLogin, async (req, res) => {
     }),
     ServiceRequest.countDocuments({ approvalStatus: APPROVAL.PENDING }),
     Change.countDocuments({ cabStatus: APPROVAL.PENDING }),
+    LeaveRequest.countDocuments({ status: APPROVAL.PENDING }),
   ]);
 
   const recent = await Incident.find().sort({ createdDate: -1 }).limit(8).lean();
@@ -27,7 +29,7 @@ router.get("/", requireLogin, async (req, res) => {
     inProgress,
     breached,
     closedToday,
-    pendingApprovals: pendingRequests + pendingChanges,
+    pendingApprovals: pendingRequests + pendingChanges + pendingLeave,
     recent,
   });
 });

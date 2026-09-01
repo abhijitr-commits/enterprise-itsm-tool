@@ -65,4 +65,14 @@ function requirePermission(action) {
   };
 }
 
-module.exports = { hasPermission, requirePermission, getPermissionsMap };
+/**
+ * Port of CacheService.getScriptCache().remove("PERMISSIONS_MAP") from the
+ * original togglePermission(). Call this right after writing a Permission
+ * document so the change is visible on the very next request instead of
+ * waiting out the 60-second cache window.
+ */
+function clearPermissionsCache() {
+  permCache = { map: null, expiresAt: 0 };
+}
+
+module.exports = { hasPermission, requirePermission, getPermissionsMap, clearPermissionsCache };

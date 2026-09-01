@@ -8,6 +8,7 @@ const cookieParser = require("cookie-parser");
 
 const connectDB = require("./config/db");
 const { attachUser } = require("./middleware/auth");
+const { attachModuleVisibility } = require("./middleware/moduleVisibility");
 const authRoutes = require("./routes/authRoutes");
 const incidentRoutes = require("./routes/incidentRoutes");
 const requestRoutes = require("./routes/requestRoutes");
@@ -17,6 +18,17 @@ const assetRoutes = require("./routes/assetRoutes");
 const cmdbRoutes = require("./routes/cmdbRoutes");
 const knowledgeRoutes = require("./routes/knowledgeRoutes");
 const reportRoutes = require("./routes/reportRoutes");
+const adminRoutes = require("./routes/adminRoutes");
+const masterDataRoutes = require("./routes/masterDataRoutes");
+const employeeRoutes = require("./routes/employeeRoutes");
+const checklistRoutes = require("./routes/checklistRoutes");
+const resignationRoutes = require("./routes/resignationRoutes");
+const profileRoutes = require("./routes/profileRoutes");
+const myWorkRoutes = require("./routes/myWorkRoutes");
+const orgChartRoutes = require("./routes/orgChartRoutes");
+const leaveRoutes = require("./routes/leaveRoutes");
+const attendanceRoutes = require("./routes/attendanceRoutes");
+const shiftRoutes = require("./routes/shiftRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 
 /*************************************************************
@@ -97,6 +109,7 @@ async function start() {
   );
 
   app.use(attachUser);
+  app.use(attachModuleVisibility);
 
   app.use("/", authRoutes);
   app.use("/", dashboardRoutes);
@@ -108,6 +121,17 @@ async function start() {
   app.use("/cmdb", cmdbRoutes);
   app.use("/knowledge", knowledgeRoutes);
   app.use("/reports", reportRoutes);
+  app.use("/admin", adminRoutes);
+  app.use("/masterdata", masterDataRoutes);
+  app.use("/employees", employeeRoutes);
+  app.use("/onboarding", checklistRoutes);
+  app.use("/resignations", resignationRoutes);
+  app.use("/profile", profileRoutes);
+  app.use("/mywork", myWorkRoutes);
+  app.use("/orgchart", orgChartRoutes);
+  app.use("/leave", leaveRoutes);
+  app.use("/attendance", attendanceRoutes);
+  app.use("/shifts", shiftRoutes);
 
   app.use((req, res) => res.status(404).render("errors/404"));
 
