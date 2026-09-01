@@ -35,6 +35,16 @@
     <label>Vendor
       <input type="text" name="vendor" value="<%= form.vendor || '' %>" />
     </label>
+    <label>Hardware Type
+      <select name="hardwareType">
+        <% Object.values(HARDWARE_TYPE).forEach(function(t) { %>
+          <option value="<%= t %>" <%= form.hardwareType === t ? 'selected' : '' %>><%= t %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Maintenance Interval (days, optional)
+      <input type="number" name="maintenanceIntervalDays" min="1" value="<%= form.maintenanceIntervalDays || '' %>" placeholder="e.g. 90" />
+    </label>
   </div>
   <div class="form-actions">
     <a class="btn btn-secondary" href="/assets">Cancel</a>

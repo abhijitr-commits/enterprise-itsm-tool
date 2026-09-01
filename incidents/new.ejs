@@ -38,6 +38,12 @@
   <label>Remarks (optional)
     <textarea name="remarks" rows="2"><%= form.remarks || '' %></textarea>
   </label>
+  <label>Related Robot / Equipment (optional)
+    <input type="text" name="relatedAsset" value="<%= form.relatedAsset || '' %>" list="assetNamesList" placeholder="Search by name or asset ID" />
+    <datalist id="assetNamesList">
+      <% assetNames.forEach(function(n) { %><option value="<%= n %>"></option><% }) %>
+    </datalist>
+  </label>
   <div class="form-actions">
     <a class="btn btn-secondary" href="/incidents">Cancel</a>
     <button type="submit" class="btn btn-primary">Create Incident</button>

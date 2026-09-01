@@ -121,6 +121,14 @@
         <% } %>
       <% } %>
       <% if (currentUser) { %>
+        <div class="nav-section-label">Sales, Production &amp; Logistics</div>
+        <a href="/sales" class="nav-link">Sales Orders</a>
+        <a href="/work-orders" class="nav-link">Work Orders</a>
+        <a href="/engineering-changes" class="nav-link">Engineering Change Requests</a>
+        <a href="/shipments" class="nav-link">Shipments</a>
+        <a href="/material-requests" class="nav-link">Material Requests</a>
+      <% } %>
+      <% if (currentUser) { %>
         <div class="nav-section-label">Wellness &amp; Engagement</div>
         <a href="/wellness/programs" class="nav-link">Wellness Programs</a>
         <a href="/wellness/pulse" class="nav-link">Pulse Survey</a>

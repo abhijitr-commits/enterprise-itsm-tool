@@ -1,0 +1,43 @@
+<%- include('../partials/header', { title: 'Material Requests' }) %>
+
+<div class="page-header">
+  <h1>Material Requests (Store)</h1>
+  <a href="/material-requests/new" class="btn btn-primary">New Material Request</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>Request ID</th><th>Requested By</th><th>Department</th><th>Item</th><th>Qty</th><th>Purpose</th><th>Status</th><% if (canIssue) { %><th></th><% } %></tr></thead>
+    <tbody>
+      <% requests.forEach(function(r) { %>
+        <tr>
+          <td><%= r.materialRequestId %></td>
+          <td><%= r.requestedBy %></td>
+          <td><%= r.department || '—' %></td>
+          <td><%= r.itemName %></td>
+          <td><%= r.quantity %></td>
+          <td><%= r.purpose || '—' %></td>
+          <td><span class="badge <%= r.status === 'Issued' ? 'badge-status-resolved' : (r.status === 'Rejected' ? 'badge-status-cancelled' : 'badge-status-open') %>"><%= r.status %></span></td>
+          <% if (canIssue) { %>
+            <td>
+              <% if (r.status === MATERIAL_REQUEST_STATUS.PENDING) { %>
+                <form method="post" action="/material-requests/<%= r._id %>/issue" style="display:inline;">
+                  <button type="submit" class="btn btn-secondary">Issue</button>
+                </form>
+                <form method="post" action="/material-requests/<%= r._id %>/reject" style="display:inline; margin-left:4px;">
+                  <input type="text" name="rejectionReason" placeholder="Reason" style="width:110px;" />
+                  <button type="submit" class="btn btn-secondary">Reject</button>
+                </form>
+              <% } %>
+            </td>
+          <% } %>
+        </tr>
+      <% }) %>
+      <% if (requests.length === 0) { %><tr><td colspan="<%= canIssue ? 8 : 7 %>" class="empty-row">No material requests yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>
