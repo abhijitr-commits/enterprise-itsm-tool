@@ -1,0 +1,50 @@
+<% const pageTitle = isOwnPage ? 'My Documents' : (employeeName + String.fromCharCode(39) + 's Documents'); %>
+<%- include('../partials/header', { title: pageTitle }) %>
+
+<div class="page-header">
+  <h1><%= pageTitle %></h1>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<div class="panel">
+  <div class="panel-header"><h2>Upload a Document</h2></div>
+  <form method="post" action="/documents/upload" enctype="multipart/form-data" class="form-panel">
+    <input type="hidden" name="employee" value="<%= employeeName %>" />
+    <div class="form-grid">
+      <label>Document Type
+        <select name="docType">
+          <option value="ID Proof">ID Proof</option>
+          <option value="Education Certificate">Education Certificate</option>
+          <option value="Offer Letter">Offer Letter</option>
+          <option value="Other" selected>Other</option>
+        </select>
+      </label>
+      <label>File (max 3MB)
+        <input type="file" name="file" required />
+      </label>
+    </div>
+    <button type="submit" class="btn btn-primary">Upload</button>
+  </form>
+</div>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>File</th><th>Type</th><th>Uploaded By</th><th>Date</th><th></th></tr></thead>
+    <tbody>
+      <% docs.forEach(function(d) { %>
+        <tr>
+          <td><%= d.fileName %></td>
+          <td><%= d.docType %></td>
+          <td><%= d.uploadedBy %></td>
+          <td><%= new Date(d.uploadDate).toLocaleDateString() %></td>
+          <td><a class="btn btn-secondary" href="/documents/file/<%= d.documentId %>" target="_blank">View</a></td>
+        </tr>
+      <% }) %>
+      <% if (docs.length === 0) { %><tr><td colspan="5" class="empty-row">No documents uploaded yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

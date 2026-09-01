@@ -1,0 +1,176 @@
+<%- include('../partials/header', { title: 'HR & Employees' }) %>
+
+<div class="page-header">
+  <h1>HR &amp; Employees</h1>
+  <% if (isManagerOrAdmin) { %><a class="btn btn-secondary" href="/reports/executive-summary">Executive Summary</a><% } %>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>People</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/profile">
+      <div class="admin-tile-title">My Profile</div>
+      <div class="admin-tile-sub">Your record, assets, leave balance, trainings, benefits, and documents.</div>
+    </a>
+    <a class="admin-tile" href="/mywork">
+      <div class="admin-tile-title">My Work</div>
+      <div class="admin-tile-sub">Your tickets and everything pending your approval or acknowledgment.</div>
+    </a>
+    <a class="admin-tile" href="/orgchart">
+      <div class="admin-tile-title">Org Chart</div>
+      <div class="admin-tile-sub">Who reports to whom, across the company.</div>
+    </a>
+    <a class="admin-tile" href="/employees">
+      <div class="admin-tile-title">Employee Directory</div>
+      <div class="admin-tile-sub">The full employee list — create/edit is HR-team only.</div>
+    </a>
+    <a class="admin-tile" href="/documents">
+      <div class="admin-tile-title">My Documents</div>
+      <div class="admin-tile-sub">ID proofs, certificates, and other files on your record.</div>
+    </a>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Time Off</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/leave">
+      <div class="admin-tile-title">Leave</div>
+      <div class="admin-tile-sub">Apply for leave and, if you approve, decide on others' requests.</div>
+    </a>
+    <a class="admin-tile" href="/attendance/my">
+      <div class="admin-tile-title">Attendance</div>
+      <div class="admin-tile-sub">Check in/out and view your attendance history.</div>
+    </a>
+    <a class="admin-tile" href="/shifts">
+      <div class="admin-tile-title">Shifts &amp; Roster</div>
+      <div class="admin-tile-sub">Shift definitions and the date-range roster.</div>
+    </a>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Employee Lifecycle</h2></div>
+  <div class="admin-tile-grid">
+    <% if (isHR) { %>
+      <a class="admin-tile" href="/onboarding/pre-onboarding">
+        <div class="admin-tile-title">Pre-Onboarding</div>
+        <div class="admin-tile-sub">Checklist tracking from offer to Day 1, per candidate.</div>
+      </a>
+      <a class="admin-tile" href="/onboarding/onboarding">
+        <div class="admin-tile-title">Onboarding</div>
+        <div class="admin-tile-sub">New-hire checklists, Day 1 through Month 1.</div>
+      </a>
+      <a class="admin-tile" href="/onboarding/offboarding">
+        <div class="admin-tile-title">Offboarding</div>
+        <div class="admin-tile-sub">Exit checklists tied to each resignation.</div>
+      </a>
+      <a class="admin-tile" href="/recruitment">
+        <div class="admin-tile-title">Recruitment</div>
+        <div class="admin-tile-sub">Job postings and the candidate pipeline.</div>
+      </a>
+    <% } %>
+    <a class="admin-tile" href="/resignations">
+      <div class="admin-tile-title">Resignations</div>
+      <div class="admin-tile-sub">Submit a resignation, track clearances, exit interviews.</div>
+    </a>
+    <a class="admin-tile" href="/referrals">
+      <div class="admin-tile-title">Referrals</div>
+      <div class="admin-tile-sub">Refer a candidate for an open role.</div>
+    </a>
+    <% if (isAdminTeam) { %>
+      <a class="admin-tile" href="/onboarding/admin-onboarding">
+        <div class="admin-tile-title">Admin Onboarding</div>
+        <div class="admin-tile-sub">Facilities checklist — ID card, desk, locker.</div>
+      </a>
+      <a class="admin-tile" href="/onboarding/admin-offboarding">
+        <div class="admin-tile-title">Admin Offboarding</div>
+        <div class="admin-tile-sub">Physical return checklist on exit.</div>
+      </a>
+    <% } %>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Growth</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/training/courses">
+      <div class="admin-tile-title">Training Catalog</div>
+      <div class="admin-tile-sub">Browse available courses, online and offline.</div>
+    </a>
+    <a class="admin-tile" href="/training/certificates">
+      <div class="admin-tile-title">My Certificates</div>
+      <div class="admin-tile-sub">Certificates you've earned — view or print any of them.</div>
+    </a>
+    <a class="admin-tile" href="/performance/goals">
+      <div class="admin-tile-title">Goals</div>
+      <div class="admin-tile-sub">Track progress on your (or your team's) performance goals.</div>
+    </a>
+    <a class="admin-tile" href="/performance/reviews">
+      <div class="admin-tile-title">Reviews</div>
+      <div class="admin-tile-sub">Performance reviews, acknowledged by the employee.</div>
+    </a>
+    <% if (isManagerOrAdmin) { %>
+      <a class="admin-tile" href="/succession">
+        <div class="admin-tile-title">Succession Planning</div>
+        <div class="admin-tile-sub">Key roles, current holders, and rated successors.</div>
+      </a>
+      <a class="admin-tile" href="/training/enrollments">
+        <div class="admin-tile-title">Training Enrollments</div>
+        <div class="admin-tile-sub">Enroll employees and mark courses complete.</div>
+      </a>
+    <% } %>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Culture</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/wellness/programs">
+      <div class="admin-tile-title">Wellness Programs</div>
+      <div class="admin-tile-sub">Upcoming physical, mental, financial &amp; social wellness events.</div>
+    </a>
+    <a class="admin-tile" href="/wellness/pulse">
+      <div class="admin-tile-title">Pulse Survey</div>
+      <div class="admin-tile-sub">A quick, anonymous check-in — how's work feeling this week?</div>
+    </a>
+    <a class="admin-tile" href="/wellness/kudos">
+      <div class="admin-tile-title">Kudos Wall</div>
+      <div class="admin-tile-sub">Give a colleague a public shoutout.</div>
+    </a>
+    <% if (isManagerOrAdmin) { %>
+      <a class="admin-tile" href="/wellness/pulse/results">
+        <div class="admin-tile-title">Pulse Results</div>
+        <div class="admin-tile-sub">Average rating and comments per survey.</div>
+      </a>
+    <% } %>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Compliance &amp; Documents</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/policies">
+      <div class="admin-tile-title">IT Policies</div>
+      <div class="admin-tile-sub">Review and acknowledge published IT policies.</div>
+    </a>
+    <% if (isHR) { %>
+      <a class="admin-tile" href="/benefits">
+        <div class="admin-tile-title">Benefits Enrollment</div>
+        <div class="admin-tile-sub">Manage who's enrolled in which company benefit.</div>
+      </a>
+      <a class="admin-tile" href="/letters">
+        <div class="admin-tile-title">Letters</div>
+        <div class="admin-tile-sub">Generate Offer/Appointment Letters and edit templates.</div>
+      </a>
+    <% } %>
+    <% if (isIT) { %>
+      <a class="admin-tile" href="/policies/new">
+        <div class="admin-tile-title">Publish a Policy</div>
+        <div class="admin-tile-sub">Add a new IT policy for company-wide acknowledgment.</div>
+      </a>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

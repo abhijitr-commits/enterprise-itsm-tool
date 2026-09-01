@@ -34,6 +34,12 @@ const referralRoutes = require("./routes/referralRoutes");
 const performanceRoutes = require("./routes/performanceRoutes");
 const successionRoutes = require("./routes/successionRoutes");
 const trainingRoutes = require("./routes/trainingRoutes");
+const benefitsRoutes = require("./routes/benefitsRoutes");
+const wellnessRoutes = require("./routes/wellnessRoutes");
+const policyRoutes = require("./routes/policyRoutes");
+const lettersRoutes = require("./routes/lettersRoutes");
+const documentRoutes = require("./routes/documentRoutes");
+const hrHubRoutes = require("./routes/hrHubRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 
 /*************************************************************
@@ -142,6 +148,12 @@ async function start() {
   app.use("/performance", performanceRoutes);
   app.use("/succession", successionRoutes);
   app.use("/training", trainingRoutes);
+  app.use("/benefits", benefitsRoutes);
+  app.use("/wellness", wellnessRoutes);
+  app.use("/policies", policyRoutes);
+  app.use("/letters", lettersRoutes);
+  app.use("/documents", documentRoutes);
+  app.use("/hr", hrHubRoutes);
 
   app.use((req, res) => res.status(404).render("errors/404"));
 

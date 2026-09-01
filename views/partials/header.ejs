@@ -27,6 +27,9 @@
       <% if (canSee('cmdb')) { %><a href="/cmdb" class="nav-link">CMDB</a><% } %>
       <% if (canSee('knowledge')) { %><a href="/knowledge" class="nav-link">Knowledge Base</a><% } %>
       <% if (canSee('reports')) { %><a href="/reports" class="nav-link">Reports</a><% } %>
+      <% if (currentUser && (currentUser.role === 'Administrator' || currentUser.role === 'Manager')) { %>
+        <a href="/reports/executive-summary" class="nav-link">Executive Summary</a>
+      <% } %>
       <%
         // HR-team / Admin-team checks, same rule as src/utils/teamAccess.js:
         // Administrator always qualifies; otherwise Manager + the matching
@@ -37,9 +40,12 @@
           (currentUser.role === 'Manager' && String(currentUser.department || '').trim().toLowerCase() === 'hr'));
         const isAdminTeamUser = currentUser && (currentUser.role === 'Administrator' ||
           (currentUser.role === 'Manager' && String(currentUser.department || '').trim().toLowerCase() === 'administration'));
+        const isITTeamUser = currentUser && (currentUser.role === 'Administrator' ||
+          (currentUser.role === 'Manager' && String(currentUser.department || '').trim().toLowerCase() === 'it'));
       %>
       <% if (currentUser) { %>
         <div class="nav-section-label">HR</div>
+        <a href="/hr" class="nav-link">HR Hub</a>
         <a href="/mywork" class="nav-link">My Work</a>
         <a href="/profile" class="nav-link">My Profile</a>
         <a href="/orgchart" class="nav-link">Org Chart</a>
@@ -52,6 +58,8 @@
         <a href="/performance/reviews" class="nav-link">Reviews</a>
         <a href="/training/courses" class="nav-link">Training Catalog</a>
         <a href="/training/certificates" class="nav-link">My Certificates</a>
+        <a href="/policies" class="nav-link">IT Policies</a>
+        <a href="/documents" class="nav-link">My Documents</a>
         <% if (isHRTeamUser) { %>
           <a href="/onboarding/pre-onboarding" class="nav-link">Pre-Onboarding</a>
           <a href="/onboarding/onboarding" class="nav-link">Onboarding</a>
@@ -63,9 +71,22 @@
           <a href="/succession" class="nav-link">Succession Planning</a>
           <a href="/training/enrollments" class="nav-link">Training Enrollments</a>
         <% } %>
+        <% if (isHRTeamUser) { %>
+          <a href="/benefits" class="nav-link">Benefits Enrollment</a>
+          <a href="/letters" class="nav-link">Letters</a>
+        <% } %>
         <% if (isAdminTeamUser) { %>
           <a href="/onboarding/admin-onboarding" class="nav-link">Admin Onboarding</a>
           <a href="/onboarding/admin-offboarding" class="nav-link">Admin Offboarding</a>
+        <% } %>
+      <% } %>
+      <% if (currentUser) { %>
+        <div class="nav-section-label">Wellness &amp; Engagement</div>
+        <a href="/wellness/programs" class="nav-link">Wellness Programs</a>
+        <a href="/wellness/pulse" class="nav-link">Pulse Survey</a>
+        <a href="/wellness/kudos" class="nav-link">Kudos Wall</a>
+        <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
+          <a href="/wellness/pulse/results" class="nav-link">Pulse Results</a>
         <% } %>
       <% } %>
       <% if (currentUser && currentUser.role === 'Administrator') { %>

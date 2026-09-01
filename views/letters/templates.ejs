@@ -1,0 +1,33 @@
+<%- include('../partials/header', { title: 'Letter Templates' }) %>
+
+<div class="page-header">
+  <h1>Letter Templates</h1>
+  <a class="btn btn-secondary" href="/letters">All Generated Letters</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="alert alert-info">
+  Use <code>{{EmployeeName}}</code>, <code>{{Department}}</code>, <code>{{Designation}}</code>,
+  <code>{{JoiningDate}}</code>, <code>{{TodayDate}}</code> and, for the No Dues Certificate,
+  <code>{{LastWorkingDay}}</code> / <code>{{ITClearance}}</code> / <code>{{FinanceClearance}}</code> /
+  <code>{{HRClearance}}</code> / <code>{{ManagerClearance}}</code> / <code>{{AdminClearance}}</code>.
+  Unknown placeholders are left as-is rather than silently disappearing.
+</div>
+
+<form class="panel form-panel" method="post" action="/letters/templates">
+  <label>Offer Letter Template
+    <textarea name="offerLetter" rows="10"><%= offerLetter %></textarea>
+  </label>
+  <label>Appointment Letter Template
+    <textarea name="appointmentLetter" rows="10"><%= appointmentLetter %></textarea>
+  </label>
+  <label>No Dues Certificate Template
+    <textarea name="noDuesCertificate" rows="10"><%= noDuesCertificate %></textarea>
+  </label>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Save Templates</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

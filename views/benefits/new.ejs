@@ -1,0 +1,30 @@
+<%- include('../partials/header', { title: 'Enroll in a Benefit' }) %>
+
+<div class="page-header">
+  <h1>Enroll Employee in a Benefit</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/benefits">
+  <div class="form-grid">
+    <label>Employee (name)
+      <input type="text" name="employee" value="<%= form.employee || '' %>" required />
+    </label>
+    <label>Benefit Type
+      <input type="text" name="benefitType" placeholder="e.g. Health Insurance" value="<%= form.benefitType || '' %>" required />
+    </label>
+    <label>Plan Name
+      <input type="text" name="planName" value="<%= form.planName || '' %>" required />
+    </label>
+  </div>
+  <label>Coverage Details
+    <textarea name="coverageDetails" rows="3"><%= form.coverageDetails || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/benefits">Cancel</a>
+    <button type="submit" class="btn btn-primary">Record Enrollment</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>
