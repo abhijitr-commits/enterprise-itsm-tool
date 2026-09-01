@@ -1,0 +1,42 @@
+<%- include('../partials/header', { title: 'System Policies' }) %>
+
+<div class="page-header">
+  <h1>System Policies</h1>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<div class="panel form-panel">
+  <p class="admin-tile-sub" style="margin-bottom:16px;">
+    These control automated calculations across the tool (leave balances, resignation notice period, etc.).
+  </p>
+  <form method="post" action="/system-policies">
+    <div class="form-grid">
+      <label>Annual (Casual) Leave Quota (days)
+        <input type="number" name="AnnualLeaveQuota" min="1" step="1" value="<%= annualLeaveQuota %>" required />
+      </label>
+      <label>Medical/Sick Leave Quota (days)
+        <input type="number" name="MedicalLeaveQuota" min="1" step="1" value="<%= medicalLeaveQuota %>" required />
+      </label>
+      <label>Unpaid Leave Quota (days, policy reference)
+        <input type="number" name="UnpaidLeaveQuota" min="1" step="1" value="<%= unpaidLeaveQuota %>" required />
+      </label>
+      <label>Standard Notice Period (days)
+        <input type="number" name="NoticePeriodDays" min="1" step="1" value="<%= noticePeriodDays %>" required />
+      </label>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save Policies</button>
+    </div>
+  </form>
+  <p style="color:var(--text-secondary);font-size:12px;margin-top:16px;">
+    Earned Leave has no fixed quota here — it's calculated automatically from days an employee worked on a
+    weekend or company holiday they were NOT actually rostered/scheduled for (checked against Shift Roster), so
+    an alternate Saturday someone was scheduled to work counts as normal work, not extra effort. See My Profile
+    &rarr; Leave Balance. Unpaid Leave quota is a policy reference limit, not a hard block — an employee can
+    still request beyond it, but it's flagged for the approver.
+  </p>
+</div>
+
+<%- include('../partials/footer') %>
