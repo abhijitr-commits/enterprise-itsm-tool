@@ -1,0 +1,19 @@
+<%- include('../partials/header', { title: 'New Pulse Survey' }) %>
+
+<div class="page-header">
+  <h1>New Pulse Survey</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/wellness/pulse">
+  <label>Question
+    <input type="text" name="question" placeholder="e.g. How are you feeling about work this week?" value="<%= form.question || '' %>" required />
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/wellness/pulse/results">Cancel</a>
+    <button type="submit" class="btn btn-primary">Create Survey</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

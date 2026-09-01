@@ -1,0 +1,46 @@
+<%- include('../partials/header', { title: 'Performance Reviews' }) %>
+
+<div class="page-header">
+  <h1>Performance Reviews</h1>
+  <% if (isHR) { %><a class="btn btn-primary" href="/performance/reviews/new">+ New Review</a><% } %>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>ID</th><th>Employee</th><th>Period</th><th>Reviewer</th><th>Rating</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      <% reviews.forEach(function(r) { %>
+        <% const isOwner = r.employee.trim().toLowerCase() === currentUserName.trim().toLowerCase(); %>
+        <tr>
+          <td><%= r.reviewId %></td>
+          <td><%= r.employee %></td>
+          <td><%= r.reviewPeriod %></td>
+          <td><%= r.reviewer %></td>
+          <td><%= r.rating %> / 5</td>
+          <td><span class="badge <%= r.status === 'Acknowledged' ? 'badge-status-resolved' : 'badge-status-open' %>"><%= r.status %></span></td>
+          <td>
+            <% if (isOwner && r.status === 'Submitted') { %>
+              <form method="post" action="/performance/reviews/<%= r._id %>/acknowledge">
+                <button type="submit" class="btn btn-secondary">Acknowledge</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+        <% if (r.strengths || r.areasForImprovement) { %>
+          <tr>
+            <td></td>
+            <td colspan="6" class="hint">
+              <% if (r.strengths) { %><strong>Strengths:</strong> <%= r.strengths %><br /><% } %>
+              <% if (r.areasForImprovement) { %><strong>Areas for Improvement:</strong> <%= r.areasForImprovement %><% } %>
+            </td>
+          </tr>
+        <% } %>
+      <% }) %>
+      <% if (reviews.length === 0) { %><tr><td colspan="7" class="empty-row">No reviews submitted yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

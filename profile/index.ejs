@@ -1,0 +1,170 @@
+<%- include('../partials/header', { title: 'My Profile' }) %>
+
+<div class="page-header">
+  <h1>My Profile</h1>
+</div>
+
+<% if (!linked) { %>
+  <div class="alert alert-info">
+    Your login isn't linked to an Employee record yet (no Employee record
+    matches your email, <%= currentUser.email %>). Ask HR to add you to the
+    Employee Directory to see your profile here.
+  </div>
+<% } else { %>
+  <% if (pendingPolicies.length > 0) { %>
+    <div class="alert alert-info">
+      You have <%= pendingPolicies.length %> IT polic<%= pendingPolicies.length === 1 ? 'y' : 'ies' %> awaiting your acknowledgment:
+      <% pendingPolicies.forEach(function(p, i) { %><a href="/policies"><%= p.policyName %></a><%= i < pendingPolicies.length - 1 ? ', ' : '' %><% }) %>.
+    </div>
+  <% } %>
+  <div class="detail-grid">
+    <div>
+      <div class="panel">
+        <div class="panel-header"><h2><%= profile.name %></h2></div>
+        <dl class="meta-list">
+          <dt>Employee ID</dt><dd><%= profile.employeeId %></dd>
+          <dt>Email</dt><dd><%= profile.email %></dd>
+          <dt>Department</dt><dd><%= profile.department %></dd>
+          <dt>Location</dt><dd><%= profile.location || '—' %></dd>
+          <dt>Designation</dt><dd><%= profile.designation || '—' %></dd>
+          <dt>Status</dt><dd><%= profile.status %></dd>
+          <dt>Employment Type</dt><dd><%= profile.employmentType %></dd>
+          <dt>Reports To</dt><dd><%= profile.reportsTo || '— (top level)' %></dd>
+        </dl>
+      </div>
+
+      <% if (onboardingTasks.length > 0) { %>
+        <div class="panel">
+          <div class="panel-header"><h2>My Onboarding Checklist</h2></div>
+          <table class="table">
+            <thead><tr><th>Task</th><th>Category</th><th>Status</th></tr></thead>
+            <tbody>
+              <% onboardingTasks.forEach(function(t) { %>
+                <tr>
+                  <td><%= t.task %></td>
+                  <td><%= t.category || '—' %></td>
+                  <td><span class="badge <%= t.status === 'Done' ? 'badge-status-resolved' : 'badge-status-open' %>"><%= t.status %></span></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+
+    <div>
+      <div class="panel">
+        <div class="panel-header"><h2>My Assets</h2></div>
+        <table class="table">
+          <thead><tr><th>Asset</th><th>Type</th><th>Status</th></tr></thead>
+          <tbody>
+            <% assets.forEach(function(a) { %>
+              <tr>
+                <td><%= a.assetName %></td>
+                <td><%= a.type %></td>
+                <td><span class="badge badge-status-open"><%= a.status %></span></td>
+              </tr>
+            <% }) %>
+            <% if (assets.length === 0) { %>
+              <tr><td colspan="3" class="empty-row">No assets currently assigned to you.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>Leave Balance</h2></div>
+        <table class="table">
+          <thead><tr><th>Type</th><th>Quota/Earned</th><th>Used</th><th>Remaining</th></tr></thead>
+          <tbody>
+            <tr><td>Casual Leave</td><td><%= leaveBalances.casual.quota %></td><td><%= leaveBalances.casual.used %></td><td><%= leaveBalances.casual.remaining %></td></tr>
+            <tr><td>Sick Leave</td><td><%= leaveBalances.medical.quota %></td><td><%= leaveBalances.medical.used %></td><td><%= leaveBalances.medical.remaining %></td></tr>
+            <tr><td>Earned Leave</td><td><%= leaveBalances.earned.earned %></td><td><%= leaveBalances.earned.used %></td><td><%= leaveBalances.earned.remaining %></td></tr>
+            <tr><td>Unpaid Leave</td><td><%= leaveBalances.unpaid.quota %></td><td><%= leaveBalances.unpaid.used %></td><td><%= leaveBalances.unpaid.remaining %></td></tr>
+          </tbody>
+        </table>
+        <a class="btn btn-secondary" href="/leave/new">Apply for Leave</a>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>My Trainings</h2></div>
+        <table class="table">
+          <thead><tr><th>Course</th><th>Status</th><th>Completed</th></tr></thead>
+          <tbody>
+            <% myTrainings.forEach(function(t) { %>
+              <tr>
+                <td><%= t.courseTitle %></td>
+                <td><span class="badge <%= t.status === 'Completed' ? 'badge-status-resolved' : 'badge-status-open' %>"><%= t.status %></span></td>
+                <td><%= t.completionDate ? new Date(t.completionDate).toLocaleDateString() : '—' %></td>
+              </tr>
+            <% }) %>
+            <% if (myTrainings.length === 0) { %>
+              <tr><td colspan="3" class="empty-row">No training enrollments yet.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+        <a class="btn btn-secondary" href="/training/courses">Browse Training Catalog</a>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>My Certificates</h2></div>
+        <table class="table">
+          <thead><tr><th>Course</th><th>Issued</th><th></th></tr></thead>
+          <tbody>
+            <% myCertificates.forEach(function(c) { %>
+              <tr>
+                <td><%= c.courseTitle %></td>
+                <td><%= new Date(c.issuedDate).toLocaleDateString() %></td>
+                <td><a class="btn btn-secondary" href="/training/certificates/<%= c.certificateId %>">View / Print</a></td>
+              </tr>
+            <% }) %>
+            <% if (myCertificates.length === 0) { %>
+              <tr><td colspan="3" class="empty-row">No certificates earned yet.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>My Benefits</h2></div>
+        <table class="table">
+          <thead><tr><th>Benefit</th><th>Plan</th><th>Status</th></tr></thead>
+          <tbody>
+            <% myBenefits.forEach(function(b) { %>
+              <tr>
+                <td><%= b.benefitType %></td>
+                <td><%= b.planName %></td>
+                <td><span class="badge <%= b.status === 'Active' ? 'badge-status-open' : 'badge-status-closed' %>"><%= b.status %></span></td>
+              </tr>
+            <% }) %>
+            <% if (myBenefits.length === 0) { %>
+              <tr><td colspan="3" class="empty-row">No benefit enrollments on record.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header"><h2>My Documents</h2></div>
+        <table class="table">
+          <thead><tr><th>File</th><th>Type</th><th></th></tr></thead>
+          <tbody>
+            <% myDocuments.forEach(function(d) { %>
+              <tr>
+                <td><%= d.fileName %></td>
+                <td><%= d.docType %></td>
+                <td><a class="btn btn-secondary" href="/documents/file/<%= d.documentId %>" target="_blank">View</a></td>
+              </tr>
+            <% }) %>
+            <% if (myDocuments.length === 0) { %>
+              <tr><td colspan="3" class="empty-row">No documents uploaded yet.</td></tr>
+            <% } %>
+          </tbody>
+        </table>
+        <a class="btn btn-secondary" href="/documents">Manage My Documents</a>
+      </div>
+    </div>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

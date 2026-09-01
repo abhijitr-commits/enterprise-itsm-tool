@@ -1,0 +1,47 @@
+<%- include('../partials/header', { title: editing ? 'Edit Vendor' : 'Add Vendor' }) %>
+
+<div class="page-header">
+  <h1><%= editing ? 'Edit Vendor' : 'Add Vendor' %></h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="<%= editing ? '/vendors/' + form._id : '/vendors' %>">
+  <div class="form-grid">
+    <label>Vendor Name
+      <input type="text" name="name" value="<%= form.name || '' %>" required />
+    </label>
+    <label>Contact Person
+      <input type="text" name="contactPerson" value="<%= form.contactPerson || '' %>" />
+    </label>
+    <label>Email
+      <input type="email" name="email" value="<%= form.email || '' %>" />
+    </label>
+    <label>Phone
+      <input type="text" name="phone" value="<%= form.phone || '' %>" />
+    </label>
+    <label>Category
+      <select name="category">
+        <% Object.values(VENDOR_CATEGORY).forEach(function(c) { %>
+          <option value="<%= c %>" <%= form.category === c ? 'selected' : '' %>><%= c %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>AMC Expiry (if applicable)
+      <input type="date" name="amcExpiry" value="<%= form.amcExpiry ? new Date(form.amcExpiry).toISOString().slice(0,10) : '' %>" />
+    </label>
+    <label>Status
+      <select name="status">
+        <% Object.values(VENDOR_STATUS).forEach(function(s) { %>
+          <option value="<%= s %>" <%= form.status === s ? 'selected' : '' %>><%= s %></option>
+        <% }) %>
+      </select>
+    </label>
+  </div>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/vendors">Cancel</a>
+    <button type="submit" class="btn btn-primary">Save</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

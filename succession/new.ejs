@@ -1,0 +1,56 @@
+<%- include('../partials/header', { title: 'New Succession Plan' }) %>
+
+<div class="page-header">
+  <h1>New Succession Plan</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/succession">
+  <div class="form-grid">
+    <label>Position / Role
+      <input type="text" name="position" value="<%= form.position || '' %>" required />
+    </label>
+    <label>Current Holder
+      <input type="text" name="currentHolder" value="<%= form.currentHolder || '' %>" required />
+    </label>
+    <label>Department
+      <input type="text" name="department" value="<%= form.department || '' %>" />
+    </label>
+  </div>
+  <div class="form-grid">
+    <label>Successor 1
+      <input type="text" name="successor1" value="<%= form.successor1 || '' %>" />
+    </label>
+    <label>Successor 1 Readiness
+      <select name="successor1Readiness">
+        <option value="">—</option>
+        <% READINESS_LEVELS.forEach(function(lvl) { %>
+          <option value="<%= lvl %>" <%= form.successor1Readiness === lvl ? 'selected' : '' %>><%= lvl %></option>
+        <% }) %>
+      </select>
+    </label>
+  </div>
+  <div class="form-grid">
+    <label>Successor 2
+      <input type="text" name="successor2" value="<%= form.successor2 || '' %>" />
+    </label>
+    <label>Successor 2 Readiness
+      <select name="successor2Readiness">
+        <option value="">—</option>
+        <% READINESS_LEVELS.forEach(function(lvl) { %>
+          <option value="<%= lvl %>" <%= form.successor2Readiness === lvl ? 'selected' : '' %>><%= lvl %></option>
+        <% }) %>
+      </select>
+    </label>
+  </div>
+  <label>Notes
+    <textarea name="notes" rows="3"><%= form.notes || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/succession">Cancel</a>
+    <button type="submit" class="btn btn-primary">Create Plan</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

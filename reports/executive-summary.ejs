@@ -1,0 +1,62 @@
+<%- include('../partials/header', { title: 'Executive Summary' }) %>
+
+<style>
+  a.stat-card { display: block; text-decoration: none; color: inherit; }
+</style>
+
+<div class="page-header">
+  <h1>Executive Summary</h1>
+  <a class="btn btn-secondary" href="/reports">Full Reports</a>
+</div>
+
+<div class="stat-grid">
+  <a href="/incidents" class="stat-card" style="border-left:4px solid #b91c1c;">
+    <div class="stat-value" style="color:#b91c1c;"><%= criticalOpen %></div>
+    <div class="stat-label">Open Critical Incidents</div>
+  </a>
+  <a href="/incidents" class="stat-card">
+    <div class="stat-value"><%= openIncidents %></div>
+    <div class="stat-label">Total Open Incidents</div>
+  </a>
+  <a href="/mywork" class="stat-card" style="border-left:4px solid #0369a1;">
+    <div class="stat-value" style="color:#0369a1;"><%= pendingApprovals %></div>
+    <div class="stat-label">Pending Approvals</div>
+  </a>
+  <div class="stat-card" style="border-left:4px solid #92400e;">
+    <div class="stat-value" style="color:#92400e;"><%= upcomingExpiries %></div>
+    <div class="stat-label">Upcoming Expiries</div>
+  </div>
+  <a href="/employees" class="stat-card">
+    <div class="stat-value"><%= totalHeadcount %></div>
+    <div class="stat-label">Total Headcount</div>
+  </a>
+  <a href="/resignations" class="stat-card">
+    <div class="stat-value"><%= pendingResignations %></div>
+    <div class="stat-label">Pending Resignations</div>
+  </a>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Pending Approvals Breakdown</h2></div>
+  <table class="table">
+    <thead><tr><th>Type</th><th>Count</th></tr></thead>
+    <tbody>
+      <tr><td>Service Requests</td><td><%= pendingRequestsCount %></td></tr>
+      <tr><td>Changes (CAB)</td><td><%= pendingChangesCount %></td></tr>
+      <tr><td>Leave Requests</td><td><%= pendingLeaveCount %></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<% if (topDepartment) { %>
+  <div class="panel">
+    <div class="panel-header"><h2>Highest Workload Department</h2></div>
+    <div class="stat-card" style="max-width:300px;">
+      <div class="stat-value"><%= topDepartment.incidents + topDepartment.requests %></div>
+      <div class="stat-label"><%= topDepartment.department %></div>
+      <div class="hint"><%= topDepartment.incidents %> incidents, <%= topDepartment.requests %> requests</div>
+    </div>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

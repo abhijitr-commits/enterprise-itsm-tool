@@ -1,0 +1,34 @@
+<%- include('../partials/header', { title: 'IT Policies' }) %>
+
+<div class="page-header">
+  <h1>IT Policies</h1>
+  <% if (currentUser.role === 'Administrator' || (currentUser.role === 'Manager' && String(currentUser.department||'').trim().toLowerCase() === 'it')) { %>
+    <a class="btn btn-primary" href="/policies/new">+ New Policy</a>
+  <% } %>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<% policies.forEach(function(p) { %>
+  <div class="panel">
+    <div class="panel-header">
+      <h2><%= p.policyName %> <span class="hint">v<%= p.version %></span></h2>
+      <% if (currentUser.role === 'Administrator' || (currentUser.role === 'Manager' && String(currentUser.department||'').trim().toLowerCase() === 'it')) { %>
+        <a class="btn btn-secondary" href="/policies/<%= p.policyId %>/compliance">Compliance Report</a>
+      <% } %>
+    </div>
+    <p style="white-space:pre-wrap;"><%= p.content %></p>
+    <% if (ackedPolicyIds.includes(p.policyId)) { %>
+      <span class="badge badge-status-resolved">Acknowledged</span>
+    <% } else if (linked) { %>
+      <form method="post" action="/policies/<%= p.policyId %>/acknowledge">
+        <button type="submit" class="btn btn-primary">I Acknowledge This Policy</button>
+      </form>
+    <% } else { %>
+      <p class="hint">Your login isn't linked to an Employee record yet, so acknowledgment can't be recorded.</p>
+    <% } %>
+  </div>
+<% }) %>
+<% if (policies.length === 0) { %><div class="panel"><p class="empty-row">No active policies published yet.</p></div><% } %>
+
+<%- include('../partials/footer') %>

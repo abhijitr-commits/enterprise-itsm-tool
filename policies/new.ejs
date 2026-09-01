@@ -1,0 +1,27 @@
+<%- include('../partials/header', { title: 'New IT Policy' }) %>
+
+<div class="page-header">
+  <h1>New IT Policy</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/policies">
+  <div class="form-grid">
+    <label>Policy Name
+      <input type="text" name="policyName" placeholder="e.g. Acceptable Use Policy" value="<%= form.policyName || '' %>" required />
+    </label>
+    <label>Version
+      <input type="text" name="version" placeholder="1.0" value="<%= form.version || '' %>" />
+    </label>
+  </div>
+  <label>Content
+    <textarea name="content" rows="10" required><%= form.content || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/policies">Cancel</a>
+    <button type="submit" class="btn btn-primary">Publish Policy</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

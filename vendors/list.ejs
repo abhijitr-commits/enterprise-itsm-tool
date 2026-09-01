@@ -1,0 +1,31 @@
+<%- include('../partials/header', { title: 'Vendors' }) %>
+
+<div class="page-header">
+  <h1>Vendors</h1>
+  <a class="btn btn-primary" href="/vendors/new">+ Add Vendor</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>Vendor Name</th><th>Contact</th><th>Email</th><th>Phone</th><th>Category</th><th>AMC Expiry</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      <% vendors.forEach(function(v) { %>
+        <tr>
+          <td><%= v.name %></td>
+          <td><%= v.contactPerson || '—' %></td>
+          <td><%= v.email || '—' %></td>
+          <td><%= v.phone || '—' %></td>
+          <td><%= v.category %></td>
+          <td><%= v.amcExpiry ? new Date(v.amcExpiry).toLocaleDateString() : '—' %></td>
+          <td><span class="badge <%= v.status === 'Active' ? 'badge-status-open' : 'badge-status-closed' %>"><%= v.status %></span></td>
+          <td><a class="btn btn-secondary" href="/vendors/<%= v._id %>/edit">Edit</a></td>
+        </tr>
+      <% }) %>
+      <% if (vendors.length === 0) { %><tr><td colspan="8" class="empty-row">No vendors yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

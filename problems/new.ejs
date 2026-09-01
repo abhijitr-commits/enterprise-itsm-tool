@@ -1,0 +1,30 @@
+<%- include('../partials/header', { title: 'New Problem' }) %>
+
+<div class="page-header">
+  <h1>New Problem</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/problems">
+  <div class="form-grid">
+    <label>Owner
+      <input type="text" name="owner" value="<%= form.owner || '' %>" placeholder="Unassigned" />
+    </label>
+    <label>Linked Incidents (optional)
+      <input type="text" name="linkedIncidents" value="<%= form.linkedIncidents || '' %>" placeholder="e.g. INC-2026-000012, INC-2026-000015" />
+    </label>
+  </div>
+  <label>Title
+    <input type="text" name="title" value="<%= form.title || '' %>" required />
+  </label>
+  <label>Description
+    <textarea name="description" rows="5" required><%= form.description || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/problems">Cancel</a>
+    <button type="submit" class="btn btn-primary">Create Problem</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

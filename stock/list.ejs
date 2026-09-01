@@ -1,0 +1,48 @@
+<%- include('../partials/header', { title: 'Stock / Inventory' }) %>
+
+<div class="page-header">
+  <h1>Stock / Inventory</h1>
+  <div style="display:flex; gap:8px;">
+    <a class="btn btn-secondary" href="/stock<%= lowStockOnly ? '' : '?lowStock=1' %>"><%= lowStockOnly ? 'Show All Items' : 'Show Low Stock Only' %></a>
+    <a class="btn btn-primary" href="/stock/new">+ Add Stock Item</a>
+  </div>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<p class="hint">Current stock is always calculated as Opening Stock + all IN − all OUT transactions, never stored as an editable number.</p>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>Item ID</th><th>Item Name</th><th>Category</th><th>Location</th><th>Current Stock</th><th>Reorder Level</th><th></th></tr></thead>
+    <tbody>
+      <% items.forEach(function(i) { %>
+        <tr>
+          <td><a href="/stock/<%= i.itemId %>/transactions"><%= i.itemId %></a></td>
+          <td><%= i.itemName %></td>
+          <td><%= i.category %></td>
+          <td><%= i.location || '—' %></td>
+          <td>
+            <%= i.currentStock %> <%= i.unit %>
+            <% if (i.lowStock) { %><span class="badge badge-status-cancelled">Low Stock</span><% } %>
+          </td>
+          <td><%= i.reorderLevel %></td>
+          <td>
+            <form method="post" action="/stock/<%= i.itemId %>/transactions" class="filter-bar">
+              <select name="type">
+                <option value="IN">IN</option>
+                <option value="OUT">OUT</option>
+              </select>
+              <input type="number" name="quantity" min="1" placeholder="Qty" style="width:70px;" required />
+              <input type="text" name="reason" placeholder="Reason/Reference" style="width:140px;" />
+              <button type="submit" class="btn btn-secondary">Record</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (items.length === 0) { %><tr><td colspan="7" class="empty-row">No stock items yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

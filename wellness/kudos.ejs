@@ -1,0 +1,36 @@
+<%- include('../partials/header', { title: 'Kudos Wall' }) %>
+
+<div class="page-header">
+  <h1>Kudos Wall</h1>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<div class="panel">
+  <div class="panel-header"><h2>Give Kudos</h2></div>
+  <form method="post" action="/wellness/kudos" class="form-panel">
+    <div class="form-grid">
+      <label>To (name)
+        <input type="text" name="to" required />
+      </label>
+    </div>
+    <label>Message
+      <textarea name="message" rows="2" required></textarea>
+    </label>
+    <button type="submit" class="btn btn-primary">Send Kudos</button>
+  </form>
+</div>
+
+<div class="panel">
+  <% kudosList.forEach(function(k) { %>
+    <div class="panel" style="margin-bottom:8px;">
+      <strong><%= k.from %></strong> → <strong><%= k.to %></strong>
+      <div><%= k.message %></div>
+      <div class="hint"><%= new Date(k.date).toLocaleDateString() %></div>
+    </div>
+  <% }) %>
+  <% if (kudosList.length === 0) { %><p class="empty-row">No kudos given yet — be the first!</p><% } %>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,35 @@
+<%- include('../partials/header', { title: 'Pulse Survey' }) %>
+
+<div class="page-header">
+  <h1>Pulse Survey</h1>
+  <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
+    <a class="btn btn-secondary" href="/wellness/pulse/new">+ New Survey</a>
+  <% } %>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+<% if (submitted) { %><div class="alert alert-success">Thanks for your feedback!</div><% } %>
+
+<div class="alert alert-info">Responses are anonymous — your name is never recorded against your answer.</div>
+
+<% if (survey) { %>
+  <form class="panel form-panel" method="post" action="/wellness/pulse/respond">
+    <input type="hidden" name="surveyId" value="<%= survey.surveyId %>" />
+    <div class="panel-header"><h2><%= survey.question %></h2></div>
+    <div class="form-grid">
+      <label>Your Rating (1-5)
+        <input type="number" name="rating" min="1" max="5" required />
+      </label>
+    </div>
+    <label>Comment (optional)
+      <textarea name="comment" rows="2"></textarea>
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+  </form>
+<% } else { %>
+  <div class="panel"><p class="hint">No pulse survey is open right now — check back later.</p></div>
+<% } %>
+
+<%- include('../partials/footer') %>

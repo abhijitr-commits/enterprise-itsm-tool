@@ -1,0 +1,56 @@
+<%- include('partials/header', { title: 'Dashboard' }) %>
+
+<div class="page-header">
+  <h1>Dashboard</h1>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-value"><%= open %></div>
+    <div class="stat-label">Open Incidents</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value"><%= inProgress %></div>
+    <div class="stat-label">In Progress</div>
+  </div>
+  <div class="stat-card stat-danger">
+    <div class="stat-value"><%= breached %></div>
+    <div class="stat-label">SLA Breached</div>
+  </div>
+  <div class="stat-card stat-success">
+    <div class="stat-value"><%= closedToday %></div>
+    <div class="stat-label">Closed Today</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value"><%= pendingApprovals %></div>
+    <div class="stat-label">Pending Approvals</div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <h2>Recent Incidents</h2>
+    <a class="btn btn-primary" href="/incidents/new">+ New Incident</a>
+  </div>
+  <table class="table">
+    <thead>
+      <tr><th>ID</th><th>Subject</th><th>Priority</th><th>Status</th><th>Engineer</th></tr>
+    </thead>
+    <tbody>
+      <% recent.forEach(function(inc) { %>
+        <tr onclick="location.href='/incidents/<%= inc._id %>'">
+          <td><%= inc.incidentId %></td>
+          <td><%= inc.subject %></td>
+          <td><span class="badge badge-priority-<%= inc.priority.toLowerCase() %>"><%= inc.priority %></span></td>
+          <td><span class="badge badge-status-<%= inc.status.toLowerCase().replace(/ /g,'-') %>"><%= inc.status %></span></td>
+          <td><%= inc.engineer || '—' %></td>
+        </tr>
+      <% }) %>
+      <% if (recent.length === 0) { %>
+        <tr><td colspan="5" class="empty-row">No incidents yet.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('partials/footer') %>

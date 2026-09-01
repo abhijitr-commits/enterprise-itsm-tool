@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= typeof title !== "undefined" ? title + " · Enterprise ITSM" : "Enterprise ITSM" %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <nav class="sidebar">
+      <div class="brand">Enterprise ITSM</div>
+      <%
+        // Port of Navigation.gs's moduleVisibility: hides a link entirely
+        // when the signed-in user's role has zero permissions left for
+        // that module (see src/middleware/moduleVisibility.js). Undefined
+        // (e.g. no user yet) defaults every module to visible.
+        const mv = typeof moduleVisibility !== "undefined" ? moduleVisibility : {};
+        const canSee = (key) => mv[key] !== false;
+      %>
+      <a href="/" class="nav-link">Dashboard</a>
+      <% if (canSee('incidents')) { %><a href="/incidents" class="nav-link">Incidents</a><% } %>
+      <% if (canSee('requests')) { %><a href="/requests" class="nav-link">Service Requests</a><% } %>
+      <% if (canSee('problems')) { %><a href="/problems" class="nav-link">Problems</a><% } %>
+      <% if (canSee('changes')) { %><a href="/changes" class="nav-link">Changes</a><% } %>
+      <% if (canSee('assets')) { %><a href="/assets" class="nav-link">Assets</a><% } %>
+      <% if (canSee('cmdb')) { %><a href="/cmdb" class="nav-link">CMDB</a><% } %>
+      <% if (canSee('knowledge')) { %><a href="/knowledge" class="nav-link">Knowledge Base</a><% } %>
+      <% if (canSee('reports')) { %><a href="/reports" class="nav-link">Reports</a><% } %>
+      <% if (currentUser && (currentUser.role === 'Administrator' || currentUser.role === 'Manager')) { %>
+        <a href="/reports/executive-summary" class="nav-link">Executive Summary</a>
+      <% } %>
+      <%
+        // HR-team / Admin-team checks, same rule as src/utils/teamAccess.js:
+        // Administrator always qualifies; otherwise Manager + the matching
+        // department. Kept inline here since header.ejs has no access to
+        // that module directly — just display logic, the real gate is
+        // still server-side on every route.
+        const isHRTeamUser = currentUser && (currentUser.role === 'Administrator' ||
+          (currentUser.role === 'Manager' && String(currentUser.department || '').trim().toLowerCase() === 'hr'));
+        const isAdminTeamUser = currentUser && (currentUser.role === 'Administrator' ||
+          (currentUser.role === 'Manager' && String(currentUser.department || '').trim().toLowerCase() === 'administration'));
+        const isITTeamUser = currentUser && (currentUser.role === 'Administrator' ||
+          (currentUser.role === 'Manager' && String(currentUser.department || '').trim().toLowerCase() === 'it'));
+      %>
+      <% if (currentUser) { %>
+        <div class="nav-section-label">HR</div>
+        <a href="/hr" class="nav-link">HR Hub</a>
+        <a href="/mywork" class="nav-link">My Work</a>
+        <a href="/profile" class="nav-link">My Profile</a>
+        <a href="/orgchart" class="nav-link">Org Chart</a>
+        <a href="/employees" class="nav-link">Employee Directory</a>
+        <a href="/leave" class="nav-link">Leave</a>
+        <a href="/attendance" class="nav-link">Attendance</a>
+        <a href="/shifts" class="nav-link">Shifts &amp; Roster</a>
+        <a href="/resignations" class="nav-link">Resignations</a>
+        <a href="/performance/goals" class="nav-link">Goals</a>
+        <a href="/performance/reviews" class="nav-link">Reviews</a>
+        <a href="/training/courses" class="nav-link">Training Catalog</a>
+        <a href="/training/certificates" class="nav-link">My Certificates</a>
+        <a href="/policies" class="nav-link">IT Policies</a>
+        <a href="/documents" class="nav-link">My Documents</a>
+        <% if (isHRTeamUser) { %>
+          <a href="/onboarding/pre-onboarding" class="nav-link">Pre-Onboarding</a>
+          <a href="/onboarding/onboarding" class="nav-link">Onboarding</a>
+          <a href="/onboarding/offboarding" class="nav-link">Offboarding</a>
+          <a href="/recruitment" class="nav-link">Recruitment</a>
+        <% } %>
+        <a href="/referrals" class="nav-link">Referrals</a>
+        <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
+          <a href="/succession" class="nav-link">Succession Planning</a>
+          <a href="/training/enrollments" class="nav-link">Training Enrollments</a>
+        <% } %>
+        <% if (isHRTeamUser) { %>
+          <a href="/benefits" class="nav-link">Benefits Enrollment</a>
+          <a href="/letters" class="nav-link">Letters</a>
+        <% } %>
+        <% if (isAdminTeamUser) { %>
+          <a href="/onboarding/admin-onboarding" class="nav-link">Admin Onboarding</a>
+          <a href="/onboarding/admin-offboarding" class="nav-link">Admin Offboarding</a>
+        <% } %>
+      <% } %>
+      <% if (currentUser) { %>
+        <div class="nav-section-label">IT Operations</div>
+        <a href="/access-requests/mine" class="nav-link">My Access Requests</a>
+        <a href="/vendors" class="nav-link">Vendors</a>
+        <a href="/purchases" class="nav-link">Purchase Register</a>
+        <a href="/stock" class="nav-link">Stock / Inventory</a>
+        <a href="/licenses" class="nav-link">Software Licenses</a>
+        <% if (isITTeamUser) { %>
+          <a href="/helpdesk" class="nav-link">IT Helpdesk</a>
+          <a href="/asset-allocation" class="nav-link">Asset Allocation</a>
+          <a href="/it-clearance" class="nav-link">IT Clearance</a>
+          <a href="/access-requests" class="nav-link">Access Requests (All)</a>
+          <a href="/vendor-service" class="nav-link">Vendor Service Tracking</a>
+        <% } %>
+        <% if (isITTeamUser || isAdminTeamUser) { %>
+          <a href="/requirements" class="nav-link">Requirement Requests</a>
+        <% } %>
+      <% } %>
+      <% if (currentUser) { %>
+        <div class="nav-section-label">Wellness &amp; Engagement</div>
+        <a href="/wellness/programs" class="nav-link">Wellness Programs</a>
+        <a href="/wellness/pulse" class="nav-link">Pulse Survey</a>
+        <a href="/wellness/kudos" class="nav-link">Kudos Wall</a>
+        <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
+          <a href="/wellness/pulse/results" class="nav-link">Pulse Results</a>
+        <% } %>
+      <% } %>
+      <% if (currentUser && currentUser.role === 'Administrator') { %>
+        <div class="nav-section-label">Admin</div>
+        <a href="/admin" class="nav-link">Admin Console</a>
+        <a href="/admin/users" class="nav-link">Users</a>
+        <a href="/admin/permissions" class="nav-link">Permissions</a>
+        <a href="/masterdata/departments" class="nav-link">Master Data</a>
+      <% } %>
+      <div class="sidebar-footer">
+        <div class="user-chip"><%= currentUser.name %> <span class="role-badge"><%= currentUser.role %></span></div>
+        <form method="post" action="/logout"><button class="link-button">Sign out</button></form>
+      </div>
+    </nav>
+    <main class="content">

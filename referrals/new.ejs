@@ -1,0 +1,38 @@
+<%- include('../partials/header', { title: 'Refer a Candidate' }) %>
+
+<div class="page-header">
+  <h1>Refer a Candidate</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/referrals">
+  <div class="form-grid">
+    <label>Candidate Name
+      <input type="text" name="candidateName" value="<%= form.candidateName || '' %>" required />
+    </label>
+    <label>Candidate Email
+      <input type="email" name="candidateEmail" value="<%= form.candidateEmail || '' %>" />
+    </label>
+    <label>Job Posting
+      <select name="jobId" required>
+        <option value="">Select…</option>
+        <% jobs.forEach(function(j) { %>
+          <option value="<%= j.jobId %>" <%= form.jobId === j.jobId ? 'selected' : '' %>><%= j.title %> (<%= j.department %>)</option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Resume Link (optional)
+      <input type="url" name="resumeLink" value="<%= form.resumeLink || '' %>" />
+    </label>
+  </div>
+  <% if (jobs.length === 0) { %>
+    <div class="alert alert-info">There are no open job postings right now — check back later.</div>
+  <% } %>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/referrals">Cancel</a>
+    <button type="submit" class="btn btn-primary">Submit Referral</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,39 @@
+<%- include('../partials/header', { title: 'Exit Interview' }) %>
+
+<div class="page-header">
+  <h1>Exit Interview</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/resignations/<%= resignationId %>/exit-interview">
+  <label>Employee
+    <input type="text" name="employee" value="<%= form.employee || '' %>" required />
+  </label>
+  <label>Primary Reason for Leaving
+    <input type="text" name="primaryReason" value="<%= form.primaryReason || '' %>" />
+  </label>
+  <label>Satisfaction Rating (1-5)
+    <input type="number" name="satisfactionRating" min="1" max="5" value="<%= form.satisfactionRating || '' %>" />
+  </label>
+  <label>Would Recommend This Company
+    <select name="wouldRecommend">
+      <option value="">Select…</option>
+      <option value="Yes" <%= form.wouldRecommend === 'Yes' ? 'selected' : '' %>>Yes</option>
+      <option value="No" <%= form.wouldRecommend === 'No' ? 'selected' : '' %>>No</option>
+      <option value="Maybe" <%= form.wouldRecommend === 'Maybe' ? 'selected' : '' %>>Maybe</option>
+    </select>
+  </label>
+  <label>Manager Feedback
+    <textarea name="managerFeedback" rows="3"><%= form.managerFeedback || '' %></textarea>
+  </label>
+  <label>Suggestions for Improvement
+    <textarea name="suggestions" rows="3"><%= form.suggestions || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/resignations/<%= resignationId %>">Cancel</a>
+    <button type="submit" class="btn btn-primary">Save Exit Interview</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,33 @@
+<%- include('../partials/header', { title: 'Resignations' }) %>
+
+<div class="page-header">
+  <h1>Resignations</h1>
+  <a class="btn btn-primary" href="/resignations/new">+ Submit Resignation</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <table class="table">
+    <thead>
+      <tr><th>ID</th><th>Employee</th><th>Department</th><th>Last Working Day</th><th>Notice (Days)</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <% resignations.forEach(function(r) { %>
+        <tr onclick="location.href='/resignations/<%= r._id %>'">
+          <td><%= r.resignationId %></td>
+          <td><%= r.employee %></td>
+          <td><%= r.department || '—' %></td>
+          <td><%= new Date(r.lastWorkingDay).toLocaleDateString() %></td>
+          <td><%= r.noticePeriodDays %></td>
+          <td><span class="badge <%= r.status === 'Completed' ? 'badge-status-closed' : 'badge-status-open' %>"><%= r.status %></span></td>
+        </tr>
+      <% }) %>
+      <% if (resignations.length === 0) { %>
+        <tr><td colspan="6" class="empty-row">No resignations on file.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

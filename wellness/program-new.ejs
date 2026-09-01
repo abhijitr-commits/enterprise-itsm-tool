@@ -1,0 +1,36 @@
+<%- include('../partials/header', { title: 'Add Wellness Program' }) %>
+
+<div class="page-header">
+  <h1>Add a Wellness Program</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/wellness/programs">
+  <div class="form-grid">
+    <label>Title
+      <input type="text" name="title" value="<%= form.title || '' %>" required />
+    </label>
+    <label>Type
+      <select name="type">
+        <option value="Physical" <%= form.type === 'Physical' ? 'selected' : '' %>>Physical</option>
+        <option value="Mental" <%= form.type === 'Mental' ? 'selected' : '' %>>Mental</option>
+        <option value="Financial" <%= form.type === 'Financial' ? 'selected' : '' %>>Financial</option>
+        <option value="Social" <%= form.type === 'Social' ? 'selected' : '' %>>Social</option>
+        <option value="General" <%= !form.type || form.type === 'General' ? 'selected' : '' %>>General</option>
+      </select>
+    </label>
+    <label>Date
+      <input type="date" name="date" value="<%= form.date || '' %>" />
+    </label>
+  </div>
+  <label>Description
+    <textarea name="description" rows="3"><%= form.description || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/wellness/programs">Cancel</a>
+    <button type="submit" class="btn btn-primary">Add Program</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

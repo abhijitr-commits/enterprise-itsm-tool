@@ -1,0 +1,141 @@
+<%- include('../partials/header', { title: 'Reports' }) %>
+
+<div class="page-header">
+  <h1>Reports</h1>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>SLA Compliance (Incidents)</h2></div>
+  <table class="table">
+    <thead><tr><th>ID</th><th>Subject</th><th>Priority</th><th>Status</th><th>Engineer</th><th>SLA Due</th><th>SLA Status</th></tr></thead>
+    <tbody>
+      <% sla.forEach(function(r){ %>
+        <tr>
+          <td><%= r.incidentId %></td><td><%= r.subject %></td>
+          <td><span class="badge badge-priority-<%= r.priority.toLowerCase() %>"><%= r.priority %></span></td>
+          <td><%= r.status %></td><td><%= r.engineer %></td><td><%= r.slaDue || '—' %></td>
+          <td><span class="badge badge-approval-<%= r.slaStatus === 'Met' ? 'approved' : (r.slaStatus === 'Breached' ? 'rejected' : 'pending-approval') %>"><%= r.slaStatus %></span></td>
+        </tr>
+      <% }) %>
+      <% if (sla.length === 0) { %><tr><td colspan="7" class="empty-row">No incidents yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Monthly Ticket Volume (Incidents)</h2></div>
+  <table class="table">
+    <thead><tr><th>Month</th><th>Incidents Created</th></tr></thead>
+    <tbody>
+      <% volume.forEach(function(v){ %><tr><td><%= v.month %></td><td><%= v.count %></td></tr><% }) %>
+      <% if (volume.length === 0) { %><tr><td colspan="2" class="empty-row">No data yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Engineer Performance (Incidents)</h2></div>
+  <table class="table">
+    <thead><tr><th>Engineer</th><th>Assigned</th><th>Closed</th></tr></thead>
+    <tbody>
+      <% engineers.forEach(function(e){ %><tr><td><%= e.engineer %></td><td><%= e.assigned %></td><td><%= e.closed %></td></tr><% }) %>
+      <% if (engineers.length === 0) { %><tr><td colspan="3" class="empty-row">No data yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Ticket Aging (Open Incidents)</h2></div>
+  <table class="table">
+    <thead><tr><th>ID</th><th>Subject</th><th>Priority</th><th>Engineer</th><th>Age</th><th>Bucket</th></tr></thead>
+    <tbody>
+      <% aging.forEach(function(a){ %>
+        <tr>
+          <td><%= a.incidentId %></td><td><%= a.subject %></td>
+          <td><span class="badge badge-priority-<%= a.priority.toLowerCase() %>"><%= a.priority %></span></td>
+          <td><%= a.engineer %></td><td><%= a.ageDays %> day(s)</td><td><%= a.bucket %></td>
+        </tr>
+      <% }) %>
+      <% if (aging.length === 0) { %><tr><td colspan="6" class="empty-row">No open incidents.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Department Workload (Incidents + Service Requests)</h2></div>
+  <table class="table">
+    <thead><tr><th>Department</th><th>Incidents</th><th>Open Incidents</th><th>Requests</th></tr></thead>
+    <tbody>
+      <% workload.forEach(function(w){ %><tr><td><%= w.department %></td><td><%= w.incidents %></td><td><%= w.openIncidents %></td><td><%= w.requests %></td></tr><% }) %>
+      <% if (workload.length === 0) { %><tr><td colspan="4" class="empty-row">No data yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Asset Warranty Expiry (next 90 days)</h2></div>
+  <table class="table">
+    <thead><tr><th>ID</th><th>Asset</th><th>Type</th><th>Department</th><th>Vendor</th><th>Expiry</th><th>Urgency</th></tr></thead>
+    <tbody>
+      <% warranty.forEach(function(w){ %>
+        <tr>
+          <td><%= w.assetId %></td><td><%= w.assetName %></td><td><%= w.type %></td>
+          <td><%= w.department %></td><td><%= w.vendor || '—' %></td><td><%= w.warrantyExpiry %></td>
+          <td><span class="badge badge-approval-<%= w.urgency === 'Expired' ? 'rejected' : 'pending-approval' %>"><%= w.urgency %></span></td>
+        </tr>
+      <% }) %>
+      <% if (warranty.length === 0) { %><tr><td colspan="7" class="empty-row">No assets expiring soon.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Contract Expiry (next 30 days)</h2></div>
+  <table class="table">
+    <thead><tr><th>ID</th><th>Name</th><th>Department</th><th>Designation</th><th>Contract End</th><th>Urgency</th></tr></thead>
+    <tbody>
+      <% contracts.forEach(function(c){ %>
+        <tr>
+          <td><%= c.employeeId %></td><td><%= c.name %></td><td><%= c.department %></td>
+          <td><%= c.designation || '—' %></td><td><%= c.contractEndDate %></td>
+          <td><span class="badge badge-approval-<%= c.urgency === 'Expired' ? 'rejected' : 'pending-approval' %>"><%= c.urgency %></span></td>
+        </tr>
+      <% }) %>
+      <% if (contracts.length === 0) { %><tr><td colspan="6" class="empty-row">No contracts expiring soon.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Vendor AMC Expiry (next 90 days)</h2></div>
+  <table class="table">
+    <thead><tr><th>Vendor</th><th>Category</th><th>AMC Expiry</th><th>Urgency</th></tr></thead>
+    <tbody>
+      <% amcs.forEach(function(a){ %>
+        <tr>
+          <td><%= a.vendorName %></td><td><%= a.category %></td><td><%= a.amcExpiry %></td>
+          <td><span class="badge badge-approval-<%= a.urgency === 'Expired' ? 'rejected' : 'pending-approval' %>"><%= a.urgency %></span></td>
+        </tr>
+      <% }) %>
+      <% if (amcs.length === 0) { %><tr><td colspan="4" class="empty-row">No vendor AMCs expiring soon.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Software License Expiry (next 90 days)</h2></div>
+  <table class="table">
+    <thead><tr><th>Software</th><th>Vendor</th><th>Expiry</th><th>Urgency</th></tr></thead>
+    <tbody>
+      <% licenses.forEach(function(l){ %>
+        <tr>
+          <td><%= l.softwareName %></td><td><%= l.vendor || '—' %></td><td><%= l.expiryDate %></td>
+          <td><span class="badge badge-approval-<%= l.urgency === 'Expired' ? 'rejected' : 'pending-approval' %>"><%= l.urgency %></span></td>
+        </tr>
+      <% }) %>
+      <% if (licenses.length === 0) { %><tr><td colspan="4" class="empty-row">No software licenses expiring soon.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

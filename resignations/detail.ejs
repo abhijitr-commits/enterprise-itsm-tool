@@ -1,0 +1,63 @@
+<%- include('../partials/header', { title: resignation.resignationId }) %>
+
+<div class="page-header">
+  <h1><%= resignation.employee %> <span class="hint"><%= resignation.resignationId %></span></h1>
+  <span class="badge <%= resignation.status === 'Completed' ? 'badge-status-closed' : 'badge-status-open' %>"><%= resignation.status %></span>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="detail-grid">
+  <div>
+    <div class="panel">
+      <dl class="meta-list">
+        <dt>Department</dt><dd><%= resignation.department || '—' %></dd>
+        <dt>Resignation Date</dt><dd><%= new Date(resignation.resignationDate).toLocaleDateString() %></dd>
+        <dt>Last Working Day</dt><dd><%= new Date(resignation.lastWorkingDay).toLocaleDateString() %></dd>
+        <dt>Notice Period</dt><dd><%= resignation.noticePeriodDays %> days</dd>
+        <dt>Reason</dt><dd><%= resignation.reason || '—' %></dd>
+      </dl>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header"><h2>Exit Interview</h2></div>
+      <% if (exitInterview) { %>
+        <dl class="meta-list">
+          <dt>Primary Reason</dt><dd><%= exitInterview.primaryReason || '—' %></dd>
+          <dt>Satisfaction</dt><dd><%= exitInterview.satisfactionRating || '—' %> / 5</dd>
+          <dt>Would Recommend</dt><dd><%= exitInterview.wouldRecommend || '—' %></dd>
+          <dt>Manager Feedback</dt><dd><%= exitInterview.managerFeedback || '—' %></dd>
+          <dt>Suggestions</dt><dd><%= exitInterview.suggestions || '—' %></dd>
+        </dl>
+      <% } else { %>
+        <p class="hint">No exit interview recorded yet.</p>
+        <a class="btn btn-secondary" href="/resignations/<%= resignation._id %>/exit-interview">Record Exit Interview</a>
+      <% } %>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <div class="panel-header"><h2>Clearances</h2></div>
+      <% CLEARANCE_TYPES.forEach(function(type) { %>
+        <form method="post" action="/resignations/<%= resignation._id %>/clearance" class="filter-bar">
+          <span style="flex:1; text-transform:capitalize;"><%= type %></span>
+          <span class="badge <%= resignation.clearances[type] === 'Cleared' ? 'badge-status-resolved' : 'badge-status-open' %>"><%= resignation.clearances[type] %></span>
+          <input type="hidden" name="type" value="<%= type %>" />
+          <input type="hidden" name="status" value="<%= resignation.clearances[type] === 'Cleared' ? 'Pending' : 'Cleared' %>" />
+          <button type="submit" class="btn btn-secondary"><%= resignation.clearances[type] === 'Cleared' ? 'Reopen' : 'Clear' %></button>
+        </form>
+      <% }) %>
+    </div>
+
+    <% if (noDuesLetter) { %>
+      <div class="panel">
+        <div class="panel-header"><h2>No Dues Certificate</h2></div>
+        <p class="hint">Generated automatically once every clearance was marked Cleared.</p>
+        <a class="btn btn-secondary" href="/letters/<%= noDuesLetter.letterId %>">View / Print</a>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
