@@ -1,4 +1,4 @@
-# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4 + 5A + 5B)
+# Enterprise ITSM Tool — Node.js + MongoDB (Phase 1 + 2 + 3 + 4 + 5A + 5B + 5C)
 
 This is the Node.js/Express + MongoDB migration of the Enterprise ITSM
 Tool off Google Apps Script + Google Sheets. It replaces the Sheets-based
@@ -111,9 +111,17 @@ matching Asset Register entry automatically when a purchase is marked
 Received; and Requirement Requests, a lightweight RFQ workflow for the
 IT/Admin procurement teams.
 
-Remaining IT-ops sub-phases (5C: Inventory &amp; Licensing, 5D:
-Facilities &amp; General Ops, 5E: Final wiring) are tracked in
-`MIGRATION.md`.
+**Phase 5C scope** (adds): a Stock / Inventory tracker for consumables
+(cables, toner, spare parts, stationery) where current stock is always
+calculated from a full IN/OUT transaction history rather than stored as
+an editable number, with a one-click Low Stock filter; Software License
+tracking (seats, cost, expiry); and a Software License Expiry report
+panel on the Reports page, joining Asset Warranty, Contract Expiry, and
+Vendor AMC Expiry as the fourth proactive-expiry category from the
+original tool.
+
+Remaining IT-ops sub-phases (5D: Facilities &amp; General Ops, 5E:
+Final wiring) are tracked in `MIGRATION.md`.
 
 ## Stack (100% free tier)
 
@@ -220,6 +228,8 @@ Railway.app works the same way if you prefer it over Render.
 | `VendorServiceEngine.gs` | `src/controllers/vendorServiceController.js` | Same service-log-against-real-vendors workflow, IT-team gated |
 | `PurchaseEngine.gs` | `src/controllers/purchaseController.js` | Same PO tracking; marking "Received" with Create Asset checked genuinely creates an Asset Register entry, via a newly-exported `logAssetHistory()` |
 | `RequirementEngine.gs` | `src/controllers/requirementController.js` | Same RFQ-style tracking; IT-or-Admin-team gated via a new combined middleware; vendor auto-email skipped (no email provider) |
+| `StockEngine.gs` | `src/controllers/stockController.js` | Same derived-not-stored current-stock calculation (Opening + IN − OUT); open read, Admin-team gated writes; low-stock alert email skipped, a badge + filter substitute |
+| `SoftwareLicenseEngine.gs` | `src/controllers/softwareLicenseController.js` | Same seats/cost/expiry tracking; open read, Admin-team gated writes; `getLicenseExpiryReport()` added to the Reports page |
 
 ## Original source, kept for reference
 
