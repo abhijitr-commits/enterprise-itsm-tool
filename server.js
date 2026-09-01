@@ -40,6 +40,10 @@ const policyRoutes = require("./routes/policyRoutes");
 const lettersRoutes = require("./routes/lettersRoutes");
 const documentRoutes = require("./routes/documentRoutes");
 const hrHubRoutes = require("./routes/hrHubRoutes");
+const helpdeskRoutes = require("./routes/helpdeskRoutes");
+const itAllocationRoutes = require("./routes/itAllocationRoutes");
+const itClearanceRoutes = require("./routes/itClearanceRoutes");
+const accessRequestRoutes = require("./routes/accessRequestRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 
 /*************************************************************
@@ -154,6 +158,10 @@ async function start() {
   app.use("/letters", lettersRoutes);
   app.use("/documents", documentRoutes);
   app.use("/hr", hrHubRoutes);
+  app.use("/helpdesk", helpdeskRoutes);
+  app.use("/asset-allocation", itAllocationRoutes);
+  app.use("/it-clearance", itClearanceRoutes);
+  app.use("/access-requests", accessRequestRoutes);
 
   app.use((req, res) => res.status(404).render("errors/404"));
 
