@@ -83,11 +83,17 @@
       <% if (currentUser) { %>
         <div class="nav-section-label">IT Operations</div>
         <a href="/access-requests/mine" class="nav-link">My Access Requests</a>
+        <a href="/vendors" class="nav-link">Vendors</a>
+        <a href="/purchases" class="nav-link">Purchase Register</a>
         <% if (isITTeamUser) { %>
           <a href="/helpdesk" class="nav-link">IT Helpdesk</a>
           <a href="/asset-allocation" class="nav-link">Asset Allocation</a>
           <a href="/it-clearance" class="nav-link">IT Clearance</a>
           <a href="/access-requests" class="nav-link">Access Requests (All)</a>
+          <a href="/vendor-service" class="nav-link">Vendor Service Tracking</a>
+        <% } %>
+        <% if (isITTeamUser || isAdminTeamUser) { %>
+          <a href="/requirements" class="nav-link">Requirement Requests</a>
         <% } %>
       <% } %>
       <% if (currentUser) { %>

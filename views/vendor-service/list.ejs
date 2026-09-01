@@ -1,0 +1,62 @@
+<%- include('../partials/header', { title: 'Vendor Service Tracking' }) %>
+
+<div class="page-header">
+  <h1>Vendor Service Tracking</h1>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <div class="panel-header"><h2>Log a Service Issue</h2></div>
+  <form class="form-panel" method="post" action="/vendor-service">
+    <div class="form-grid">
+      <label>Vendor
+        <input list="vendorList" name="vendor" required />
+        <datalist id="vendorList">
+          <% vendors.forEach(function(v) { %><option value="<%= v.name %>"><% }) %>
+        </datalist>
+      </label>
+      <label>Priority
+        <select name="priority">
+          <option>Normal</option><option>High</option><option>Critical</option>
+        </select>
+      </label>
+    </div>
+    <label>Issue
+      <textarea name="issue" rows="2" required></textarea>
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Log Issue</button>
+    </div>
+  </form>
+</div>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>Log ID</th><th>Vendor</th><th>Issue</th><th>Priority</th><th>Status</th><th>Raised By</th><th>Raised</th><th></th></tr></thead>
+    <tbody>
+      <% logs.forEach(function(l) { %>
+        <tr>
+          <td><%= l.logId %></td>
+          <td><%= l.vendor %></td>
+          <td><%= l.issue %></td>
+          <td><span class="badge badge-priority-<%= l.priority.toLowerCase() %>"><%= l.priority %></span></td>
+          <td><span class="badge <%= l.status === 'Resolved' ? 'badge-status-resolved' : 'badge-status-open' %>"><%= l.status %></span></td>
+          <td><%= l.raisedBy %></td>
+          <td><%= new Date(l.raisedDate).toLocaleDateString() %></td>
+          <td>
+            <% if (l.status !== 'Resolved') { %>
+              <form method="post" action="/vendor-service/<%= l._id %>/status">
+                <input type="hidden" name="status" value="Resolved" />
+                <button type="submit" class="btn btn-secondary">Mark Resolved</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (logs.length === 0) { %><tr><td colspan="8" class="empty-row">No service issues logged yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

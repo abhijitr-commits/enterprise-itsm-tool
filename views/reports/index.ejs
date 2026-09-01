@@ -106,4 +106,20 @@
   </table>
 </div>
 
+<div class="panel">
+  <div class="panel-header"><h2>Vendor AMC Expiry (next 90 days)</h2></div>
+  <table class="table">
+    <thead><tr><th>Vendor</th><th>Category</th><th>AMC Expiry</th><th>Urgency</th></tr></thead>
+    <tbody>
+      <% amcs.forEach(function(a){ %>
+        <tr>
+          <td><%= a.vendorName %></td><td><%= a.category %></td><td><%= a.amcExpiry %></td>
+          <td><span class="badge badge-approval-<%= a.urgency === 'Expired' ? 'rejected' : 'pending-approval' %>"><%= a.urgency %></span></td>
+        </tr>
+      <% }) %>
+      <% if (amcs.length === 0) { %><tr><td colspan="4" class="empty-row">No vendor AMCs expiring soon.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
 <%- include('../partials/footer') %>

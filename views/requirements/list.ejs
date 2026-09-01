@@ -1,0 +1,74 @@
+<%- include('../partials/header', { title: 'Requirement Requests' }) %>
+
+<div class="page-header">
+  <h1>Requirement Requests</h1>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <div class="panel-header"><h2>New Requirement Request</h2></div>
+  <form class="form-panel" method="post" action="/requirements">
+    <div class="form-grid">
+      <label>Department
+        <select name="department">
+          <option>IT</option><option>Administration</option>
+        </select>
+      </label>
+      <label>Vendor Name
+        <input list="vendorList" name="vendorName" />
+        <datalist id="vendorList">
+          <% vendors.forEach(function(v) { %><option value="<%= v.name %>"><% }) %>
+        </datalist>
+      </label>
+      <label>Vendor Email
+        <input type="email" name="vendorEmail" required />
+      </label>
+      <label>Priority
+        <select name="priority">
+          <option>Normal</option><option>Critical</option>
+        </select>
+      </label>
+    </div>
+    <label>Requirement Description
+      <textarea name="description" rows="2" required></textarea>
+    </label>
+    <div class="alert alert-info">
+      Recorded and tracked through to fulfillment — no email provider yet (see MIGRATION.md), so the vendor isn't auto-emailed; share the requirement with them directly.
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Record Requirement</button>
+    </div>
+  </form>
+</div>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>Requirement ID</th><th>Raised By</th><th>Vendor</th><th>Description</th><th>Priority</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      <% requirements.forEach(function(r) { %>
+        <tr>
+          <td><%= r.requirementId %></td>
+          <td><%= r.raisedBy %></td>
+          <td><%= r.vendorName || r.vendorEmail %></td>
+          <td><%= r.description %></td>
+          <td><span class="badge badge-priority-<%= r.priority.toLowerCase() %>"><%= r.priority %></span></td>
+          <td><span class="badge <%= r.status === 'Fulfilled' ? 'badge-status-resolved' : (r.status === 'Rejected' ? 'badge-status-cancelled' : 'badge-status-open') %>"><%= r.status %></span></td>
+          <td>
+            <form method="post" action="/requirements/<%= r._id %>/status" class="filter-bar">
+              <select name="status">
+                <% Object.values(REQUIREMENT_STATUS).forEach(function(s) { %>
+                  <option value="<%= s %>" <%= r.status === s ? 'selected' : '' %>><%= s %></option>
+                <% }) %>
+              </select>
+              <button type="submit" class="btn btn-secondary">Update</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (requirements.length === 0) { %><tr><td colspan="7" class="empty-row">No requirement requests yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

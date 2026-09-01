@@ -1,0 +1,71 @@
+<%- include('../partials/header', { title: 'Purchase Register' }) %>
+
+<div class="page-header">
+  <h1>Purchase Register</h1>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <div class="panel-header"><h2>New Purchase Order</h2></div>
+  <form class="form-panel" method="post" action="/purchases">
+    <div class="form-grid">
+      <label>Vendor
+        <input list="vendorList" name="vendor" required />
+        <datalist id="vendorList">
+          <% vendors.forEach(function(v) { %><option value="<%= v.name %>"><% }) %>
+        </datalist>
+      </label>
+      <label>Quantity
+        <input type="number" name="quantity" min="1" required />
+      </label>
+      <label>Amount
+        <input type="number" name="amount" min="0" step="0.01" required />
+      </label>
+    </div>
+    <label>Item Description
+      <textarea name="itemDescription" rows="2" required></textarea>
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Create Purchase Order</button>
+    </div>
+  </form>
+</div>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>PO ID</th><th>Date</th><th>Vendor</th><th>Item</th><th>Qty</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      <% purchases.forEach(function(p) { %>
+        <tr>
+          <td><%= p.poId %></td>
+          <td><%= new Date(p.date).toLocaleDateString() %></td>
+          <td><%= p.vendor %></td>
+          <td><%= p.itemDescription %></td>
+          <td><%= p.quantity %></td>
+          <td><%= p.amount %></td>
+          <td><span class="badge <%= p.status === 'Received' ? 'badge-status-resolved' : (p.status === 'Cancelled' ? 'badge-status-cancelled' : 'badge-status-open') %>"><%= p.status %></span></td>
+          <td>
+            <% if (p.status === 'Ordered') { %>
+              <form method="post" action="/purchases/<%= p._id %>/status" class="filter-bar">
+                <input type="hidden" name="status" value="Received" />
+                <label style="font-weight:400; display:flex; align-items:center; gap:4px;">
+                  <input type="checkbox" name="createAsset" value="1" /> Create Asset
+                </label>
+                <input type="text" name="assetType" placeholder="Asset Type" style="width:110px;" />
+                <button type="submit" class="btn btn-secondary">Mark Received</button>
+              </form>
+              <form method="post" action="/purchases/<%= p._id %>/status" style="margin-top:6px;">
+                <input type="hidden" name="status" value="Cancelled" />
+                <button type="submit" class="btn btn-secondary">Cancel</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (purchases.length === 0) { %><tr><td colspan="8" class="empty-row">No purchase orders yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>
