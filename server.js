@@ -50,6 +50,10 @@ const purchaseRoutes = require("./routes/purchaseRoutes");
 const requirementRoutes = require("./routes/requirementRoutes");
 const stockRoutes = require("./routes/stockRoutes");
 const licenseRoutes = require("./routes/licenseRoutes");
+const roomRoutes = require("./routes/roomRoutes");
+const complaintRoutes = require("./routes/complaintRoutes");
+const maintenanceRoutes = require("./routes/maintenanceRoutes");
+const expenseRoutes = require("./routes/expenseRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 
 /*************************************************************
@@ -69,6 +73,8 @@ async function autoSeed() {
   const Permission = require("./models/Permission");
   const SLAMatrix = require("./models/SLAMatrix");
   const User = require("./models/User");
+  const Room = require("./models/Room");
+  const { generateSequentialId } = require("./utils/idGenerator");
   const { DEFAULT_PERMISSIONS_MAP } = require("./config/permissions");
   const { PRIORITY, ROLE, COMPANY_EMAIL_DOMAIN } = require("./config/constants");
 
@@ -88,6 +94,20 @@ async function autoSeed() {
       { $set: { responseTimeHours: hours.response, resolutionTimeHours: hours.resolution } },
       { upsert: true }
     );
+  }
+
+  // Port of RoomBookingEngine.gs's seedDefaultConferenceRooms() — seeds
+  // the company's real conference rooms once, so there's something to
+  // book immediately instead of an empty list. Idempotent: only runs
+  // when the Room collection is completely empty.
+  const roomCount = await Room.countDocuments();
+  if (roomCount === 0) {
+    const defaultRooms = ["Board Room", "Mechanical Meeting Room", "Tech-Ops Meeting Room1", "Tech-Ops Meeting Room2", "Cabin1", "Cabin2"];
+    for (const roomName of defaultRooms) {
+      const roomId = await generateSequentialId("ROOM");
+      await Room.create({ roomId, roomName });
+    }
+    console.log(`[auto-seed] First run: created ${defaultRooms.length} default conference room(s).`);
   }
 
   const userCount = await User.countDocuments();
@@ -174,6 +194,10 @@ async function start() {
   app.use("/requirements", requirementRoutes);
   app.use("/stock", stockRoutes);
   app.use("/licenses", licenseRoutes);
+  app.use("/rooms", roomRoutes);
+  app.use("/complaints", complaintRoutes);
+  app.use("/maintenance", maintenanceRoutes);
+  app.use("/expenses", expenseRoutes);
 
   app.use((req, res) => res.status(404).render("errors/404"));
 
