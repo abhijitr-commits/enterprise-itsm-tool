@@ -14,7 +14,7 @@
     <div class="stat-label">My Open Requests</div>
   </div>
   <div class="stat-card">
-    <div class="stat-value"><%= pendingRequests.length + pendingChanges.length %></div>
+    <div class="stat-value"><%= pendingRequests.length + pendingChanges.length + pendingLeave.length %></div>
     <div class="stat-label">Pending My Approval</div>
   </div>
 </div>
@@ -55,7 +55,7 @@
   </table>
 </div>
 
-<% if (pendingRequests.length > 0 || pendingChanges.length > 0) { %>
+<% if (pendingRequests.length > 0 || pendingChanges.length > 0 || pendingLeave.length > 0) { %>
 <div class="panel">
   <div class="panel-header"><h2>Pending My Approval</h2></div>
   <table class="table">
@@ -69,6 +69,11 @@
       <% pendingChanges.forEach(function(c) { %>
         <tr onclick="location.href='/changes/<%= c._id %>'">
           <td>Change</td><td><%= c.changeId %></td><td><%= c.title %></td>
+        </tr>
+      <% }) %>
+      <% pendingLeave.forEach(function(l) { %>
+        <tr onclick="location.href='/leave'">
+          <td>Leave</td><td><%= l.leaveId %></td><td><%= l.employee %> — <%= l.leaveType %> (<%= l.days %>d)</td>
         </tr>
       <% }) %>
     </tbody>

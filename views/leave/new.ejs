@@ -1,0 +1,41 @@
+<%- include('../partials/header', { title: 'Apply for Leave' }) %>
+
+<div class="page-header">
+  <h1>Apply for Leave</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/leave">
+  <div class="form-grid">
+    <label>Employee
+      <input type="text" name="employee" value="<%= form.employee || currentUser.name %>" required />
+    </label>
+    <label>Leave Type
+      <select name="leaveType" required>
+        <option value="">Select…</option>
+        <% Object.values(LEAVE_TYPE).forEach(function(t){ %>
+          <option value="<%= t %>" <%= form.leaveType === t ? 'selected' : '' %>><%= t %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>From Date
+      <input type="date" name="fromDate" value="<%= form.fromDate || '' %>" required />
+    </label>
+    <label>To Date
+      <input type="date" name="toDate" value="<%= form.toDate || '' %>" required />
+    </label>
+    <label>Delegate To (optional)
+      <input type="text" name="delegateTo" value="<%= form.delegateTo || '' %>" />
+    </label>
+  </div>
+  <label>Reason
+    <textarea name="reason" rows="3"><%= form.reason || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/leave">Cancel</a>
+    <button type="submit" class="btn btn-primary">Submit Request</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

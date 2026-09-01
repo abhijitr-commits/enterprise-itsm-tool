@@ -1,0 +1,39 @@
+<%- include('../partials/header', { title: 'Submit Resignation' }) %>
+
+<div class="page-header">
+  <h1>Submit Resignation</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/resignations">
+  <div class="form-grid">
+    <label>Employee
+      <input type="text" name="employee" value="<%= form.employee || '' %>" required />
+    </label>
+    <label>Department
+      <input type="text" name="department" value="<%= form.department || '' %>" />
+    </label>
+    <label>Resignation Date
+      <input type="date" name="resignationDate" value="<%= form.resignationDate || '' %>" required />
+    </label>
+    <label>Last Working Day
+      <input type="date" name="lastWorkingDay" value="<%= form.lastWorkingDay || '' %>" required />
+    </label>
+  </div>
+  <label>Reason
+    <textarea name="reason" rows="3"><%= form.reason || '' %></textarea>
+  </label>
+  <div class="alert alert-info">
+    This immediately starts the offboarding checklist. IT/Finance/HR/
+    Manager/Admin clearances can be tracked from the resignation's detail
+    page — once all five are marked Cleared, the employee's status is
+    automatically set to "Left" and their login is deactivated.
+  </div>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/resignations">Cancel</a>
+    <button type="submit" class="btn btn-primary">Submit Resignation</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

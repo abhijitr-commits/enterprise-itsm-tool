@@ -68,7 +68,16 @@
 
       <div class="panel">
         <div class="panel-header"><h2>Leave Balance</h2></div>
-        <p class="hint">Not available yet — coming in the Leave &amp; Attendance module.</p>
+        <table class="table">
+          <thead><tr><th>Type</th><th>Quota/Earned</th><th>Used</th><th>Remaining</th></tr></thead>
+          <tbody>
+            <tr><td>Casual Leave</td><td><%= leaveBalances.casual.quota %></td><td><%= leaveBalances.casual.used %></td><td><%= leaveBalances.casual.remaining %></td></tr>
+            <tr><td>Sick Leave</td><td><%= leaveBalances.medical.quota %></td><td><%= leaveBalances.medical.used %></td><td><%= leaveBalances.medical.remaining %></td></tr>
+            <tr><td>Earned Leave</td><td><%= leaveBalances.earned.earned %></td><td><%= leaveBalances.earned.used %></td><td><%= leaveBalances.earned.remaining %></td></tr>
+            <tr><td>Unpaid Leave</td><td><%= leaveBalances.unpaid.quota %></td><td><%= leaveBalances.unpaid.used %></td><td><%= leaveBalances.unpaid.remaining %></td></tr>
+          </tbody>
+        </table>
+        <a class="btn btn-secondary" href="/leave/new">Apply for Leave</a>
       </div>
 
       <div class="panel">
