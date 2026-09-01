@@ -56,6 +56,7 @@ const maintenanceRoutes = require("./routes/maintenanceRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const itHubRoutes = require("./routes/itHubRoutes");
+const systemPolicyRoutes = require("./routes/systemPolicyRoutes");
 
 /*************************************************************
  * Auto-seed on boot — runs automatically every time the server
@@ -200,6 +201,7 @@ async function start() {
   app.use("/maintenance", maintenanceRoutes);
   app.use("/expenses", expenseRoutes);
   app.use("/it", itHubRoutes);
+  app.use("/system-policies", systemPolicyRoutes);
 
   app.use((req, res) => res.status(404).render("errors/404"));
 

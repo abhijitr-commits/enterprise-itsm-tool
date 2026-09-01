@@ -1,16 +1,27 @@
 /*************************************************************
  * leaveBalances.js — port of the balance-calculation half of
  * LeaveEngine.gs (getLeaveBalanceForType / getEarnedLeaveBalance /
- * getAllLeaveBalancesSafe). Quota-per-type is a fixed constant here
- * (config/constants.js's LEAVE_QUOTAS) rather than a Settings-sheet
- * lookup — see that file's comment for why.
+ * getAllLeaveBalancesSafe). Quota-per-type now reads from the
+ * Settings store first — the same "AnnualLeaveQuota"/
+ * "MedicalLeaveQuota"/"UnpaidLeaveQuota" keys HR edits on the new
+ * System Policies page (systemPolicyController.js, Phase 6) —
+ * falling back to config/constants.js's LEAVE_QUOTAS if HR hasn't
+ * saved a policy yet, exactly matching the original's
+ * `Number(getSetting(quotaSettingKey)) || defaultQuota` pattern.
  *************************************************************/
 const LeaveRequest = require("../models/LeaveRequest");
 const Attendance = require("../models/Attendance");
 const RosterEntry = require("../models/RosterEntry");
 const { getHolidaySet } = require("./sla");
+const { getSetting } = require("./settings");
 const { LEAVE_TYPE, LEAVE_QUOTAS } = require("../config/constants");
 const { APPROVAL } = require("../models/ServiceRequest");
+
+async function quotaFor(settingKey, defaultQuota) {
+  const raw = await getSetting(settingKey, null);
+  const num = Number(raw);
+  return Number.isFinite(num) && num > 0 ? num : defaultQuota;
+}
 
 async function balanceForType(employeeName, leaveType, quota) {
   const currentYear = new Date().getFullYear();
@@ -64,11 +75,17 @@ async function earnedLeaveBalance(employeeName) {
 
 /** All four balances at once, for My Profile. */
 async function getAllLeaveBalances(employeeName) {
+  const [casualQuota, medicalQuota, unpaidQuota] = await Promise.all([
+    quotaFor("AnnualLeaveQuota", LEAVE_QUOTAS.CASUAL),
+    quotaFor("MedicalLeaveQuota", LEAVE_QUOTAS.SICK),
+    quotaFor("UnpaidLeaveQuota", LEAVE_QUOTAS.UNPAID),
+  ]);
+
   const [casual, medical, earned, unpaid] = await Promise.all([
-    balanceForType(employeeName, LEAVE_TYPE.CASUAL, LEAVE_QUOTAS.CASUAL),
-    balanceForType(employeeName, LEAVE_TYPE.SICK, LEAVE_QUOTAS.SICK),
+    balanceForType(employeeName, LEAVE_TYPE.CASUAL, casualQuota),
+    balanceForType(employeeName, LEAVE_TYPE.SICK, medicalQuota),
     earnedLeaveBalance(employeeName),
-    balanceForType(employeeName, LEAVE_TYPE.UNPAID, LEAVE_QUOTAS.UNPAID),
+    balanceForType(employeeName, LEAVE_TYPE.UNPAID, unpaidQuota),
   ]);
 
   return { casual, medical, earned, unpaid };
