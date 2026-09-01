@@ -5,6 +5,8 @@ const Asset = require("../models/Asset");
 const AssetHistory = require("../models/AssetHistory");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { hasPermission } = require("../utils/permissions");
+const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 
 const { ASSET_STATUS } = Asset;
 
@@ -85,13 +87,22 @@ async function showAsset(req, res) {
   const asset = await Asset.findById(req.params.id).lean();
   if (!asset) return res.status(404).render("errors/404");
 
-  const history = await AssetHistory.find({ assetId: asset.assetId }).sort({ date: -1 }).lean();
+  const [history, attachments, auditEntries, canUpload] = await Promise.all([
+    AssetHistory.find({ assetId: asset.assetId }).sort({ date: -1 }).lean(),
+    getAttachmentsForRecord("assets", asset._id),
+    getAuditTrailForRecord(asset._id),
+    hasPermission(req.user.role, "assets_edit"),
+  ]);
 
   res.render("assets/detail", {
     asset,
     history,
     ASSET_STATUS,
     justCreated: req.query.created === "1",
+    attachments,
+    auditEntries,
+    canUpload,
+    moduleKey: "assets",
   });
 }
 

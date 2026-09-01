@@ -5,6 +5,8 @@ const Change = require("../models/Change");
 const { APPROVAL } = require("../models/ServiceRequest");
 const { logAudit } = require("../utils/auditLog");
 const { generateSequentialId } = require("../utils/idGenerator");
+const { hasPermission } = require("../utils/permissions");
+const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 
 const { IMPL } = Change;
 
@@ -73,11 +75,21 @@ async function showChange(req, res) {
   const change = await Change.findById(req.params.id).lean();
   if (!change) return res.status(404).render("errors/404");
 
+  const [attachments, auditEntries, canUpload] = await Promise.all([
+    getAttachmentsForRecord("changes", change._id),
+    getAuditTrailForRecord(change._id),
+    hasPermission(req.user.role, "changes_edit"),
+  ]);
+
   res.render("changes/detail", {
     change,
     APPROVAL,
     IMPL,
     justCreated: req.query.created === "1",
+    attachments,
+    auditEntries,
+    canUpload,
+    moduleKey: "changes",
   });
 }
 

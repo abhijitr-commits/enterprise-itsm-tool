@@ -10,6 +10,8 @@ const { STATUS, PRIORITY } = require("../config/constants");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { calculateSLADue } = require("../utils/sla");
 const { logAudit } = require("../utils/auditLog");
+const { hasPermission } = require("../utils/permissions");
+const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 
 async function listIncidents(req, res) {
   const { q, status, priority } = req.query;
@@ -93,11 +95,21 @@ async function showIncident(req, res) {
   const incident = await Incident.findById(req.params.id).lean();
   if (!incident) return res.status(404).render("errors/404");
 
+  const [attachments, auditEntries, canUpload] = await Promise.all([
+    getAttachmentsForRecord("incidents", incident._id),
+    getAuditTrailForRecord(incident._id),
+    hasPermission(req.user.role, "incidents_edit"),
+  ]);
+
   res.render("incidents/detail", {
     incident,
     STATUS,
     PRIORITY,
     justCreated: req.query.created === "1",
+    attachments,
+    auditEntries,
+    canUpload,
+    moduleKey: "incidents",
   });
 }
 

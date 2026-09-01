@@ -4,6 +4,8 @@
 const ConfigurationItem = require("../models/ConfigurationItem");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { hasPermission } = require("../utils/permissions");
+const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 
 async function listCIs(req, res) {
   const { q, status, type } = req.query;
@@ -68,7 +70,20 @@ async function showCI(req, res) {
   const ci = await ConfigurationItem.findById(req.params.id).lean();
   if (!ci) return res.status(404).render("errors/404");
 
-  res.render("cmdb/detail", { ci, justCreated: req.query.created === "1" });
+  const [attachments, auditEntries, canUpload] = await Promise.all([
+    getAttachmentsForRecord("cmdb", ci._id),
+    getAuditTrailForRecord(ci._id),
+    hasPermission(req.user.role, "cmdb_edit"),
+  ]);
+
+  res.render("cmdb/detail", {
+    ci,
+    justCreated: req.query.created === "1",
+    attachments,
+    auditEntries,
+    canUpload,
+    moduleKey: "cmdb",
+  });
 }
 
 async function updateCI(req, res) {

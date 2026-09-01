@@ -10,6 +10,8 @@ const ServiceRequest = require("../models/ServiceRequest");
 const { STATUS } = require("../config/constants");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { hasPermission } = require("../utils/permissions");
+const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 
 const { APPROVAL } = ServiceRequest;
 
@@ -76,11 +78,21 @@ async function showRequest(req, res) {
   const request = await ServiceRequest.findById(req.params.id).lean();
   if (!request) return res.status(404).render("errors/404");
 
+  const [attachments, auditEntries, canUpload] = await Promise.all([
+    getAttachmentsForRecord("requests", request._id),
+    getAuditTrailForRecord(request._id),
+    hasPermission(req.user.role, "requests_edit"),
+  ]);
+
   res.render("requests/detail", {
     request,
     STATUS,
     APPROVAL,
     justCreated: req.query.created === "1",
+    attachments,
+    auditEntries,
+    canUpload,
+    moduleKey: "requests",
   });
 }
 
