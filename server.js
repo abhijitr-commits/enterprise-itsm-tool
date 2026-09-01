@@ -60,6 +60,7 @@ const systemPolicyRoutes = require("./routes/systemPolicyRoutes");
 const publicIntakeRoutes = require("./routes/publicIntakeRoutes");
 const attachmentRoutes = require("./routes/attachmentRoutes");
 const searchRoutes = require("./routes/searchRoutes");
+const safetyRoutes = require("./routes/safetyRoutes");
 
 /*************************************************************
  * Auto-seed on boot — runs automatically every time the server
@@ -208,6 +209,7 @@ async function start() {
   app.use("/support", publicIntakeRoutes);
   app.use("/attachments", attachmentRoutes);
   app.use("/search", searchRoutes);
+  app.use("/safety", safetyRoutes);
 
   app.use((req, res) => res.status(404).render("errors/404"));
 
