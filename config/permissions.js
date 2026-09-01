@@ -146,6 +146,21 @@ const DEFAULT_PERMISSIONS_MAP = {
   // get diluted by IT/facilities complaints.
   safety_submit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
   safety_manage: [ROLE.ADMIN, ROLE.MANAGER],
+
+  // --- Phase 10 (company-wide departments: Sales, Production,
+  // Engineering, Logistics, Store) ---
+  // Same "everyone can create/submit, a smaller tier manages/decides"
+  // shape used throughout this app (Purchases, Complaints, Changes).
+  sales_create: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  sales_edit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER],
+  workorders_create: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  workorders_edit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER],
+  ecr_create: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  ecr_decide: [ROLE.ADMIN, ROLE.MANAGER],
+  shipments_create: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER],
+  shipments_edit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER],
+  material_requests_submit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  material_requests_issue: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK],
 };
 
 const ALL_ROLES_LIST = Object.values(ROLE);

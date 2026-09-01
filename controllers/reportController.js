@@ -13,6 +13,8 @@ const Asset = require("../models/Asset");
 const Employee = require("../models/Employee");
 const Vendor = require("../models/Vendor");
 const SoftwareLicense = require("../models/SoftwareLicense");
+const PurchaseOrder = require("../models/PurchaseOrder");
+const ExpenseClaim = require("../models/ExpenseClaim");
 const { STATUS } = require("../config/constants");
 
 function slaComplianceReport(incidents) {
@@ -252,14 +254,54 @@ function assetReliabilityReport(incidents) {
     .sort((a, b) => b.incidentCount - a.incidentCount);
 }
 
+/**
+ * Phase 10 addition — Finance & Spend Overview. No new model: reuses
+ * existing Purchase Orders (outgoing spend on goods/vendors) and
+ * Expense Claims (reimbursable spend by employees), grouped by month,
+ * so Finance gets a genuine deliverable out of data every other
+ * department is already generating rather than a whole new ledger
+ * module. Purchases are counted regardless of status (an "Ordered"
+ * PO is still a spend commitment); Expense Claims are counted only
+ * once Approved or Reimbursed, since Pending/Rejected claims aren't
+ * real spend yet.
+ */
+function financeSpendReport(purchases, expenses) {
+  const byMonth = {};
+  const monthKey = (d) => new Date(d).toLocaleString("en-US", { month: "short", year: "numeric" });
+
+  purchases.forEach((p) => {
+    if (!p.date) return;
+    const key = monthKey(p.date);
+    if (!byMonth[key]) byMonth[key] = { month: key, purchaseAmount: 0, purchaseCount: 0, expenseAmount: 0, expenseCount: 0 };
+    byMonth[key].purchaseAmount += p.amount || 0;
+    byMonth[key].purchaseCount++;
+  });
+
+  expenses
+    .filter((e) => e.status === "Approved" || e.status === "Reimbursed")
+    .forEach((e) => {
+      if (!e.expenseDate && !e.submittedDate) return;
+      const key = monthKey(e.expenseDate || e.submittedDate);
+      if (!byMonth[key]) byMonth[key] = { month: key, purchaseAmount: 0, purchaseCount: 0, expenseAmount: 0, expenseCount: 0 };
+      byMonth[key].expenseAmount += e.amount || 0;
+      byMonth[key].expenseCount++;
+    });
+
+  return Object.values(byMonth)
+    .map((r) => ({ ...r, totalAmount: r.purchaseAmount + r.expenseAmount }))
+    .sort((a, b) => new Date(b.month) - new Date(a.month));
+}
+
 async function showReports(req, res) {
-  const [incidents, requests, assets, employees, vendors, licenses] = await Promise.all([
+  const [incidents, requests, assets, employees, vendors, licenses, purchases, expenses] = await Promise.all([
     Incident.find().lean(),
     ServiceRequest.find().lean(),
     Asset.find().lean(),
     Employee.find().lean(),
     Vendor.find().lean(),
     SoftwareLicense.find().lean(),
+    PurchaseOrder.find().lean(),
+    ExpenseClaim.find().lean(),
   ]);
 
   res.render("reports/index", {
@@ -274,6 +316,7 @@ async function showReports(req, res) {
     licenses: licenseExpiryReport(licenses),
     maintenanceDue: maintenanceDueReport(assets),
     fleetReliability: assetReliabilityReport(incidents),
+    financeSpend: financeSpendReport(purchases, expenses),
   });
 }
 
@@ -286,4 +329,5 @@ module.exports = {
   licenseExpiryReport,
   maintenanceDueReport,
   assetReliabilityReport,
+  financeSpendReport,
 };

@@ -1,4 +1,4 @@
-# Enterprise ITSM Tool — Node.js + MongoDB (migration complete: Phase 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9)
+# Enterprise ITSM Tool — Node.js + MongoDB (migration complete: Phase 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10)
 
 This is the Node.js/Express + MongoDB migration of the Enterprise ITSM
 Tool off Google Apps Script + Google Sheets. It replaces the Sheets-based
@@ -196,6 +196,20 @@ Production, Management, and others — is intentionally left for a
 separate, scoped follow-up rather than guessed at in this phase; see
 MIGRATION.md.
 
+**Phase 10 scope** (adds — genuinely new, not a port of anything in the
+original 116 files): the larger company-wide scope Phase 9 deferred,
+now built. Sales Orders (Enquiry through Delivered); Work Orders, one
+shared module across Production/Robotics/Electrical/Electronics/
+Technical/Software via a department field; Engineering Change
+Requests for Designing/product revisions (deliberately separate from
+the IT-infrastructure Changes/CAB module); Shipments covering both
+inbound and outbound Logistics tracking; Material Requests letting any
+department draw against Store's existing Stock/Inventory through a
+real request-and-issue workflow that genuinely moves stock, not just
+a status flag; and a Finance & Spend Overview report on the Reports
+page built from the Purchase Orders and Expense Claims data that
+already existed. See MIGRATION.md for the full design rationale.
+
 ## Stack (100% free tier)
 
 - **Backend**: Node.js + Express
@@ -320,6 +334,12 @@ Railway.app works the same way if you prefer it over Render.
 | *(Phase 9 — new, not a port)* Fleet Reliability (MTBF) Report | `Incident.relatedAsset` field + `reportController.assetReliabilityReport()` | No original equivalent; groups Incidents by the equipment they were filed against |
 | *(Phase 9 — new, not a port)* Safety Incident / Near-Miss Reporting | `src/models/SafetyIncident.js` + `src/controllers/safetyController.js` + `views/safety/*` (`/safety`) | No original equivalent; modeled on `Complaint`'s open-submit/Admin-Manager-manage shape, kept separate so severity/injury data isn't diluted into general complaints |
 | *(Phase 9 — new, not a port)* Equipment Booking | `Room.resourceType` field (Room/Equipment) | No original equivalent; reuses Conference Room Booking's exact model, conflict-check logic, and views for shared lab/robotics equipment |
+| *(Phase 10 — new, not a port)* Sales Orders | `src/models/SalesOrder.js` + `src/controllers/salesController.js` + `views/sales/*` (`/sales`) | No original equivalent; modeled on `purchaseController.js`'s list+create+inline-status-update shape |
+| *(Phase 10 — new, not a port)* Work Orders | `src/models/WorkOrder.js` + `src/controllers/workOrderController.js` + `views/work-orders/*` (`/work-orders`) | No original equivalent; one model covers Production/Robotics/Electrical/Electronics/Technical/Software via a free-text `department` field, same discriminator pattern as `Room.resourceType` |
+| *(Phase 10 — new, not a port)* Engineering Change Requests | `src/models/EngineeringChangeRequest.js` + `src/controllers/ecrController.js` + `views/engineering-changes/*` (`/engineering-changes`) | No original equivalent; deliberately separate from the IT-infrastructure Changes/CAB module — same propose/decide shape, different subject matter (product/design revisions) |
+| *(Phase 10 — new, not a port)* Shipments | `src/models/Shipment.js` + `src/controllers/shipmentController.js` + `views/shipments/*` (`/shipments`) | No original equivalent; one model covers both Inbound and Outbound via a `direction` field |
+| *(Phase 10 — new, not a port)* Material Requests | `src/models/MaterialRequest.js` + `src/controllers/materialRequestController.js` + `views/material-requests/*` (`/material-requests`) | No original equivalent; issuing a request calls a newly-extracted `stockController.recordTransactionInternal()`, so it genuinely moves Stock, not just a status flag |
+| *(Phase 10 — new, not a port)* Finance & Spend Overview report | `reportController.js` (`financeSpendReport()`) | No original equivalent; reuses existing `PurchaseOrder` + `ExpenseClaim` data grouped by month, no new model |
 
 ## Original source, kept for reference
 
