@@ -73,27 +73,42 @@ a:hover { color: var(--primary-dark); }
 .icon { flex-shrink: 0; display: inline-block; vertical-align: middle; }
 
 .page-shell { display: flex; flex-direction: column; min-height: 100vh; }
-.app-shell { display: flex; flex: 1; min-height: 0; }
 
-/* ---------- Top tab bar ----------
- * The primary, front-and-center department switcher: Dashboard / HR
- * Hub / IT Management Hub / Operations Hub / Admin Console, one click
- * from anywhere in the app. The sidebar remains for deep links inside
- * a department; this bar is for jumping between departments. */
+/* ---------- Top bar ----------
+ * Every department ("head") — HR / IT Management / Operations / Admin —
+ * lives under exactly one button here. Click it and its full page list
+ * drops down right underneath (see .nav-dropdown below); there is no
+ * separate sidebar duplicating the same links. Dashboard and search sit
+ * alongside as the two things that aren't scoped to one department. */
 .top-tabs {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 3px;
-  padding: 0 24px;
-  height: 60px;
+  row-gap: 6px;
+  padding: 10px 24px;
+  min-height: 60px;
   flex-shrink: 0;
   background: var(--panel);
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 20;
-  overflow-x: auto;
 }
+.brand-inline {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 16px 6px 4px;
+  margin-right: 8px;
+  font-weight: 800;
+  font-size: 14.5px;
+  color: var(--text);
+  border-right: 1px solid var(--border);
+  white-space: nowrap;
+}
+.brand-inline:hover { color: var(--text); }
+.brand-inline .brand-mark { width: 26px; height: 26px; border-radius: 8px; }
 .top-tab {
   display: flex;
   align-items: center;
@@ -107,10 +122,77 @@ a:hover { color: var(--primary-dark); }
   transition: background 0.15s ease, color 0.15s ease;
 }
 .top-tab .icon { opacity: 0.85; }
+.top-tab .chev { opacity: 0.6; margin-left: 1px; }
 .top-tab:hover { background: var(--primary-50); color: var(--primary-dark); }
 .top-tab.active { background: var(--primary); color: #fff; box-shadow: 0 4px 10px -2px rgba(79, 70, 229, 0.45); }
-.top-tab.active .icon { opacity: 1; }
+.top-tab.active .icon, .top-tab.active .chev { opacity: 1; }
 .top-tabs-spacer { flex: 1; }
+
+/* ---------- Hub dropdown menus ----------
+ * Native <details>/<summary> gives us click-to-open for free; footer.ejs
+ * adds ~15 lines of JS to close a dropdown on an outside click and to
+ * keep only one open at a time, same as any standard menu bar. */
+.nav-dropdown { position: relative; }
+.nav-dropdown summary { list-style: none; cursor: pointer; }
+.nav-dropdown summary::-webkit-details-marker { display: none; }
+.nav-dropdown[open] > summary .chev { transform: rotate(180deg); }
+.nav-dropdown .chev { transition: transform 0.15s ease; display: inline-flex; }
+.nav-dropdown-right { margin-left: auto; }
+.nav-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 30;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 14px 18px;
+  min-width: 240px;
+  max-width: calc(100vw - 48px);
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.nav-dropdown-right .nav-dropdown-panel { left: auto; right: 0; }
+.nav-dropdown-panel-wide { width: 480px; columns: 2; column-gap: 22px; display: block; }
+.panel-group { break-inside: avoid; margin-bottom: 4px; }
+.panel-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 13.3px;
+  font-weight: 500;
+  break-inside: avoid;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.panel-link .icon { color: var(--text-faint); opacity: 0.9; }
+.panel-link:hover { background: var(--primary-50); color: var(--primary-dark); }
+.panel-link:hover .icon { color: var(--primary); }
+.panel-link.active { background: var(--primary-light); color: var(--primary-dark); font-weight: 700; }
+.panel-link.active .icon { color: var(--primary); }
+.panel-link.hub-link {
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 6px;
+  padding-bottom: 10px;
+  break-inside: avoid;
+}
+.nav-dropdown-subsection-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-faint);
+  margin: 10px 10px 4px;
+}
+.panel-group:first-of-type .nav-dropdown-subsection-label { margin-top: 0; }
 .top-tabs-search { flex-shrink: 0; position: relative; }
 .top-tabs-search::before {
   content: "";
@@ -174,32 +256,6 @@ a:hover { color: var(--primary-dark); }
   flex-shrink: 0;
   letter-spacing: 0.02em;
 }
-.sidebar-footer .avatar { width: 32px; height: 32px; font-size: 12.5px; }
-
-/* ---------- Sidebar ---------- */
-.sidebar {
-  width: 258px;
-  background: linear-gradient(180deg, var(--sidebar-bg) 0%, var(--sidebar-bg-2) 100%);
-  color: var(--sidebar-text);
-  display: flex;
-  flex-direction: column;
-  padding: 20px 12px;
-  flex-shrink: 0;
-  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.18);
-  overflow-y: auto;
-}
-.brand {
-  font-weight: 800;
-  font-size: 16.5px;
-  letter-spacing: -.01em;
-  color: #fff;
-  margin-bottom: 18px;
-  padding: 4px 10px 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-bottom: 1px solid var(--sidebar-border);
-}
 .brand-mark {
   display: inline-flex;
   align-items: center;
@@ -213,135 +269,36 @@ a:hover { color: var(--primary-dark); }
   color: #fff;
 }
 
-.nav-link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: var(--radius-sm);
-  color: var(--sidebar-text);
-  margin-bottom: 1px;
-  font-size: 13.3px;
-  font-weight: 500;
-  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
-}
-.nav-link .icon { color: var(--sidebar-text-dim); opacity: 0.9; }
-.nav-link:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
-.nav-link:hover .icon { color: #fff; }
-.nav-link:active { transform: scale(0.98); }
-.nav-link.disabled { color: #4b5063; cursor: default; }
-.nav-link.disabled:hover { background: none; color: #4b5063; }
-.nav-link.active { background: var(--sidebar-active-bg); color: #fff; box-shadow: inset 2.5px 0 0 #818cf8; }
-.nav-link.active .icon { color: #a5b4fc; }
-.nav-link.active:hover { background: var(--sidebar-active-bg); }
-
-/* Top-level hub link at the head of each collapsible group — same shape
-   as the group summary so the "HR Hub" / "IT Management Hub" jump link
-   reads as the group's home, not just another item in the list. */
-.nav-link-hub { font-weight: 700; color: #fff; }
-.nav-link-top { margin-bottom: 8px; }
-
-.nav-section-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 10.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .07em;
-  color: var(--sidebar-text-dim);
-  margin: 18px 10px 6px;
-}
-
-/* Collapsible nav groups (native <details>/<summary>): each hub gets its
-   own disclosure so the sidebar shows ~6 group headers instead of every
-   link in the app at once, and auto-opens whichever group the current
-   page belongs to (computed server-side from currentPath). */
-.nav-group { margin-top: 4px; }
-.nav-group + .nav-group { border-top: 1px solid var(--sidebar-border); padding-top: 4px; }
-.nav-group summary {
-  list-style: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 9px 10px;
-  border-radius: var(--radius-sm);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  color: #dfe1f2;
-  transition: background 0.15s ease;
-}
-.nav-group summary::-webkit-details-marker { display: none; }
-.nav-group summary:hover { background: rgba(255, 255, 255, 0.06); }
-.nav-group summary .icon:first-child { color: #a5b4fc; }
-.nav-group summary .chev { margin-left: auto; color: var(--sidebar-text-dim); transition: transform 0.18s ease; }
-.nav-group[open] summary .chev { transform: rotate(180deg); }
-.nav-group[open] summary { margin-bottom: 2px; }
-.nav-group .nav-link { margin-left: 4px; }
-.nav-subsection-label {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  color: var(--sidebar-text-dim);
-  margin: 12px 10px 4px 14px;
-}
-
-.sidebar-footer { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--sidebar-border); }
-.sidebar-search { padding: 0 10px 14px; }
-.sidebar-search input {
-  width: 100%;
-  padding: 9px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.07);
-  color: #fff;
-  font-size: 13px;
-  font-family: inherit;
-  box-sizing: border-box;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-.sidebar-search input:focus { outline: none; border-color: var(--primary); background: rgba(255, 255, 255, 0.1); }
-.sidebar-search input::placeholder { color: #8a8fb0; }
-
 .user-chip {
   font-size: 13px;
-  margin-bottom: 0;
-  padding: 0;
-  color: #fff;
+  color: var(--text);
   font-weight: 600;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
 }
-.sidebar-footer .user-chip { margin-bottom: 8px; padding: 0 6px; }
 .user-chip-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .user-chip-name { line-height: 1.1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .role-badge {
   display: inline-block;
   font-size: 10px;
   font-weight: 700;
-  background: rgba(129, 140, 248, 0.25);
-  color: #c7d2fe;
+  background: var(--primary-light);
+  color: var(--primary-dark);
   padding: 3px 7px;
   border-radius: 6px;
   width: fit-content;
 }
-.top-tabs-user .role-badge { margin-left: 2px; }
 .link-button {
   background: none;
   border: none;
-  color: var(--sidebar-text);
+  color: var(--text-muted);
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
   padding: 8px 10px;
   cursor: pointer;
-  width: 100%;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -349,9 +306,9 @@ a:hover { color: var(--primary-dark); }
   border-radius: var(--radius-sm);
   transition: background 0.15s ease, color 0.15s ease;
 }
-.link-button:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.link-button:hover { color: var(--danger); background: var(--danger-light); }
 
-.content { flex: 1; padding: 32px 40px; max-width: 1280px; }
+.content { padding: 32px 40px; max-width: 1320px; margin: 0 auto; width: 100%; }
 
 .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; gap: 16px; flex-wrap: wrap; }
 .page-header h1 { font-size: 23px; font-weight: 750; letter-spacing: -.015em; margin: 0; }
@@ -602,9 +559,12 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
   .top-tabs-search { display: none; }
 }
 
+@media (max-width: 700px) {
+  .nav-dropdown-panel-wide { width: min(90vw, 380px); columns: 1; }
+  .brand-inline-text { display: none; }
+}
+
 @media (max-width: 600px) {
-  .app-shell { flex-direction: column; }
-  .sidebar { width: 100%; }
   .content { padding: 22px 18px; }
   .top-tabs-user .user-chip-text { display: none; }
   .stat-grid, .admin-tile-grid { grid-template-columns: 1fr; }
