@@ -20,10 +20,10 @@
       <input type="text" name="relatedSalesOrder" value="<%= form.relatedSalesOrder || '' %>" placeholder="e.g. SO-2026-000001" />
     </label>
     <label>Related Robot / Equipment
-      <input type="text" name="relatedAsset" value="<%= form.relatedAsset || '' %>" />
+      <input type="text" name="relatedAsset" list="assetNameList" value="<%= form.relatedAsset || '' %>" />
     </label>
     <label>Assigned To
-      <input type="text" name="assignedTo" value="<%= form.assignedTo || '' %>" />
+      <input type="text" name="assignedTo" list="employeeList" value="<%= form.assignedTo || '' %>" />
     </label>
     <label>Start Date
       <input type="date" name="startDate" value="<%= form.startDate || '' %>" />
