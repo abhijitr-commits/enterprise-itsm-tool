@@ -4,16 +4,22 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Submit a Support Request · Enterprise ITSM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body class="centered-page">
+  <div class="brand-lockup">
+    <span class="brand-mark"><%- icon('grid', {size:22}) %></span>
+  </div>
   <div class="public-card">
     <h1>Submit a Support Request</h1>
     <p class="subtitle">Peppermint Robotics — IT Service Desk</p>
 
     <% if (submitted) { %>
       <div class="public-success">
-        <p class="alert alert-success" style="display:inline-block;font-weight:600;">
+        <p class="alert alert-success" style="display:inline-flex;font-weight:600;"><%- icon('check-circle', {size:16}) %>
           <% if (incidentId) { %>
             Thank you — your request has been submitted as <%= incidentId %>.
           <% } else { %>
@@ -24,7 +30,7 @@
       </div>
     <% } else { %>
 
-      <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+      <% if (error) { %><div class="alert alert-error"><%- icon('alert-circle', {size:15}) %> <%= error %></div><% } %>
 
       <form class="form-panel" method="post" action="/support">
         <div class="form-grid">
