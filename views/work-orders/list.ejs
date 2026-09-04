@@ -8,7 +8,7 @@
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <form class="panel filter-bar" method="get" action="/work-orders">
-  <input type="text" name="department" placeholder="Department" value="<%= query.department %>" />
+  <input type="text" name="department" list="departmentList" placeholder="Department" value="<%= query.department %>" />
   <select name="status">
     <option value="">All Statuses</option>
     <% Object.values(WORK_ORDER_STATUS).forEach(function(s) { %>

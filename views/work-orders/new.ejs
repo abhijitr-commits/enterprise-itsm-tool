@@ -11,7 +11,7 @@
 <form class="panel form-panel" method="post" action="/work-orders">
   <div class="form-grid">
     <label>Department
-      <input type="text" name="department" value="<%= form.department || '' %>" required />
+      <input type="text" name="department" list="departmentList" value="<%= form.department || '' %>" required />
     </label>
     <label>Quantity
       <input type="number" name="quantity" min="1" value="<%= form.quantity || '1' %>" />
