@@ -57,6 +57,15 @@
         <a class="btn btn-secondary" href="/letters/<%= noDuesLetter.letterId %>">View / Print</a>
       </div>
     <% } %>
+
+    <div class="panel">
+      <div class="panel-header"><h2>Relieving Letter</h2></div>
+      <p class="hint">Confirms tenure and last working day for future employers — separate from the No Dues Certificate above.</p>
+      <a
+        class="btn btn-secondary"
+        href="/letters/relieving/new?employeeName=<%= encodeURIComponent(resignation.employee) %>&department=<%= encodeURIComponent(resignation.department || '') %>&lastWorkingDay=<%= resignation.lastWorkingDay ? new Date(resignation.lastWorkingDay).toISOString().slice(0,10) : '' %>"
+      >Generate Relieving Letter</a>
+    </div>
   </div>
 </div>
 

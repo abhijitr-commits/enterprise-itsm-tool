@@ -9,7 +9,7 @@
 <form class="panel form-panel" method="post" action="/resignations">
   <div class="form-grid">
     <label>Employee
-      <input type="text" name="employee" value="<%= form.employee || '' %>" required />
+      <input type="text" name="employee" list="employeeList" value="<%= form.employee || '' %>" required />
     </label>
     <label>Department
       <input type="text" name="department" list="departmentList" value="<%= form.department || '' %>" />
