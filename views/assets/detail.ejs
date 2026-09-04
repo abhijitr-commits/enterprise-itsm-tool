@@ -27,7 +27,7 @@
           <input type="text" name="serialNumber" value="<%= asset.serialNumber || '' %>" />
         </label>
         <label>Department
-          <input type="text" name="department" value="<%= asset.department %>" required />
+          <input type="text" name="department" list="departmentList" value="<%= asset.department %>" required />
         </label>
         <label>Location
           <input type="text" name="location" value="<%= asset.location %>" required />

@@ -21,7 +21,7 @@
       <input type="text" name="assignedTo" value="<%= form.assignedTo || '' %>" placeholder="Leave blank if in storage" />
     </label>
     <label>Department
-      <input type="text" name="department" value="<%= form.department || '' %>" required />
+      <input type="text" name="department" list="departmentList" value="<%= form.department || '' %>" required />
     </label>
     <label>Location
       <input type="text" name="location" value="<%= form.location || '' %>" required />
