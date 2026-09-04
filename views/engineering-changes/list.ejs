@@ -1,0 +1,42 @@
+<%- include('../partials/header', { title: 'Engineering Change Requests' }) %>
+
+<div class="page-header">
+  <h1>Engineering Change Requests</h1>
+  <a href="/engineering-changes/new" class="btn btn-primary">New ECR</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>ECR ID</th><th>Title</th><th>Department</th><th>Requested By</th><th>Status</th><th>Reviewed By</th><% if (canDecide) { %><th></th><% } %></tr></thead>
+    <tbody>
+      <% ecrs.forEach(function(e) { %>
+        <tr>
+          <td><%= e.ecrId %></td>
+          <td><%= e.title %></td>
+          <td><%= e.department %></td>
+          <td><%= e.requestedBy %></td>
+          <td><span class="badge <%= e.status === 'Implemented' || e.status === 'Approved' ? 'badge-status-resolved' : (e.status === 'Rejected' ? 'badge-status-cancelled' : 'badge-status-open') %>"><%= e.status %></span></td>
+          <td><%= e.reviewedBy || '—' %></td>
+          <% if (canDecide) { %>
+            <td>
+              <form method="post" action="/engineering-changes/<%= e._id %>/decision" class="filter-bar">
+                <select name="status">
+                  <% [ECR_STATUS.UNDER_REVIEW, ECR_STATUS.APPROVED, ECR_STATUS.REJECTED, ECR_STATUS.IMPLEMENTED].forEach(function(s) { %>
+                    <option value="<%= s %>" <%= e.status === s ? 'selected' : '' %>><%= s %></option>
+                  <% }) %>
+                </select>
+                <input type="text" name="reviewNotes" placeholder="Review notes" style="width:140px;" />
+                <button type="submit" class="btn btn-secondary">Decide</button>
+              </form>
+            </td>
+          <% } %>
+        </tr>
+      <% }) %>
+      <% if (ecrs.length === 0) { %><tr><td colspan="<%= canDecide ? 7 : 6 %>" class="empty-row">No engineering change requests yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

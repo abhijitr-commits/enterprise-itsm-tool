@@ -1,0 +1,35 @@
+<%- include('../partials/header', { title: 'New Engineering Change Request' }) %>
+
+<div class="page-header">
+  <h1>New Engineering Change Request</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<p class="hint">For product/design revisions (Designing, Technical, Software, Robotics, Electrical, Electronics) — separate from the IT infrastructure Changes (CAB) module.</p>
+
+<form class="panel form-panel" method="post" action="/engineering-changes">
+  <div class="form-grid">
+    <label>Title
+      <input type="text" name="title" value="<%= form.title || '' %>" required />
+    </label>
+    <label>Department
+      <input type="text" name="department" value="<%= form.department || '' %>" required />
+    </label>
+    <label>Related Robot / Equipment
+      <input type="text" name="relatedAsset" value="<%= form.relatedAsset || '' %>" />
+    </label>
+  </div>
+  <label>Description
+    <textarea name="description" rows="3" required><%= form.description || '' %></textarea>
+  </label>
+  <label>Reason
+    <textarea name="reason" rows="2"><%= form.reason || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/engineering-changes">Cancel</a>
+    <button type="submit" class="btn btn-primary">Submit ECR</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>
