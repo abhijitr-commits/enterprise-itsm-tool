@@ -7,7 +7,37 @@
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  <div class="app-shell">
+  <%
+    // currentPath comes from src/middleware/auth.js's attachUser (set on
+    // every request, res.locals.currentPath = req.path) — used here to
+    // light up the right top tab / sidebar link for the page we're
+    // actually on, without every controller having to pass it in.
+    const cp = typeof currentPath !== "undefined" ? currentPath : "";
+    const underPath = (p) => cp === p || cp.startsWith(p + "/");
+    const navClass = (p) => "nav-link" + (underPath(p) ? " active" : "");
+    const topTabClass = (p) => "top-tab" + (underPath(p) ? " active" : "");
+  %>
+  <div class="page-shell">
+    <% if (currentUser) { %>
+      <nav class="top-tabs">
+        <a class="<%= cp === '/' ? 'top-tab active' : 'top-tab' %>" href="/">🏠 Dashboard</a>
+        <a class="<%= topTabClass('/hr') %>" href="/hr">🧑‍💼 HR Hub</a>
+        <a class="<%= topTabClass('/it') %>" href="/it">🖥️ IT Management Hub</a>
+        <a class="<%= topTabClass('/operations') %>" href="/operations">🏭 Operations Hub</a>
+        <% if (currentUser.role === 'Administrator') { %>
+          <a class="<%= topTabClass('/admin') %>" href="/admin">⚙️ Admin Console</a>
+        <% } %>
+        <div class="top-tabs-spacer"></div>
+        <form method="get" action="/search" class="top-tabs-search">
+          <input type="text" name="q" placeholder="Search everything…" />
+        </form>
+        <div class="top-tabs-user">
+          <span class="user-chip"><%= currentUser.name %> <span class="role-badge"><%= currentUser.role %></span></span>
+          <form method="post" action="/logout"><button class="link-button">Sign out</button></form>
+        </div>
+      </nav>
+    <% } %>
+    <div class="app-shell">
     <nav class="sidebar">
       <div class="brand">Enterprise ITSM</div>
       <%
@@ -18,18 +48,13 @@
         const mv = typeof moduleVisibility !== "undefined" ? moduleVisibility : {};
         const canSee = (key) => mv[key] !== false;
       %>
-      <a href="/" class="nav-link">Dashboard</a>
+      <a href="/" class="<%= cp === '/' ? 'nav-link active' : 'nav-link' %>">Dashboard</a>
       <% if (currentUser) { %>
-        <form method="get" action="/search" class="sidebar-search">
-          <input type="text" name="q" placeholder="Search everything…" />
-        </form>
+        <a href="/hr" class="<%= navClass('/hr') %>">HR Hub</a>
+        <a href="/it" class="<%= navClass('/it') %>">IT Management Hub</a>
+        <a href="/operations" class="<%= navClass('/operations') %>">Operations Hub</a>
       <% } %>
-      <% if (currentUser) { %>
-        <a href="/hr" class="nav-link">HR Hub</a>
-        <a href="/it" class="nav-link">IT Management Hub</a>
-        <a href="/operations" class="nav-link">Operations Hub</a>
-      <% } %>
-      <% if (canSee('incidents')) { %><a href="/incidents" class="nav-link">Incidents</a><% } %>
+      <% if (canSee('incidents')) { %><a href="/incidents" class="<%= navClass('/incidents') %>">Incidents</a><% } %>
       <% if (canSee('requests')) { %><a href="/requests" class="nav-link">Service Requests</a><% } %>
       <% if (canSee('problems')) { %><a href="/problems" class="nav-link">Problems</a><% } %>
       <% if (canSee('changes')) { %><a href="/changes" class="nav-link">Changes</a><% } %>
