@@ -122,4 +122,70 @@
   </table>
 </div>
 
+<div class="panel">
+  <div class="panel-header"><h2>Software License Expiry (next 90 days)</h2></div>
+  <table class="table">
+    <thead><tr><th>Software</th><th>Vendor</th><th>Expiry</th><th>Urgency</th></tr></thead>
+    <tbody>
+      <% licenses.forEach(function(l){ %>
+        <tr>
+          <td><%= l.softwareName %></td><td><%= l.vendor || '—' %></td><td><%= l.expiryDate %></td>
+          <td><span class="badge badge-approval-<%= l.urgency === 'Expired' ? 'rejected' : 'pending-approval' %>"><%= l.urgency %></span></td>
+        </tr>
+      <% }) %>
+      <% if (licenses.length === 0) { %><tr><td colspan="4" class="empty-row">No software licenses expiring soon.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Calibration / Maintenance Due (next 90 days)</h2></div>
+  <table class="table">
+    <thead><tr><th>ID</th><th>Asset</th><th>Hardware Type</th><th>Department</th><th>Due</th><th>Urgency</th></tr></thead>
+    <tbody>
+      <% maintenanceDue.forEach(function(m){ %>
+        <tr>
+          <td><%= m.assetId %></td><td><%= m.assetName %></td><td><%= m.hardwareType %></td>
+          <td><%= m.department %></td><td><%= m.nextMaintenanceDue %></td>
+          <td><span class="badge badge-approval-<%= m.urgency === 'Overdue' ? 'rejected' : 'pending-approval' %>"><%= m.urgency %></span></td>
+        </tr>
+      <% }) %>
+      <% if (maintenanceDue.length === 0) { %><tr><td colspan="6" class="empty-row">Nothing due for maintenance soon.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Fleet Reliability (MTBF, from Incidents with a Related Asset)</h2></div>
+  <table class="table">
+    <thead><tr><th>Robot / Equipment</th><th>Incident Count</th><th>First Incident</th><th>Last Incident</th><th>MTBF</th></tr></thead>
+    <tbody>
+      <% fleetReliability.forEach(function(f){ %>
+        <tr>
+          <td><%= f.relatedAsset %></td><td><%= f.incidentCount %></td>
+          <td><%= f.firstIncident %></td><td><%= f.lastIncident %></td>
+          <td><%= f.mtbfDays !== null ? f.mtbfDays + ' day(s)' : '—' %></td>
+        </tr>
+      <% }) %>
+      <% if (fleetReliability.length === 0) { %><tr><td colspan="5" class="empty-row">No incidents have a Related Asset recorded yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Finance &amp; Spend Overview (Purchase Orders + Expense Claims, by month)</h2></div>
+  <table class="table">
+    <thead><tr><th>Month</th><th>Purchase Spend</th><th>POs</th><th>Approved/Reimbursed Expenses</th><th>Claims</th><th>Total</th></tr></thead>
+    <tbody>
+      <% financeSpend.forEach(function(f){ %>
+        <tr>
+          <td><%= f.month %></td><td><%= f.purchaseAmount %></td><td><%= f.purchaseCount %></td>
+          <td><%= f.expenseAmount %></td><td><%= f.expenseCount %></td><td><%= f.totalAmount %></td>
+        </tr>
+      <% }) %>
+      <% if (financeSpend.length === 0) { %><tr><td colspan="6" class="empty-row">No purchase or expense data yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
 <%- include('../partials/footer') %>
