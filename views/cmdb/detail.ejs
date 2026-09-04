@@ -47,4 +47,7 @@
   </div>
 </form>
 
+<%- include('../partials/attachments', { attachments, moduleKey, recordId: ci._id, canUpload }) %>
+<%- include('../partials/auditTrail', { auditEntries }) %>
+
 <%- include('../partials/footer') %>
