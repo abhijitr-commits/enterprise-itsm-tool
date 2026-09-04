@@ -6,7 +6,11 @@
 
 <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
 
-<form class="panel form-panel" method="post" action="<%= editing ? '/employees/' + form._id : '/employees' %>">
+<%
+  const deptList = typeof departmentList !== "undefined" ? departmentList : [];
+  const deptIsKnown = form.department && deptList.includes(form.department);
+%>
+<form class="panel form-panel" method="post" action="<%= editing ? '/employees/' + form._id : '/employees' %>" id="employee-form">
   <div class="form-grid">
     <label>Name
       <input type="text" name="name" value="<%= form.name || '' %>" required />
@@ -15,7 +19,16 @@
       <input type="email" name="email" value="<%= form.email || '' %>" required />
     </label>
     <label>Department
-      <input type="text" name="department" value="<%= form.department || '' %>" required />
+      <select id="employee-department-select" required>
+        <option value="">— Select a department —</option>
+        <% deptList.forEach(function(d) { %>
+          <option value="<%= d %>" <%= form.department === d ? 'selected' : '' %>><%= d %></option>
+        <% }) %>
+        <option value="__other__" <%= (form.department && !deptIsKnown) ? 'selected' : '' %>>Other (type manually)…</option>
+      </select>
+    </label>
+    <label id="employee-department-manual-label" style="<%= (form.department && !deptIsKnown) ? '' : 'display:none' %>">Department (type manually)
+      <input type="text" id="employee-department-manual" value="<%= (form.department && !deptIsKnown) ? form.department : '' %>" />
     </label>
     <label>Location
       <input type="text" name="location" value="<%= form.location || '' %>" />
@@ -56,5 +69,37 @@
     <button type="submit" class="btn btn-primary"><%= editing ? 'Save Changes' : 'Add Employee' %></button>
   </div>
 </form>
+
+<script>
+  (function () {
+    var select = document.getElementById('employee-department-select');
+    var manualLabel = document.getElementById('employee-department-manual-label');
+    var manual = document.getElementById('employee-department-manual');
+    var form = document.getElementById('employee-form');
+
+    select.addEventListener('change', function () {
+      if (select.value === '__other__') {
+        manualLabel.style.display = '';
+        manual.focus();
+      } else {
+        manualLabel.style.display = 'none';
+      }
+    });
+
+    form.addEventListener('submit', function (evt) {
+      var value = select.value === '__other__' ? manual.value.trim() : select.value;
+      if (!value) {
+        evt.preventDefault();
+        alert('Please select a department, or choose "Other" and type one.');
+        return;
+      }
+      var hidden = document.createElement('input');
+      hidden.type = 'hidden';
+      hidden.name = 'department';
+      hidden.value = value;
+      form.appendChild(hidden);
+    });
+  })();
+</script>
 
 <%- include('../partials/footer') %>
