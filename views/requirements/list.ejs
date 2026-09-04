@@ -12,7 +12,7 @@
     <div class="form-grid">
       <label>Department
         <select name="department">
-          <option>IT</option><option>Administration</option>
+          <% departmentList.forEach(function(d) { %><option value="<%= d %>"><%= d %></option><% }) %>
         </select>
       </label>
       <label>Vendor Name
