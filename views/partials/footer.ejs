@@ -1,5 +1,28 @@
     </main>
-    </div>
   </div>
+  <script>
+    // Each hub lives under one dropdown button in the top bar (see
+    // partials/header.ejs's .nav-dropdown <details> elements) — this is
+    // the only JS needed to make that feel like a normal menu: close any
+    // other open dropdown when one opens, and close on an outside click.
+    // Opening/closing itself is native <details>/<summary> behavior.
+    (function () {
+      var dropdowns = document.querySelectorAll(".nav-dropdown");
+      dropdowns.forEach(function (d) {
+        d.addEventListener("toggle", function () {
+          if (d.open) {
+            dropdowns.forEach(function (other) {
+              if (other !== d) other.open = false;
+            });
+          }
+        });
+      });
+      document.addEventListener("click", function (e) {
+        dropdowns.forEach(function (d) {
+          if (d.open && !d.contains(e.target)) d.open = false;
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
