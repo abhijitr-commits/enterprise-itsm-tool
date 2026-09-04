@@ -1,0 +1,54 @@
+<%- include('../partials/header', { title: 'Rooms & Equipment' }) %>
+
+<div class="page-header">
+  <h1>Rooms &amp; Equipment</h1>
+  <a class="btn btn-secondary" href="/rooms/bookings">Go to Bookings</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <div class="panel-header"><h2>Add a Room or Piece of Equipment</h2></div>
+  <p class="hint">Equipment covers any shared, schedulable resource that isn't a meeting room — a test rig, a dev robot unit, a bench.</p>
+  <form class="form-panel" method="post" action="/rooms">
+    <div class="form-grid">
+      <label>Name
+        <input type="text" name="roomName" required />
+      </label>
+      <label>Type
+        <select name="resourceType">
+          <% Object.values(RESOURCE_TYPE).forEach(function(t) { %><option value="<%= t %>"><%= t %></option><% }) %>
+        </select>
+      </label>
+      <label>Location
+        <input type="text" name="location" />
+      </label>
+      <label>Capacity <span class="hint">(rooms only)</span>
+        <input type="number" name="capacity" min="1" />
+      </label>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Add</button>
+    </div>
+  </form>
+</div>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Location</th><th>Capacity</th></tr></thead>
+    <tbody>
+      <% rooms.forEach(function(r) { %>
+        <tr>
+          <td><%= r.roomId %></td>
+          <td><%= r.roomName %></td>
+          <td><span class="badge"><%= r.resourceType %></span></td>
+          <td><%= r.location || '—' %></td>
+          <td><%= r.capacity || '—' %></td>
+        </tr>
+      <% }) %>
+      <% if (rooms.length === 0) { %><tr><td colspan="5" class="empty-row">Nothing added yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>
