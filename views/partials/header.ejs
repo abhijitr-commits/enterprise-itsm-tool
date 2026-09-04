@@ -24,6 +24,11 @@
           <input type="text" name="q" placeholder="Search everything…" />
         </form>
       <% } %>
+      <% if (currentUser) { %>
+        <a href="/hr" class="nav-link">HR Hub</a>
+        <a href="/it" class="nav-link">IT Management Hub</a>
+        <a href="/operations" class="nav-link">Operations Hub</a>
+      <% } %>
       <% if (canSee('incidents')) { %><a href="/incidents" class="nav-link">Incidents</a><% } %>
       <% if (canSee('requests')) { %><a href="/requests" class="nav-link">Service Requests</a><% } %>
       <% if (canSee('problems')) { %><a href="/problems" class="nav-link">Problems</a><% } %>
