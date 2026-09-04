@@ -31,7 +31,41 @@ const attendanceRoutes = require("./routes/attendanceRoutes");
 const shiftRoutes = require("./routes/shiftRoutes");
 const recruitmentRoutes = require("./routes/recruitmentRoutes");
 const referralRoutes = require("./routes/referralRoutes");
+const performanceRoutes = require("./routes/performanceRoutes");
+const successionRoutes = require("./routes/successionRoutes");
+const trainingRoutes = require("./routes/trainingRoutes");
+const benefitsRoutes = require("./routes/benefitsRoutes");
+const wellnessRoutes = require("./routes/wellnessRoutes");
+const policyRoutes = require("./routes/policyRoutes");
+const lettersRoutes = require("./routes/lettersRoutes");
+const documentRoutes = require("./routes/documentRoutes");
+const hrHubRoutes = require("./routes/hrHubRoutes");
+const helpdeskRoutes = require("./routes/helpdeskRoutes");
+const itAllocationRoutes = require("./routes/itAllocationRoutes");
+const itClearanceRoutes = require("./routes/itClearanceRoutes");
+const accessRequestRoutes = require("./routes/accessRequestRoutes");
+const vendorRoutes = require("./routes/vendorRoutes");
+const vendorServiceRoutes = require("./routes/vendorServiceRoutes");
+const purchaseRoutes = require("./routes/purchaseRoutes");
+const requirementRoutes = require("./routes/requirementRoutes");
+const stockRoutes = require("./routes/stockRoutes");
+const licenseRoutes = require("./routes/licenseRoutes");
+const roomRoutes = require("./routes/roomRoutes");
+const complaintRoutes = require("./routes/complaintRoutes");
+const maintenanceRoutes = require("./routes/maintenanceRoutes");
+const expenseRoutes = require("./routes/expenseRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const itHubRoutes = require("./routes/itHubRoutes");
+const systemPolicyRoutes = require("./routes/systemPolicyRoutes");
+const publicIntakeRoutes = require("./routes/publicIntakeRoutes");
+const attachmentRoutes = require("./routes/attachmentRoutes");
+const searchRoutes = require("./routes/searchRoutes");
+const safetyRoutes = require("./routes/safetyRoutes");
+const salesRoutes = require("./routes/salesRoutes");
+const workOrderRoutes = require("./routes/workOrderRoutes");
+const ecrRoutes = require("./routes/ecrRoutes");
+const shipmentRoutes = require("./routes/shipmentRoutes");
+const materialRequestRoutes = require("./routes/materialRequestRoutes");
 
 /*************************************************************
  * Auto-seed on boot — runs automatically every time the server
@@ -50,6 +84,8 @@ async function autoSeed() {
   const Permission = require("./models/Permission");
   const SLAMatrix = require("./models/SLAMatrix");
   const User = require("./models/User");
+  const Room = require("./models/Room");
+  const { generateSequentialId } = require("./utils/idGenerator");
   const { DEFAULT_PERMISSIONS_MAP } = require("./config/permissions");
   const { PRIORITY, ROLE, COMPANY_EMAIL_DOMAIN } = require("./config/constants");
 
@@ -69,6 +105,20 @@ async function autoSeed() {
       { $set: { responseTimeHours: hours.response, resolutionTimeHours: hours.resolution } },
       { upsert: true }
     );
+  }
+
+  // Port of RoomBookingEngine.gs's seedDefaultConferenceRooms() — seeds
+  // the company's real conference rooms once, so there's something to
+  // book immediately instead of an empty list. Idempotent: only runs
+  // when the Room collection is completely empty.
+  const roomCount = await Room.countDocuments();
+  if (roomCount === 0) {
+    const defaultRooms = ["Board Room", "Mechanical Meeting Room", "Tech-Ops Meeting Room1", "Tech-Ops Meeting Room2", "Cabin1", "Cabin2"];
+    for (const roomName of defaultRooms) {
+      const roomId = await generateSequentialId("ROOM");
+      await Room.create({ roomId, roomName });
+    }
+    console.log(`[auto-seed] First run: created ${defaultRooms.length} default conference room(s).`);
   }
 
   const userCount = await User.countDocuments();
@@ -136,6 +186,40 @@ async function start() {
   app.use("/shifts", shiftRoutes);
   app.use("/recruitment", recruitmentRoutes);
   app.use("/referrals", referralRoutes);
+  app.use("/performance", performanceRoutes);
+  app.use("/succession", successionRoutes);
+  app.use("/training", trainingRoutes);
+  app.use("/benefits", benefitsRoutes);
+  app.use("/wellness", wellnessRoutes);
+  app.use("/policies", policyRoutes);
+  app.use("/letters", lettersRoutes);
+  app.use("/documents", documentRoutes);
+  app.use("/hr", hrHubRoutes);
+  app.use("/helpdesk", helpdeskRoutes);
+  app.use("/asset-allocation", itAllocationRoutes);
+  app.use("/it-clearance", itClearanceRoutes);
+  app.use("/access-requests", accessRequestRoutes);
+  app.use("/vendors", vendorRoutes);
+  app.use("/vendor-service", vendorServiceRoutes);
+  app.use("/purchases", purchaseRoutes);
+  app.use("/requirements", requirementRoutes);
+  app.use("/stock", stockRoutes);
+  app.use("/licenses", licenseRoutes);
+  app.use("/rooms", roomRoutes);
+  app.use("/complaints", complaintRoutes);
+  app.use("/maintenance", maintenanceRoutes);
+  app.use("/expenses", expenseRoutes);
+  app.use("/it", itHubRoutes);
+  app.use("/system-policies", systemPolicyRoutes);
+  app.use("/support", publicIntakeRoutes);
+  app.use("/attachments", attachmentRoutes);
+  app.use("/search", searchRoutes);
+  app.use("/safety", safetyRoutes);
+  app.use("/sales", salesRoutes);
+  app.use("/work-orders", workOrderRoutes);
+  app.use("/engineering-changes", ecrRoutes);
+  app.use("/shipments", shipmentRoutes);
+  app.use("/material-requests", materialRequestRoutes);
 
   app.use((req, res) => res.status(404).render("errors/404"));
 
