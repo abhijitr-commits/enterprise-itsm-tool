@@ -87,6 +87,8 @@ async function autoSeed() {
   const User = require("./models/User");
   const Room = require("./models/Room");
   const Department = require("./models/Department");
+  const Category = require("./models/Category");
+  const Holiday = require("./models/Holiday");
   const { generateSequentialId } = require("./utils/idGenerator");
   const { DEFAULT_PERMISSIONS_MAP } = require("./config/permissions");
   const { PRIORITY, ROLE, COMPANY_EMAIL_DOMAIN } = require("./config/constants");
@@ -107,6 +109,42 @@ async function autoSeed() {
       { $set: { responseTimeHours: hours.response, resolutionTimeHours: hours.resolution } },
       { upsert: true }
     );
+  }
+
+  // Master Data -> SLA Matrix supports Problem/Change/Request too (see
+  // masterDataController.js's module options), but only Incident ever
+  // had default rows — the other three modules had nothing to compare
+  // against for SLA reporting/breach checks out of the box. Same
+  // upsert-on-every-start pattern as Incident above, just looser
+  // targets since these are lower-urgency than a live Incident.
+  const DEFAULT_OTHER_SLA_HOURS = {
+    Problem: {
+      [PRIORITY.CRITICAL]: { response: 4, resolution: 48 },
+      [PRIORITY.HIGH]: { response: 8, resolution: 96 },
+      [PRIORITY.MEDIUM]: { response: 24, resolution: 168 },
+      [PRIORITY.LOW]: { response: 48, resolution: 336 },
+    },
+    Change: {
+      [PRIORITY.CRITICAL]: { response: 4, resolution: 24 },
+      [PRIORITY.HIGH]: { response: 8, resolution: 48 },
+      [PRIORITY.MEDIUM]: { response: 24, resolution: 120 },
+      [PRIORITY.LOW]: { response: 48, resolution: 240 },
+    },
+    Request: {
+      [PRIORITY.CRITICAL]: { response: 4, resolution: 24 },
+      [PRIORITY.HIGH]: { response: 8, resolution: 48 },
+      [PRIORITY.MEDIUM]: { response: 24, resolution: 96 },
+      [PRIORITY.LOW]: { response: 48, resolution: 168 },
+    },
+  };
+  for (const [module, byPriority] of Object.entries(DEFAULT_OTHER_SLA_HOURS)) {
+    for (const [priority, hours] of Object.entries(byPriority)) {
+      await SLAMatrix.updateOne(
+        { module, priority },
+        { $set: { responseTimeHours: hours.response, resolutionTimeHours: hours.resolution } },
+        { upsert: true }
+      );
+    }
   }
 
   // Port of RoomBookingEngine.gs's seedDefaultConferenceRooms() — seeds
@@ -154,6 +192,43 @@ async function autoSeed() {
     ];
     await Department.insertMany(defaultDepartments.map((name) => ({ name })));
     console.log(`[auto-seed] First run: created ${defaultDepartments.length} default department(s).`);
+  }
+
+  // Master Data -> Categories already existed and is already Admin-
+  // editable, but no controller ever consumed it and it was never
+  // seeded, so Incidents' Category field and Assets' Type field were
+  // both plain free text with nothing to suggest. incidentController.js
+  // and assetController.js now offer these as <datalist> suggestions —
+  // seed a starting set so that isn't a blank list on day one.
+  // Idempotent: only runs when the whole Category collection is empty,
+  // so an Admin's own edits/additions are never overwritten.
+  const categoryCount = await Category.countDocuments();
+  if (categoryCount === 0) {
+    const defaultCategories = [
+      ...["Hardware", "Software", "Network", "Access", "Robotics/Equipment"].map((name) => ({ name, module: "Incident" })),
+      ...["Laptop", "Desktop", "Monitor", "Printer", "Network Equipment", "Robot Arm", "Sensor Module", "Actuator", "Controller Board", "Software License"].map(
+        (name) => ({ name, module: "Asset" })
+      ),
+    ];
+    await Category.insertMany(defaultCategories);
+    console.log(`[auto-seed] First run: created ${defaultCategories.length} default categor(y/ies).`);
+  }
+
+  // Holiday already existed as a model read by the SLA business-hours
+  // calculator and the Earned Leave accrual calc (see src/utils/sla.js
+  // / leaveBalances.js), but until masterDataController.js added a
+  // "holidays" table there was no screen anywhere that could write to
+  // it, so both calculations silently ran as if the company observed
+  // zero holidays. This doesn't try to guess a full regional holiday
+  // calendar (that's a real business decision for an Admin to make at
+  // Master Data -> Holidays) — it just seeds one universally-safe
+  // placeholder so the collection isn't empty, and so the new screen
+  // has something to show the first time an Admin opens it.
+  const holidayCount = await Holiday.countDocuments();
+  if (holidayCount === 0) {
+    const currentYear = new Date().getFullYear();
+    await Holiday.create({ date: new Date(currentYear, 0, 1), description: "New Year's Day" });
+    console.log(`[auto-seed] First run: created 1 starter holiday (New Year's Day, ${currentYear}) — add the rest at Master Data -> Holidays.`);
   }
 
   const userCount = await User.countDocuments();
