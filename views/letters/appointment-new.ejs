@@ -6,17 +6,35 @@
 
 <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
 
-<form class="panel form-panel" method="post" action="/letters/appointment">
-  <input type="hidden" name="employeeId" value="<%= form.employeeId || '' %>" />
+<% if (employees && employees.length) { %>
+  <div class="alert alert-success">The template is already filled in — pick an employee below and every field auto-fills, ready to generate.</div>
+<% } %>
+
+<form class="panel form-panel" method="post" action="/letters/appointment" id="appointment-letter-form">
+  <input type="hidden" name="employeeId" id="appt-employeeId" value="<%= form.employeeId || '' %>" />
   <div class="form-grid">
-    <label>Employee Name
-      <input type="text" name="employeeName" value="<%= form.employeeName || '' %>" required />
+    <label>Employee
+      <select id="appt-employee-select">
+        <option value="">— Select an employee —</option>
+        <% (employees || []).forEach(function(e) { %>
+          <option
+            value="<%= e.name %>"
+            data-id="<%= e.employeeId %>"
+            data-department="<%= e.department || '' %>"
+            data-designation="<%= e.designation || '' %>"
+          ><%= e.name %> <% if (e.department) { %>— <%= e.department %><% } %></option>
+        <% }) %>
+        <option value="__other__">Other (type a name manually)…</option>
+      </select>
+    </label>
+    <label id="appt-employeeName-label" style="display:none">Employee Name
+      <input type="text" id="appt-employeeName-manual" value="<%= form.employeeName || '' %>" />
     </label>
     <label>Department
-      <input type="text" name="department" value="<%= form.department || '' %>" />
+      <input type="text" name="department" id="appt-department" value="<%= form.department || '' %>" />
     </label>
     <label>Designation
-      <input type="text" name="designation" value="<%= form.designation || '' %>" />
+      <input type="text" name="designation" id="appt-designation" value="<%= form.designation || '' %>" />
     </label>
     <label>Joining Date
       <input type="date" name="joiningDate" value="<%= form.joiningDate || '' %>" />
@@ -27,5 +45,45 @@
     <button type="submit" class="btn btn-primary">Generate Appointment Letter</button>
   </div>
 </form>
+
+<script>
+  (function () {
+    var select = document.getElementById('appt-employee-select');
+    var nameLabel = document.getElementById('appt-employeeName-label');
+    var nameManual = document.getElementById('appt-employeeName-manual');
+    var department = document.getElementById('appt-department');
+    var designation = document.getElementById('appt-designation');
+    var employeeId = document.getElementById('appt-employeeId');
+    var form = document.getElementById('appointment-letter-form');
+
+    select.addEventListener('change', function () {
+      var opt = select.options[select.selectedIndex];
+      if (select.value === '__other__') {
+        nameLabel.style.display = '';
+        nameManual.focus();
+        employeeId.value = '';
+      } else {
+        nameLabel.style.display = 'none';
+        employeeId.value = (opt && opt.getAttribute('data-id')) || '';
+        department.value = (opt && opt.getAttribute('data-department')) || '';
+        designation.value = (opt && opt.getAttribute('data-designation')) || '';
+      }
+    });
+
+    form.addEventListener('submit', function (evt) {
+      var name = select.value === '__other__' ? nameManual.value.trim() : select.value;
+      if (!name) {
+        evt.preventDefault();
+        alert('Please select an employee, or choose "Other" and type a name.');
+        return;
+      }
+      var hidden = document.createElement('input');
+      hidden.type = 'hidden';
+      hidden.name = 'employeeName';
+      hidden.value = name;
+      form.appendChild(hidden);
+    });
+  })();
+</script>
 
 <%- include('../partials/footer') %>

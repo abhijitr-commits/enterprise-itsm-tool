@@ -13,20 +13,38 @@
   Sent" on the candidate's Pre-Onboarding checklist.
 </div>
 
-<form class="panel form-panel" method="post" action="/letters/offer">
-  <input type="hidden" name="candidateId" value="<%= form.candidateId || '' %>" />
+<% if (candidates && candidates.length) { %>
+  <div class="alert alert-success">The template is already filled in — pick a candidate below and every field auto-fills, ready to generate.</div>
+<% } %>
+
+<form class="panel form-panel" method="post" action="/letters/offer" id="offer-letter-form">
+  <input type="hidden" name="candidateId" id="offer-candidateId" value="<%= form.candidateId || '' %>" />
   <div class="form-grid">
-    <label>Candidate Name
-      <input type="text" name="candidateName" value="<%= form.candidateName || '' %>" required />
+    <label>Candidate
+      <select id="offer-candidate-select">
+        <option value="">— Select a candidate —</option>
+        <% (candidates || []).forEach(function(c) { %>
+          <option
+            value="<%= c.name %>"
+            data-id="<%= c.candidateId %>"
+            data-email="<%= c.email || '' %>"
+            data-designation="<%= c.jobTitle || '' %>"
+          ><%= c.name %> <% if (c.jobTitle) { %>— <%= c.jobTitle %><% } %></option>
+        <% }) %>
+        <option value="__other__">Other (type a name manually)…</option>
+      </select>
+    </label>
+    <label id="offer-candidateName-label" style="display:none">Candidate Name
+      <input type="text" id="offer-candidateName-manual" value="<%= form.candidateName || '' %>" />
     </label>
     <label>Candidate Email
-      <input type="email" name="candidateEmail" value="<%= form.candidateEmail || '' %>" required />
+      <input type="email" name="candidateEmail" id="offer-candidateEmail" value="<%= form.candidateEmail || '' %>" required />
     </label>
     <label>Department
-      <input type="text" name="department" value="<%= form.department || '' %>" />
+      <input type="text" name="department" id="offer-department" value="<%= form.department || '' %>" />
     </label>
     <label>Designation
-      <input type="text" name="designation" value="<%= form.designation || '' %>" />
+      <input type="text" name="designation" id="offer-designation" value="<%= form.designation || '' %>" />
     </label>
     <label>Joining Date
       <input type="date" name="joiningDate" value="<%= form.joiningDate || '' %>" />
@@ -37,5 +55,47 @@
     <button type="submit" class="btn btn-primary">Generate Offer Letter</button>
   </div>
 </form>
+
+<script>
+  (function () {
+    var select = document.getElementById('offer-candidate-select');
+    var nameLabel = document.getElementById('offer-candidateName-label');
+    var nameManual = document.getElementById('offer-candidateName-manual');
+    var email = document.getElementById('offer-candidateEmail');
+    var department = document.getElementById('offer-department');
+    var designation = document.getElementById('offer-designation');
+    var candidateId = document.getElementById('offer-candidateId');
+    var form = document.getElementById('offer-letter-form');
+
+    select.addEventListener('change', function () {
+      var opt = select.options[select.selectedIndex];
+      if (select.value === '__other__') {
+        nameLabel.style.display = '';
+        nameManual.focus();
+        candidateId.value = '';
+      } else {
+        nameLabel.style.display = 'none';
+        candidateId.value = (opt && opt.getAttribute('data-id')) || '';
+        email.value = (opt && opt.getAttribute('data-email')) || '';
+        designation.value = (opt && opt.getAttribute('data-designation')) || '';
+        department.value = department.value || '';
+      }
+    });
+
+    form.addEventListener('submit', function (evt) {
+      var name = select.value === '__other__' ? nameManual.value.trim() : select.value;
+      if (!name) {
+        evt.preventDefault();
+        alert('Please select a candidate, or choose "Other" and type a name.');
+        return;
+      }
+      var hidden = document.createElement('input');
+      hidden.type = 'hidden';
+      hidden.name = 'candidateName';
+      hidden.value = name;
+      form.appendChild(hidden);
+    });
+  })();
+</script>
 
 <%- include('../partials/footer') %>
