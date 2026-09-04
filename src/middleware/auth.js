@@ -10,6 +10,11 @@ async function attachUser(req, res, next) {
       }
     }
     res.locals.currentUser = req.user || null;
+    // Bare path (no query string) so header.ejs's top tab bar can
+    // highlight whichever department tab the current page belongs to
+    // (e.g. "/operations/..." keeps the Operations tab lit) without
+    // every single controller having to pass it in explicitly.
+    res.locals.currentPath = req.path || req.originalUrl.split("?")[0];
     next();
   } catch (err) {
     next(err);
