@@ -12,15 +12,23 @@ const Asset = require("../models/Asset");
 const Vendor = require("../models/Vendor");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
-const { logAssetHistory } = require("./assetController");
+const { logAssetHistory, listAssetTypeNames } = require("./assetController");
 
 async function listPurchases(req, res) {
-  const [purchases, vendors] = await Promise.all([
+  const [purchases, vendors, assetTypes] = await Promise.all([
     PurchaseOrder.find().sort({ date: -1 }).lean(),
     Vendor.find({ status: "Active" }).sort({ name: 1 }).lean(),
+    listAssetTypeNames(),
   ]);
 
-  res.render("purchases/list", { purchases, vendors, PURCHASE_STATUS, message: req.query.message || null });
+  res.render("purchases/list", {
+    purchases,
+    vendors,
+    PURCHASE_STATUS,
+    HARDWARE_TYPE: Asset.HARDWARE_TYPE,
+    assetTypes,
+    message: req.query.message || null,
+  });
 }
 
 async function createPurchase(req, res) {
@@ -62,7 +70,7 @@ async function createPurchase(req, res) {
  */
 async function updateStatus(req, res) {
   try {
-    const { status, createAsset, assetType } = req.body;
+    const { status, createAsset, assetType, hardwareType } = req.body;
     if (!Object.values(PURCHASE_STATUS).includes(status)) throw new Error(`Invalid status: ${status}`);
 
     const purchase = await PurchaseOrder.findById(req.params.id);
@@ -82,6 +90,7 @@ async function updateStatus(req, res) {
         assetId,
         assetName: purchase.itemDescription,
         type: assetType || "Other",
+        hardwareType: Object.values(Asset.HARDWARE_TYPE).includes(hardwareType) ? hardwareType : Asset.HARDWARE_TYPE.IT_EQUIPMENT,
         department: "Unassigned",
         location: "Unassigned",
         status: Asset.ASSET_STATUS.IN_STORAGE,

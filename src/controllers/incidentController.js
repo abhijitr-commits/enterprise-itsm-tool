@@ -7,6 +7,7 @@
  *************************************************************/
 const Incident = require("../models/Incident");
 const Asset = require("../models/Asset");
+const Category = require("../models/Category");
 const { STATUS, PRIORITY } = require("../config/constants");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { calculateSLADue } = require("../utils/sla");
@@ -25,6 +26,16 @@ const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/re
 async function listAssetNames() {
   const assets = await Asset.find({ status: { $ne: "Decommissioned" } }).select("assetId assetName").sort({ assetName: 1 }).lean();
   return assets.map((a) => `${a.assetName} (${a.assetId})`);
+}
+
+// Master Data -> Categories has an "Incident" module column purpose-built
+// for this field, so the Category field offers real suggestions instead
+// of every reporter re-typing "Hardware"/"Network"/etc. their own way —
+// still a <datalist>, not a hard <select>, since an edge-case incident
+// category an Admin hasn't added yet shouldn't be un-reportable.
+async function listIncidentCategoryNames() {
+  const categories = await Category.find({ module: "Incident" }).select("name").sort({ name: 1 }).lean();
+  return categories.map((c) => c.name);
 }
 
 async function listIncidents(req, res) {
@@ -60,8 +71,8 @@ async function listIncidents(req, res) {
 }
 
 async function showNewForm(req, res) {
-  const assetNames = await listAssetNames();
-  res.render("incidents/new", { PRIORITY, error: null, form: {}, assetNames });
+  const [assetNames, categories] = await Promise.all([listAssetNames(), listIncidentCategoryNames()]);
+  res.render("incidents/new", { PRIORITY, error: null, form: {}, assetNames, categories });
 }
 
 async function createIncident(req, res) {
@@ -103,8 +114,8 @@ async function createIncident(req, res) {
 
     res.redirect(`/incidents/${incident._id}?created=1`);
   } catch (err) {
-    const assetNames = await listAssetNames();
-    res.status(400).render("incidents/new", { PRIORITY, error: err.message, form: req.body, assetNames });
+    const [assetNames, categories] = await Promise.all([listAssetNames(), listIncidentCategoryNames()]);
+    res.status(400).render("incidents/new", { PRIORITY, error: err.message, form: req.body, assetNames, categories });
   }
 }
 
@@ -112,11 +123,12 @@ async function showIncident(req, res) {
   const incident = await Incident.findById(req.params.id).lean();
   if (!incident) return res.status(404).render("errors/404");
 
-  const [attachments, auditEntries, canUpload, assetNames] = await Promise.all([
+  const [attachments, auditEntries, canUpload, assetNames, categories] = await Promise.all([
     getAttachmentsForRecord("incidents", incident._id),
     getAuditTrailForRecord(incident._id),
     hasPermission(req.user.role, "incidents_edit"),
     listAssetNames(),
+    listIncidentCategoryNames(),
   ]);
 
   res.render("incidents/detail", {
@@ -129,6 +141,7 @@ async function showIncident(req, res) {
     canUpload,
     moduleKey: "incidents",
     assetNames,
+    categories,
   });
 }
 

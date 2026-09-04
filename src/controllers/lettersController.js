@@ -79,6 +79,22 @@ This certificate is issued for record purposes.
 HR Team
 Peppermint Robotics`;
 
+const DEFAULT_RELIEVING_LETTER_TEMPLATE = `RELIEVING LETTER
+
+Date: {{TodayDate}}
+
+Dear {{EmployeeName}},
+
+This is to confirm that you were employed with Peppermint Robotics as {{Designation}} in the {{Department}} department, and that your last working day with us was {{LastWorkingDay}}.
+
+You are hereby relieved of your duties and responsibilities with effect from that date. All dues, if any, have been settled as per company policy.
+
+We thank you for your contribution and wish you the very best in your future endeavors.
+
+Warm regards,
+HR Team
+Peppermint Robotics`;
+
 /** Port of mergeLetterTemplate() — unknown placeholders are left as-is rather than silently vanishing, so a typo'd template tag is obvious instead of hidden. */
 function mergeLetterTemplate(template, data) {
   let result = template;
@@ -95,12 +111,13 @@ function formatToday() {
 /* ---------- TEMPLATES ---------- */
 
 async function showTemplates(req, res) {
-  const [offerLetter, appointmentLetter, noDuesCertificate] = await Promise.all([
+  const [offerLetter, appointmentLetter, noDuesCertificate, relievingLetter] = await Promise.all([
     getSetting("OfferLetterTemplate", DEFAULT_OFFER_LETTER_TEMPLATE),
     getSetting("AppointmentLetterTemplate", DEFAULT_APPOINTMENT_LETTER_TEMPLATE),
     getSetting("NoDuesCertificateTemplate", DEFAULT_NO_DUES_CERTIFICATE_TEMPLATE),
+    getSetting("RelievingLetterTemplate", DEFAULT_RELIEVING_LETTER_TEMPLATE),
   ]);
-  res.render("letters/templates", { offerLetter, appointmentLetter, noDuesCertificate, message: req.query.message || null });
+  res.render("letters/templates", { offerLetter, appointmentLetter, noDuesCertificate, relievingLetter, message: req.query.message || null });
 }
 
 async function saveTemplates(req, res) {
@@ -108,6 +125,7 @@ async function saveTemplates(req, res) {
     setSetting("OfferLetterTemplate", req.body.offerLetter || DEFAULT_OFFER_LETTER_TEMPLATE),
     setSetting("AppointmentLetterTemplate", req.body.appointmentLetter || DEFAULT_APPOINTMENT_LETTER_TEMPLATE),
     setSetting("NoDuesCertificateTemplate", req.body.noDuesCertificate || DEFAULT_NO_DUES_CERTIFICATE_TEMPLATE),
+    setSetting("RelievingLetterTemplate", req.body.relievingLetter || DEFAULT_RELIEVING_LETTER_TEMPLATE),
   ]);
 
   await logAudit({ user: req.user._id, action: "Save Letter Templates", entityType: "Setting" });
@@ -242,6 +260,63 @@ async function generateAppointmentLetter(req, res) {
   }
 }
 
+// "Select a name and ready to go" for the Relieving Letter too — the
+// Employee Directory was the only thing generating letters for exiting
+// employees before now (via the auto-generated No Dues Certificate);
+// this is the separate, formal "you worked here, this was your role,
+// this was your last day" document a departing employee actually needs
+// for a future employer's background check, distinct from the No Dues
+// Certificate's clearance-status report.
+async function showRelievingForm(req, res) {
+  const employees = await getAppointmentEmployeeOptions();
+
+  res.render("letters/relieving-new", {
+    error: null,
+    employees,
+    form: {
+      employeeName: req.query.employeeName || "",
+      department: req.query.department || "",
+      designation: req.query.designation || "",
+      lastWorkingDay: req.query.lastWorkingDay || "",
+      employeeId: req.query.employeeId || "",
+    },
+  });
+}
+
+async function generateRelievingLetter(req, res) {
+  try {
+    const data = req.body;
+    if (!data.employeeName) throw new Error("Employee name is required.");
+    if (!data.lastWorkingDay) throw new Error("Last working day is required.");
+
+    const template = await getSetting("RelievingLetterTemplate", DEFAULT_RELIEVING_LETTER_TEMPLATE);
+    const merged = mergeLetterTemplate(template, {
+      EmployeeName: data.employeeName,
+      Department: data.department || "",
+      Designation: data.designation || "",
+      LastWorkingDay: new Date(data.lastWorkingDay).toLocaleDateString(),
+      TodayDate: formatToday(),
+    });
+
+    const letterId = await generateSequentialId("LTR");
+    const letter = await Letter.create({
+      letterId,
+      type: LETTER_TYPE.RELIEVING,
+      recipientName: data.employeeName,
+      content: merged,
+      relatedId: data.employeeId || "",
+      generatedBy: req.user.email,
+    });
+
+    await logAudit({ user: req.user._id, action: "Relieving Letter Generated", entityType: "Letter", entityId: letter._id, details: data.employeeName });
+
+    res.redirect(`/letters/${letter.letterId}`);
+  } catch (err) {
+    const employees = await getAppointmentEmployeeOptions();
+    res.status(400).render("letters/relieving-new", { error: err.message, employees, form: req.body });
+  }
+}
+
 /**
  * INTERNAL — no permission check, called from resignationController.js
  * once every clearance is "Cleared" (port of the original's automatic
@@ -304,6 +379,8 @@ module.exports = {
   generateOfferLetter,
   showAppointmentForm,
   generateAppointmentLetter,
+  showRelievingForm,
+  generateRelievingLetter,
   generateNoDuesCertificateInternal,
   showLetter,
 };

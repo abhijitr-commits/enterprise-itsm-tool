@@ -101,6 +101,25 @@ async function submitResponse(req, res) {
   }
 }
 
+/**
+ * There was previously no way to ever close a Pulse Survey — once
+ * created it stayed "Open" forever and showPulse() kept serving it to
+ * every employee indefinitely, since nothing in this file or
+ * wellnessRoutes.js ever set status to "Closed". Gated the same as
+ * creating a survey ("wellness_manage").
+ */
+async function closeSurvey(req, res) {
+  const survey = await PulseSurvey.findById(req.params.id);
+  if (!survey) return res.status(404).render("errors/404");
+
+  survey.status = "Closed";
+  await survey.save();
+
+  await logAudit({ user: req.user._id, action: "Close Pulse Survey", entityType: "PulseSurvey", entityId: survey._id, details: survey.question });
+
+  res.redirect("/wellness/pulse/results?message=Pulse Survey Closed");
+}
+
 async function pulseResults(req, res) {
   const surveys = await PulseSurvey.find().sort({ createdDate: -1 }).lean();
 
@@ -150,6 +169,7 @@ module.exports = {
   showNewSurveyForm,
   createSurvey,
   submitResponse,
+  closeSurvey,
   pulseResults,
   listKudos,
   giveKudos,

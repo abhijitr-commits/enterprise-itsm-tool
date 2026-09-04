@@ -17,8 +17,31 @@ const Department = require("../models/Department");
 const Location = require("../models/Location");
 const Category = require("../models/Category");
 const SLAMatrix = require("../models/SLAMatrix");
+const Holiday = require("../models/Holiday");
 const { PRIORITY } = require("../config/constants");
 const { logAudit } = require("../utils/auditLog");
+
+// The Holiday model already existed (src/models/Holiday.js) and is
+// already read by the SLA business-hours calculator and the Earned
+// Leave accrual calc (see src/utils/sla.js / leaveBalances.js), but
+// until now there was no controller, route, or view anywhere that
+// could ever write to it — an Admin had no way to add a single
+// company holiday, so both calculations silently behaved as if the
+// company observed zero holidays, forever. Wiring it into the same
+// generic Master Data CRUD as everything else fixes that with no new
+// screen to build.
+const HOLIDAY_FIELDS = [
+  { name: "date", label: "Date", type: "date", required: true },
+  { name: "description", label: "Description", type: "text", required: true },
+];
+
+// The three Department rows teamAccess.js matches on (case-insensitive)
+// to gate HR/IT/Administration team access — see isHRTeam/isITTeam/
+// isAdminTeam. Renaming or deleting one of these from Master Data would
+// silently lock out (or open up) a whole team's access with no warning,
+// so these three names are the one thing on this generic CRUD screen
+// that isn't freely editable.
+const PROTECTED_DEPARTMENT_NAMES = ["hr", "it", "administration"];
 
 const MASTER_DATA_TABLES = {
   departments: {
@@ -69,6 +92,11 @@ const MASTER_DATA_TABLES = {
       { name: "resolutionTimeHours", label: "Resolution SLA (Hours)", type: "number", required: true },
     ],
   },
+  holidays: {
+    label: "Holidays",
+    model: Holiday,
+    fields: HOLIDAY_FIELDS,
+  },
 };
 
 function getTableOr404(req, res) {
@@ -96,6 +124,7 @@ async function listRows(req, res) {
     rows,
     tables: tableNav(),
     message: req.query.message || null,
+    error: req.query.error || null,
   });
 }
 
@@ -173,6 +202,15 @@ async function updateRow(req, res) {
     const row = await table.model.findById(req.params.id);
     if (!row) return res.status(404).render("errors/404");
 
+    if (req.params.table === "departments" && PROTECTED_DEPARTMENT_NAMES.includes(String(row.name || "").trim().toLowerCase())) {
+      const newName = String(req.body.name || "").trim().toLowerCase();
+      if (newName !== String(row.name || "").trim().toLowerCase()) {
+        throw new Error(
+          `"${row.name}" can't be renamed — team access (HR/IT/Administration) is matched against this exact name. Add a new department instead.`
+        );
+      }
+    }
+
     for (const field of table.fields) {
       if (field.required && !req.body[field.name]) {
         throw new Error(`${field.label} is required.`);
@@ -206,6 +244,15 @@ async function updateRow(req, res) {
 async function deleteRow(req, res) {
   const table = getTableOr404(req, res);
   if (!table) return;
+
+  if (req.params.table === "departments") {
+    const existing = await table.model.findById(req.params.id).lean();
+    if (existing && PROTECTED_DEPARTMENT_NAMES.includes(String(existing.name || "").trim().toLowerCase())) {
+      return res.redirect(
+        `/masterdata/departments?error=${encodeURIComponent(`"${existing.name}" can't be deleted — team access (HR/IT/Administration) depends on it.`)}`
+      );
+    }
+  }
 
   const row = await table.model.findByIdAndDelete(req.params.id);
 

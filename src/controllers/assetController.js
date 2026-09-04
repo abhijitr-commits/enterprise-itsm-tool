@@ -3,6 +3,7 @@
  *************************************************************/
 const Asset = require("../models/Asset");
 const AssetHistory = require("../models/AssetHistory");
+const Category = require("../models/Category");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
@@ -38,8 +39,19 @@ async function listAssets(req, res) {
   });
 }
 
-function showNewForm(req, res) {
-  res.render("assets/new", { error: null, form: {}, HARDWARE_TYPE });
+// Master Data -> Categories has an "Asset" module column purpose-built
+// for this field ("Laptop", "Robot Arm", "Sensor Module", etc.) — kept
+// as a <datalist>, not a hard <select>, same reasoning as Incident's
+// Category field (see incidentController.js): still free text so an
+// Admin doesn't have to pre-populate every possible asset type first.
+async function listAssetTypeNames() {
+  const categories = await Category.find({ module: "Asset" }).select("name").sort({ name: 1 }).lean();
+  return categories.map((c) => c.name);
+}
+
+async function showNewForm(req, res) {
+  const assetTypes = await listAssetTypeNames();
+  res.render("assets/new", { error: null, form: {}, HARDWARE_TYPE, assetTypes });
 }
 
 async function createAsset(req, res) {
@@ -83,7 +95,8 @@ async function createAsset(req, res) {
 
     res.redirect(`/assets/${asset._id}?created=1`);
   } catch (err) {
-    res.status(400).render("assets/new", { error: err.message, form: req.body });
+    const assetTypes = await listAssetTypeNames();
+    res.status(400).render("assets/new", { error: err.message, form: req.body, HARDWARE_TYPE, assetTypes });
   }
 }
 
@@ -91,11 +104,12 @@ async function showAsset(req, res) {
   const asset = await Asset.findById(req.params.id).lean();
   if (!asset) return res.status(404).render("errors/404");
 
-  const [history, attachments, auditEntries, canUpload] = await Promise.all([
+  const [history, attachments, auditEntries, canUpload, assetTypes] = await Promise.all([
     AssetHistory.find({ assetId: asset.assetId }).sort({ date: -1 }).lean(),
     getAttachmentsForRecord("assets", asset._id),
     getAuditTrailForRecord(asset._id),
     hasPermission(req.user.role, "assets_edit"),
+    listAssetTypeNames(),
   ]);
 
   res.render("assets/detail", {
@@ -108,6 +122,7 @@ async function showAsset(req, res) {
     auditEntries,
     canUpload,
     moduleKey: "assets",
+    assetTypes,
   });
 }
 
@@ -306,4 +321,5 @@ module.exports = {
   returnAssetInternal,
   logAssetHistory,
   logMaintenance,
+  listAssetTypeNames,
 };
