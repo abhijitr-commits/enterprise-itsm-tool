@@ -6,16 +6,24 @@
  * purely an aggregator over other collections, same as the original.
  *
  * Leave balances are wired up as of Phase 4B (see utils/leaveBalances.js).
- * Trainings are still a placeholder until Phase 4D (LMS) exists — the
- * original pulled that from getMyTrainingsSafe(), which has no Node
- * equivalent yet. The profile page shows an honest "not available yet"
- * note for that section instead of silently omitting it.
+ * My Trainings is wired up as of Phase 4D (LMS) — pulls this employee's
+ * enrollments + earned certificates, same as the original's
+ * getMyTrainingsSafe()/getMyCertificatesSafe(). My Benefits, My
+ * Documents, and pending Policy Acknowledgments are wired up as of
+ * Phase 4E, same as the original's getMyBenefitsSafe()/
+ * getMyDocumentsSafe()/getMyPendingPolicyAcknowledgmentsSafe().
  *************************************************************/
 const Employee = require("../models/Employee");
 const Asset = require("../models/Asset");
 const ChecklistItem = require("../models/Checklist");
 const { CHECKLIST_TYPE } = require("../models/Checklist");
 const { getAllLeaveBalances } = require("../utils/leaveBalances");
+const Enrollment = require("../models/Enrollment");
+const Certificate = require("../models/Certificate");
+const BenefitEnrollment = require("../models/BenefitEnrollment");
+const EmployeeDocument = require("../models/EmployeeDocument");
+const Policy = require("../models/Policy");
+const PolicyAcknowledgment = require("../models/PolicyAcknowledgment");
 
 async function showMyProfile(req, res) {
   const me = await Employee.findOne({ email: req.user.email.toLowerCase().trim() }).lean();
@@ -27,14 +35,28 @@ async function showMyProfile(req, res) {
       assets: [],
       onboardingTasks: [],
       leaveBalances: null,
+      myTrainings: [],
+      myCertificates: [],
+      myBenefits: [],
+      myDocuments: [],
+      pendingPolicies: [],
     });
   }
 
-  const [assets, onboardingTasks, leaveBalances] = await Promise.all([
+  const [assets, onboardingTasks, leaveBalances, myTrainings, myCertificates, myBenefits, myDocuments, allPolicies, myAcks] = await Promise.all([
     Asset.find({ assignedTo: new RegExp(`^${me.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") }).lean(),
     ChecklistItem.find({ type: CHECKLIST_TYPE.ONBOARDING, employee: me.name }).sort({ createdAt: 1 }).lean(),
     getAllLeaveBalances(me.name),
+    Enrollment.find({ employee: me.name }).sort({ enrollmentDate: -1 }).lean(),
+    Certificate.find({ employee: me.name }).sort({ issuedDate: -1 }).lean(),
+    BenefitEnrollment.find({ employee: me.name }).lean(),
+    EmployeeDocument.find({ employee: me.name }).select("-data").sort({ uploadDate: -1 }).lean(),
+    Policy.find({ active: true }).lean(),
+    PolicyAcknowledgment.find({ employee: me.name }).lean(),
   ]);
+
+  const ackedIds = new Set(myAcks.map((a) => a.policyId));
+  const pendingPolicies = allPolicies.filter((p) => !ackedIds.has(p.policyId));
 
   res.render("profile/index", {
     linked: true,
@@ -42,6 +64,11 @@ async function showMyProfile(req, res) {
     assets,
     onboardingTasks,
     leaveBalances,
+    myTrainings,
+    myCertificates,
+    myBenefits,
+    myDocuments,
+    pendingPolicies,
   });
 }
 

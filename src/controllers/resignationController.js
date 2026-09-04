@@ -18,15 +18,23 @@
  * (only HR/IT/Admin do — see teamAccess.js). Once IT Clearance
  * (Phase 5) exists it can post to this same endpoint from its own
  * IT-team-gated screen.
+ *
+ * As of Phase 4E, completing a resignation also generates a No Dues
+ * Certificate (see lettersController.js's generateNoDuesCertificateInternal)
+ * — the original emailed it automatically at this same point; here it's
+ * saved as a Letter record the employee and HR can view/print, same
+ * "record instead of emailing" substitution as everywhere else.
  *************************************************************/
 const Resignation = require("../models/Resignation");
 const ExitInterview = require("../models/ExitInterview");
+const Letter = require("../models/Letter");
 const Employee = require("../models/Employee");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { createChecklistIfMissing } = require("../utils/checklists");
 const { CHECKLIST_TYPE } = require("../models/Checklist");
 const { deactivateUserAccess } = require("../utils/provisioning");
+const { generateNoDuesCertificateInternal } = require("./lettersController");
 
 const CLEARANCE_TYPES = ["it", "finance", "hr", "manager", "admin"];
 
@@ -79,42 +87,61 @@ async function showResignation(req, res) {
   const resignation = await Resignation.findById(req.params.id).lean();
   if (!resignation) return res.status(404).render("errors/404");
 
-  const exitInterview = await ExitInterview.findOne({ resignationId: resignation.resignationId }).lean();
+  const [exitInterview, noDuesLetter] = await Promise.all([
+    ExitInterview.findOne({ resignationId: resignation.resignationId }).lean(),
+    Letter.findOne({ relatedId: resignation.resignationId, type: Letter.LETTER_TYPE.NO_DUES }).lean(),
+  ]);
 
   res.render("resignations/detail", {
     resignation,
     exitInterview,
+    noDuesLetter,
     CLEARANCE_TYPES,
     message: req.query.message || null,
   });
 }
 
+/**
+ * Internal — port of updateResignationClearanceInternal(). Takes an
+ * already-loaded Resignation doc (not an ID) so both the HR-gated route
+ * below AND IT Clearance's own IT-team-gated screen (Phase 5A,
+ * itClearanceController.js) can update the same record and get the
+ * same "all clearances done -> auto-complete" behavior, without
+ * itClearanceController needing HR-team access itself.
+ */
+async function updateClearanceInternal(resignation, type, status, actorId) {
+  if (!CLEARANCE_TYPES.includes(type)) throw new Error(`Unknown clearance type: ${type}`);
+
+  resignation.clearances[type] = status;
+  await resignation.save();
+
+  await logAudit({
+    user: actorId,
+    action: "Clearance Update",
+    entityType: "Resignation",
+    entityId: resignation._id,
+    details: `${type} -> ${status}`,
+  });
+
+  const allCleared = CLEARANCE_TYPES.every((t) => resignation.clearances[t] === "Cleared");
+
+  let message = `${type.toUpperCase()} clearance updated to ${status}`;
+  if (allCleared && resignation.status !== "Completed") {
+    await completeResignation(resignation, actorId);
+    message += " — all clearances complete, resignation finalized automatically.";
+  }
+
+  return { message, allCleared };
+}
+
 async function updateClearance(req, res) {
   try {
     const { type, status } = req.body;
-    if (!CLEARANCE_TYPES.includes(type)) throw new Error(`Unknown clearance type: ${type}`);
 
     const resignation = await Resignation.findById(req.params.id);
     if (!resignation) return res.status(404).render("errors/404");
 
-    resignation.clearances[type] = status;
-    await resignation.save();
-
-    await logAudit({
-      user: req.user._id,
-      action: "Clearance Update",
-      entityType: "Resignation",
-      entityId: resignation._id,
-      details: `${type} -> ${status}`,
-    });
-
-    const allCleared = CLEARANCE_TYPES.every((t) => resignation.clearances[t] === "Cleared");
-
-    let message = `${type.toUpperCase()} clearance updated to ${status}`;
-    if (allCleared && resignation.status !== "Completed") {
-      await completeResignation(resignation, req.user._id);
-      message += " — all clearances complete, resignation finalized automatically.";
-    }
+    const { message } = await updateClearanceInternal(resignation, type, status, req.user._id);
 
     res.redirect(`/resignations/${resignation._id}?message=${encodeURIComponent(message)}`);
   } catch (err) {
@@ -146,6 +173,8 @@ async function completeResignation(resignation, actorId) {
     entityId: resignation._id,
     details: "All clearances complete — employee status set to Left.",
   });
+
+  await generateNoDuesCertificateInternal(resignation, actorId);
 }
 
 function showExitInterviewForm(req, res) {
@@ -192,4 +221,6 @@ module.exports = {
   updateClearance,
   showExitInterviewForm,
   submitExitInterview,
+  updateClearanceInternal,
+  CLEARANCE_TYPES,
 };

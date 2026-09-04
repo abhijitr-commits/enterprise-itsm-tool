@@ -5,6 +5,8 @@ const Problem = require("../models/Problem");
 const { STATUS } = require("../config/constants");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { hasPermission } = require("../utils/permissions");
+const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 
 async function listProblems(req, res) {
   const { q, status } = req.query;
@@ -68,10 +70,20 @@ async function showProblem(req, res) {
   const problem = await Problem.findById(req.params.id).lean();
   if (!problem) return res.status(404).render("errors/404");
 
+  const [attachments, auditEntries, canUpload] = await Promise.all([
+    getAttachmentsForRecord("problems", problem._id),
+    getAuditTrailForRecord(problem._id),
+    hasPermission(req.user.role, "problems_edit"),
+  ]);
+
   res.render("problems/detail", {
     problem,
     STATUS,
     justCreated: req.query.created === "1",
+    attachments,
+    auditEntries,
+    canUpload,
+    moduleKey: "problems",
   });
 }
 

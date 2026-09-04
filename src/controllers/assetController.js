@@ -5,8 +5,10 @@ const Asset = require("../models/Asset");
 const AssetHistory = require("../models/AssetHistory");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { hasPermission } = require("../utils/permissions");
+const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 
-const { ASSET_STATUS } = Asset;
+const { ASSET_STATUS, HARDWARE_TYPE } = Asset;
 
 async function logAssetHistory(assetId, action, from, to, notes) {
   try {
@@ -37,7 +39,7 @@ async function listAssets(req, res) {
 }
 
 function showNewForm(req, res) {
-  res.render("assets/new", { error: null, form: {} });
+  res.render("assets/new", { error: null, form: {}, HARDWARE_TYPE });
 }
 
 async function createAsset(req, res) {
@@ -49,6 +51,8 @@ async function createAsset(req, res) {
 
     const assetId = await generateSequentialId("AST");
     const status = data.assignedTo ? ASSET_STATUS.IN_SERVICE : ASSET_STATUS.IN_STORAGE;
+    const hardwareType = Object.values(HARDWARE_TYPE).includes(data.hardwareType) ? data.hardwareType : HARDWARE_TYPE.IT_EQUIPMENT;
+    const maintenanceIntervalDays = data.maintenanceIntervalDays ? Number(data.maintenanceIntervalDays) : undefined;
 
     const asset = await Asset.create({
       assetId,
@@ -62,6 +66,8 @@ async function createAsset(req, res) {
       purchaseDate: data.purchaseDate ? new Date(data.purchaseDate) : undefined,
       warrantyExpiry: data.warrantyExpiry ? new Date(data.warrantyExpiry) : undefined,
       vendor: data.vendor || "",
+      hardwareType,
+      maintenanceIntervalDays,
       createdBy: req.user.email,
     });
 
@@ -85,13 +91,23 @@ async function showAsset(req, res) {
   const asset = await Asset.findById(req.params.id).lean();
   if (!asset) return res.status(404).render("errors/404");
 
-  const history = await AssetHistory.find({ assetId: asset.assetId }).sort({ date: -1 }).lean();
+  const [history, attachments, auditEntries, canUpload] = await Promise.all([
+    AssetHistory.find({ assetId: asset.assetId }).sort({ date: -1 }).lean(),
+    getAttachmentsForRecord("assets", asset._id),
+    getAuditTrailForRecord(asset._id),
+    hasPermission(req.user.role, "assets_edit"),
+  ]);
 
   res.render("assets/detail", {
     asset,
     history,
     ASSET_STATUS,
+    HARDWARE_TYPE,
     justCreated: req.query.created === "1",
+    attachments,
+    auditEntries,
+    canUpload,
+    moduleKey: "assets",
   });
 }
 
@@ -109,6 +125,8 @@ async function updateAsset(req, res) {
     asset.vendor = data.vendor || "";
     if (data.purchaseDate) asset.purchaseDate = new Date(data.purchaseDate);
     if (data.warrantyExpiry) asset.warrantyExpiry = new Date(data.warrantyExpiry);
+    if (Object.values(HARDWARE_TYPE).includes(data.hardwareType)) asset.hardwareType = data.hardwareType;
+    asset.maintenanceIntervalDays = data.maintenanceIntervalDays ? Number(data.maintenanceIntervalDays) : undefined;
 
     await asset.save();
 
@@ -177,6 +195,49 @@ async function returnAsset(req, res) {
   res.redirect(`/assets/${asset._id}`);
 }
 
+/**
+ * Internal — no req/res, no permission check of its own (callers are
+ * already gated). Port of the "actually calls issueAsset()" behavior
+ * ITAssetAllocationEngine.gs relies on: this is what makes an IT Asset
+ * Allocation (Phase 5A) real instead of a checkbox — the asset
+ * genuinely becomes assigned, with full Asset History logging, exactly
+ * like the button-driven issueAsset() above.
+ */
+async function issueAssetInternal(assetId, assignedTo, actorId) {
+  const asset = await Asset.findOne({ assetId });
+  if (!asset) return { success: false, message: `Asset ${assetId} not found.` };
+
+  const previousHolder = asset.assignedTo || "Unassigned";
+  asset.assignedTo = assignedTo;
+  asset.status = ASSET_STATUS.IN_SERVICE;
+  await asset.save();
+
+  await logAssetHistory(asset.assetId, "Issued", previousHolder, assignedTo, "");
+  await logAudit({ user: actorId, action: "Issue", entityType: "Asset", entityId: asset._id, details: `To: ${assignedTo}` });
+
+  return { success: true, message: `${assetId} issued to ${assignedTo}.` };
+}
+
+/**
+ * Internal counterpart to issueAssetInternal() — used by IT Clearance
+ * (Phase 5A) to genuinely return every asset a resignee had assigned,
+ * the same way returnAsset() above does from the Asset detail page.
+ */
+async function returnAssetInternal(assetId, actorId) {
+  const asset = await Asset.findOne({ assetId });
+  if (!asset) return { success: false, message: `Asset ${assetId} not found.` };
+
+  const previousHolder = asset.assignedTo || "Unassigned";
+  asset.assignedTo = "";
+  asset.status = ASSET_STATUS.IN_STORAGE;
+  await asset.save();
+
+  await logAssetHistory(asset.assetId, "Returned", previousHolder, "Unassigned", "");
+  await logAudit({ user: actorId, action: "Return", entityType: "Asset", entityId: asset._id, details: `From: ${previousHolder}` });
+
+  return { success: true, message: `${assetId} returned.` };
+}
+
 async function decommissionAsset(req, res) {
   const asset = await Asset.findById(req.params.id);
   if (!asset) return res.status(404).render("errors/404");
@@ -197,6 +258,41 @@ async function decommissionAsset(req, res) {
   res.redirect(`/assets/${asset._id}`);
 }
 
+/**
+ * Phase 9 addition — no equivalent in the original. Logs a
+ * calibration/maintenance event against an asset with a schedule
+ * (`maintenanceIntervalDays` set) and rolls `nextMaintenanceDue`
+ * forward from the date logged, so reportController.js's Maintenance
+ * Due report always reflects the real last service date rather than
+ * a hand-edited due date that can drift from reality.
+ */
+async function logMaintenance(req, res) {
+  try {
+    const asset = await Asset.findById(req.params.id);
+    if (!asset) return res.status(404).render("errors/404");
+
+    const performedDate = req.body.performedDate ? new Date(req.body.performedDate) : new Date();
+    asset.lastMaintenanceDate = performedDate;
+    asset.nextMaintenanceDue = asset.maintenanceIntervalDays
+      ? new Date(performedDate.getTime() + asset.maintenanceIntervalDays * 24 * 60 * 60 * 1000)
+      : undefined;
+    await asset.save();
+
+    await logAssetHistory(asset.assetId, "Maintenance Logged", "", "", req.body.notes || "");
+    await logAudit({
+      user: req.user._id,
+      action: "Maintenance Logged",
+      entityType: "Asset",
+      entityId: asset._id,
+      details: asset.nextMaintenanceDue ? `Next due ${asset.nextMaintenanceDue.toISOString().slice(0, 10)}` : "No schedule set",
+    });
+
+    res.redirect(`/assets/${asset._id}`);
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+}
+
 module.exports = {
   listAssets,
   showNewForm,
@@ -206,4 +302,8 @@ module.exports = {
   issueAsset,
   returnAsset,
   decommissionAsset,
+  issueAssetInternal,
+  returnAssetInternal,
+  logAssetHistory,
+  logMaintenance,
 };

@@ -13,10 +13,16 @@ const ServiceRequest = require("../models/ServiceRequest");
 const Problem = require("../models/Problem");
 const Change = require("../models/Change");
 const Asset = require("../models/Asset");
+const Employee = require("../models/Employee");
+const Vendor = require("../models/Vendor");
+const SoftwareLicense = require("../models/SoftwareLicense");
 const { ROLE } = require("../config/constants");
 const { ALL_ROLES_LIST, DEFAULT_PERMISSIONS_MAP } = require("../config/permissions");
 const { clearPermissionsCache } = require("../utils/permissions");
 const { logAudit } = require("../utils/auditLog");
+const { getSetting, setSetting } = require("../utils/settings");
+const { notifyChannels } = require("../utils/notifications");
+const { assetWarrantyReport, contractExpiryReport, amcExpiryReport, licenseExpiryReport } = require("./reportController");
 
 /************************************************
  * USER MANAGEMENT
@@ -240,6 +246,150 @@ async function showSummary(req, res) {
   });
 }
 
+/************************************************
+ * INTEGRATION SETTINGS — port of NotificationChannelEngine.gs's
+ * setSetting()/getAllSettingsSafe() as they apply to Slack/Teams
+ * webhook URLs (its System Policies half — Leave Quota/Notice
+ * Period — is out of scope here; see MIGRATION.md Phase 5E for why).
+ * The original gated this with requireAdminTeam(); this app already
+ * uses "admin_manage_settings" as its one general "can configure
+ * this system" permission (it also gates the Permission Matrix
+ * itself), so this reuses that same key rather than introducing a
+ * second settings-gating mechanism.
+ ************************************************/
+async function showIntegrationSettings(req, res) {
+  const [slackWebhookUrl, teamsWebhookUrl] = await Promise.all([
+    getSetting("SlackWebhookURL", ""),
+    getSetting("TeamsWebhookURL", ""),
+  ]);
+
+  res.render("admin/integrations", {
+    slackWebhookUrl,
+    teamsWebhookUrl,
+    message: req.query.message || null,
+    error: null,
+  });
+}
+
+async function saveIntegrationSettings(req, res) {
+  try {
+    await Promise.all([
+      setSetting("SlackWebhookURL", (req.body.slackWebhookUrl || "").trim()),
+      setSetting("TeamsWebhookURL", (req.body.teamsWebhookUrl || "").trim()),
+    ]);
+
+    await logAudit({
+      user: req.user._id,
+      action: "Update",
+      entityType: "Setting",
+      details: "Integration Settings (Slack/Teams webhooks) updated.",
+    });
+
+    res.redirect("/admin/integrations?message=Integration settings saved.");
+  } catch (err) {
+    res.status(400).render("admin/integrations", {
+      slackWebhookUrl: req.body.slackWebhookUrl || "",
+      teamsWebhookUrl: req.body.teamsWebhookUrl || "",
+      message: null,
+      error: err.message,
+    });
+  }
+}
+
+/** "Send Test Notification" button on the Integration Settings page. */
+async function sendTestNotification(req, res) {
+  const result = await notifyChannels(
+    "Test Notification — Enterprise ITSM",
+    `This is a test notification sent by ${req.user.name} from the Admin Console's Integration Settings page.`
+  );
+
+  const parts = [];
+  if (result.slack.sent) parts.push("Slack: sent.");
+  else parts.push(`Slack: ${result.slack.reason}`);
+  if (result.teams.sent) parts.push("Teams: sent.");
+  else parts.push(`Teams: ${result.teams.reason}`);
+
+  res.redirect("/admin/integrations?message=" + encodeURIComponent(parts.join(" ")));
+}
+
+/************************************************
+ * PROACTIVE EXPIRY DIGEST — port of AutomationEngine.gs's
+ * sendExpiryAlerts(). The original ran this as a daily 8am
+ * trigger, emailing the HR team. Render's free tier has no
+ * persistent cron, and standing up one via a third-party
+ * scheduled-ping service would mean creating a new account this
+ * project has committed to never create — so this is a manual
+ * "Send Expiry Digest Now" button instead: same four expiry
+ * categories (contracts, asset warranties, vendor AMCs, software
+ * licenses), same 90/30-day windows (the existing report
+ * functions, unchanged), sent to Slack/Teams instead of email
+ * since this app has no email provider (see MIGRATION.md's
+ * "no email provider" note, applied consistently everywhere else).
+ ************************************************/
+async function sendExpiryDigest(req, res) {
+  const [assets, employees, vendors, licenses] = await Promise.all([
+    Asset.find().lean(),
+    Employee.find().lean(),
+    Vendor.find().lean(),
+    SoftwareLicense.find().lean(),
+  ]);
+
+  const warranties = assetWarrantyReport(assets);
+  const contracts = contractExpiryReport(employees);
+  const amcs = amcExpiryReport(vendors);
+  const licenseExpiries = licenseExpiryReport(licenses);
+
+  const total = warranties.length + contracts.length + amcs.length + licenseExpiries.length;
+
+  if (total === 0) {
+    return res.redirect("/admin/integrations?message=" + encodeURIComponent("Nothing expiring soon — no digest sent."));
+  }
+
+  let body = "";
+  if (contracts.length > 0) {
+    body += "CONTRACTS EXPIRING SOON:\n";
+    contracts.forEach((c) => {
+      body += `- ${c.name} (${c.department}): ${c.contractEndDate} [${c.urgency}]\n`;
+    });
+    body += "\n";
+  }
+  if (warranties.length > 0) {
+    body += "ASSET WARRANTIES EXPIRING SOON:\n";
+    warranties.forEach((a) => {
+      body += `- ${a.assetId} ${a.assetName}: ${a.warrantyExpiry} [${a.urgency}]\n`;
+    });
+    body += "\n";
+  }
+  if (amcs.length > 0) {
+    body += "VENDOR AMCs EXPIRING SOON:\n";
+    amcs.forEach((v) => {
+      body += `- ${v.vendorName} (${v.category}): ${v.amcExpiry} [${v.urgency}]\n`;
+    });
+    body += "\n";
+  }
+  if (licenseExpiries.length > 0) {
+    body += "SOFTWARE LICENSES EXPIRING SOON:\n";
+    licenseExpiries.forEach((l) => {
+      body += `- ${l.softwareName} (${l.vendor}): ${l.expiryDate} [${l.urgency}]\n`;
+    });
+  }
+
+  const result = await notifyChannels("Expiry Digest — Enterprise ITSM", body.trim());
+
+  await logAudit({
+    user: req.user._id,
+    action: "Create",
+    entityType: "ExpiryDigest",
+    details: `${total} item(s) expiring soon. Slack: ${result.slack.sent ? "sent" : "skipped"}, Teams: ${result.teams.sent ? "sent" : "skipped"}.`,
+  });
+
+  const parts = [`Digest covered ${total} item(s).`];
+  parts.push(result.slack.sent ? "Slack: sent." : `Slack: ${result.slack.reason}`);
+  parts.push(result.teams.sent ? "Teams: sent." : `Teams: ${result.teams.reason}`);
+
+  res.redirect("/admin/integrations?message=" + encodeURIComponent(parts.join(" ")));
+}
+
 module.exports = {
   listUsers,
   showNewUserForm,
@@ -249,4 +399,8 @@ module.exports = {
   showPermissionMatrix,
   updatePermissionMatrix,
   showSummary,
+  showIntegrationSettings,
+  saveIntegrationSettings,
+  sendTestNotification,
+  sendExpiryDigest,
 };
