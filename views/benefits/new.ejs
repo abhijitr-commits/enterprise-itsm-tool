@@ -9,7 +9,7 @@
 <form class="panel form-panel" method="post" action="/benefits">
   <div class="form-grid">
     <label>Employee (name)
-      <input type="text" name="employee" value="<%= form.employee || '' %>" required />
+      <input type="text" name="employee" list="employeeList" value="<%= form.employee || '' %>" required />
     </label>
     <label>Benefit Type
       <input type="text" name="benefitType" placeholder="e.g. Health Insurance" value="<%= form.benefitType || '' %>" required />
