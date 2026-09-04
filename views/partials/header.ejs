@@ -186,3 +186,18 @@
           <% departmentList.forEach(function(d) { %><option value="<%= d %>"><% }) %>
         </datalist>
       <% } %>
+      <% if (typeof employeeList !== "undefined" && employeeList.length) { %>
+        <datalist id="employeeList">
+          <% employeeList.forEach(function(e) { %><option value="<%= e %>"><% }) %>
+        </datalist>
+      <% } %>
+      <% if (typeof locationList !== "undefined" && locationList.length) { %>
+        <datalist id="locationList">
+          <% locationList.forEach(function(l) { %><option value="<%= l %>"><% }) %>
+        </datalist>
+      <% } %>
+      <% if (typeof assetNameList !== "undefined" && assetNameList.length) { %>
+        <datalist id="assetNameList">
+          <% assetNameList.forEach(function(a) { %><option value="<%= a %>"><% }) %>
+        </datalist>
+      <% } %>
