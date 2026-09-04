@@ -181,3 +181,8 @@
       </div>
     </nav>
     <main class="content">
+      <% if (typeof departmentList !== "undefined" && departmentList.length) { %>
+        <datalist id="departmentList">
+          <% departmentList.forEach(function(d) { %><option value="<%= d %>"><% }) %>
+        </datalist>
+      <% } %>
