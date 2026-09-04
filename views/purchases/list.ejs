@@ -32,6 +32,10 @@
   </form>
 </div>
 
+<datalist id="purchaseAssetTypeList">
+  <% assetTypes.forEach(function(t) { %><option value="<%= t %>"><% }) %>
+</datalist>
+
 <div class="panel">
   <table class="table">
     <thead><tr><th>PO ID</th><th>Date</th><th>Vendor</th><th>Item</th><th>Qty</th><th>Amount</th><th>Status</th><th></th></tr></thead>
@@ -52,7 +56,10 @@
                 <label style="font-weight:400; display:flex; align-items:center; gap:4px;">
                   <input type="checkbox" name="createAsset" value="1" /> Create Asset
                 </label>
-                <input type="text" name="assetType" placeholder="Asset Type" style="width:110px;" />
+                <input type="text" name="assetType" list="purchaseAssetTypeList" placeholder="Asset Type" style="width:110px;" />
+                <select name="hardwareType" style="width:110px;">
+                  <% Object.values(HARDWARE_TYPE).forEach(function(t) { %><option value="<%= t %>"><%= t %></option><% }) %>
+                </select>
                 <button type="submit" class="btn btn-secondary">Mark Received</button>
               </form>
               <form method="post" action="/purchases/<%= p._id %>/status" style="margin-top:6px;">
