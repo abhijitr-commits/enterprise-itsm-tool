@@ -27,6 +27,7 @@ router.post("/pulse/respond", wellnessController.submitResponse);
 router.get("/pulse/new", guard("wellness_manage"), wellnessController.showNewSurveyForm);
 router.post("/pulse", guard("wellness_manage"), wellnessController.createSurvey);
 router.get("/pulse/results", guard("reports_view"), wellnessController.pulseResults);
+router.post("/pulse/:id/close", guard("wellness_manage"), wellnessController.closeSurvey);
 
 // Kudos — the wall is open to everyone; giving kudos is "kudos_give"
 // (every role, by default).
