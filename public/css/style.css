@@ -39,7 +39,66 @@ a:hover { color: var(--primary-dark); }
 ::-webkit-scrollbar-thumb { background: #d1d5e0; border-radius: 6px; }
 ::-webkit-scrollbar-thumb:hover { background: #b7bccc; }
 
-.app-shell { display: flex; min-height: 100vh; }
+.page-shell { display: flex; flex-direction: column; min-height: 100vh; }
+.app-shell { display: flex; flex: 1; min-height: 0; }
+
+/* ---------- Top tab bar ----------
+ * The primary, front-and-center department switcher: Dashboard / HR
+ * Hub / IT Management Hub / Operations Hub / Admin Console, one click
+ * from anywhere in the app. The sidebar remains for deep links inside
+ * a department; this bar is for jumping between departments. */
+.top-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 20px;
+  height: 56px;
+  flex-shrink: 0;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  overflow-x: auto;
+}
+.top-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.top-tab:hover { background: var(--primary-light); color: var(--primary-dark); }
+.top-tab.active { background: var(--primary); color: #fff; box-shadow: 0 1px 4px rgba(79, 70, 229, 0.35); }
+.top-tabs-spacer { flex: 1; }
+.top-tabs-search { flex-shrink: 0; }
+.top-tabs-search input {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  width: 220px;
+  background: var(--bg);
+}
+.top-tabs-search input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+.top-tabs-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 14px;
+  margin-left: 6px;
+  border-left: 1px solid var(--border);
+}
+.top-tabs-user .user-chip { color: var(--text); font-size: 13px; font-weight: 600; white-space: nowrap; }
+.top-tabs-user .role-badge { background: var(--primary-light); color: var(--primary-dark); }
+.top-tabs-user .link-button { color: var(--text-muted); font-weight: 600; padding: 6px 8px; }
+.top-tabs-user .link-button:hover { color: var(--danger); background: none; }
 
 .sidebar {
   width: 244px;
@@ -86,6 +145,8 @@ a:hover { color: var(--primary-dark); }
 .nav-link:active { transform: scale(0.98); }
 .nav-link.disabled { color: #4b5063; cursor: default; }
 .nav-link.disabled:hover { background: none; color: #4b5063; }
+.nav-link.active { background: var(--sidebar-active-bg); color: #fff; box-shadow: inset 3px 0 0 var(--primary); }
+.nav-link.active:hover { background: var(--sidebar-active-bg); }
 .nav-section-label {
   font-size: 10.5px;
   font-weight: 700;
@@ -360,11 +421,13 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
   .admin-tile-grid { grid-template-columns: repeat(2, 1fr); }
   .form-grid { grid-template-columns: 1fr; }
   .detail-grid { grid-template-columns: 1fr; }
+  .top-tabs-search { display: none; }
 }
 
 @media (max-width: 600px) {
   .app-shell { flex-direction: column; }
   .sidebar { width: 100%; }
   .content { padding: 22px 18px; }
+  .top-tabs-user .user-chip { display: none; }
   .stat-grid, .admin-tile-grid { grid-template-columns: 1fr; }
 }
