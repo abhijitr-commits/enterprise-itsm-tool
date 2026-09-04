@@ -31,6 +31,15 @@ const incidentSchema = new mongoose.Schema(
     remarks: { type: String, trim: true },
     createdBy: { type: String, trim: true }, // email of whoever filed it
 
+    // Phase 9 addition — no equivalent in the original sheet. Optional
+    // free-text match against Asset.assetId/assetName (same
+    // plain-string-link convention as every other cross-reference in
+    // this app, e.g. Problem.linkedIncidents), so an Incident about a
+    // specific robot unit or piece of equipment can be tied back to
+    // its Asset Register entry for the Fleet Reliability report in
+    // reportController.js.
+    relatedAsset: { type: String, trim: true },
+
     comments: [commentSchema],
     history: [historyEntrySchema],
     attachments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Attachment" }],
