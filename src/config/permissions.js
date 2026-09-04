@@ -57,12 +57,14 @@ const DEFAULT_PERMISSIONS_MAP = {
   admin_view_database: [ROLE.ADMIN],
 
   // --- Phase 4 (HR suite) ---
-  // Employee Directory management, Onboarding/Offboarding automation,
-  // Performance Management, and Succession Planning are NOT in this map —
-  // same as the original, they're gated by requireHRTeam() (Administrator,
-  // or Manager + Department="HR") in src/utils/teamAccess.js instead of a
-  // per-role permission, since those need a real HR person, not just any
-  // Manager. See MIGRATION.md for which actions use which gate.
+  // Employee Directory management, Onboarding/Offboarding automation, and
+  // creating Performance Goals/Reviews are NOT in this map — same as the
+  // original, they're gated by requireHRTeam() (Administrator, or Manager +
+  // Department="HR") in src/utils/teamAccess.js instead of a per-role
+  // permission, since those need a real HR person, not just any Manager.
+  // Succession Planning (below) is the one exception in this family that
+  // DOES use a Permission Matrix key — see its own comment for why.
+  // See MIGRATION.md for which actions use which gate.
 
   // Resignations — any employee can submit their own
   resignation_submit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
@@ -80,14 +82,85 @@ const DEFAULT_PERMISSIONS_MAP = {
   referrals_submit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
   referrals_manage: [ROLE.ADMIN, ROLE.MANAGER],
 
-  // Learning & Development / Succession (Phase 4D — PMS/Succession stay
-  // requireHRTeam-gated like the original; LMS training assignment uses
-  // this permission)
+  // Learning & Development / Succession (Phase 4D — PMS goals/reviews
+  // stay requireHRTeam-gated like the original; LMS training assignment
+  // uses this permission)
   training_manage: [ROLE.ADMIN, ROLE.MANAGER],
+
+  // Succession Planning — genuinely sensitive HR data (who's a backup
+  // for whom), Admin/Manager only. Bug fix vs. the original: every
+  // function in SuccessionEngine.gs called requirePermission("view_reports"),
+  // a key that was never actually defined anywhere in DEFAULT_PERMISSIONS_MAP
+  // (the real key everywhere else is "reports_view") — so in the original,
+  // hasPermission() always hit its "unknown permission key" fallback and
+  // returned false for EVERYONE, including Administrators, meaning
+  // Succession Planning was permanently inaccessible. This gives it its
+  // own real key instead of silently reusing "reports_view" (which would
+  // couple two unrelated features — unchecking Reports access for a
+  // Manager shouldn't also lock them out of succession plans).
+  succession_manage: [ROLE.ADMIN, ROLE.MANAGER],
 
   // Wellness & Engagement (Phase 4E)
   wellness_manage: [ROLE.ADMIN, ROLE.MANAGER],
   kudos_give: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+
+  // --- Phase 5 (IT operations & facilities) ---
+  // IT Helpdesk, Asset Allocation, and IT Clearance are NOT in this map —
+  // same pattern as the HR suite, gated by requireITTeam() (Administrator,
+  // or Manager + Department="IT") in teamAccess.js instead, since those
+  // genuinely need an IT person. Access Requests submission is the one
+  // "anyone logged in" exception (Phase 5A) — same tier as
+  // resignation_submit/leave_create, matching the original's own comment
+  // that it "reuses the anyone-logged-in permission tier."
+  access_requests_submit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+
+  // Vendors & Procurement (Phase 5B) — same tier as Assets: everyone can
+  // create, Viewer can't edit. Vendor list/read has no key at all, same
+  // as the original's getAllVendors() — reading a vendor directory needs
+  // no special permission. Vendor Service Tracking and Requirement
+  // Requests aren't in this map either — IT-team/Admin-team gated
+  // (teamAccess.js) instead, matching the original's requireITTeam()/
+  // isITTeam()-or-isAdminTeam() checks.
+  vendors_create: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  vendors_edit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER],
+  purchases_create: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  purchases_edit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER],
+
+  // Facilities & General Ops (Phase 5D)
+  rooms_book: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  rooms_manage: [ROLE.ADMIN],
+  complaints_submit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  complaints_manage: [ROLE.ADMIN, ROLE.MANAGER],
+  expenses_submit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  expenses_approve: [ROLE.ADMIN, ROLE.MANAGER],
+  // Maintenance Announcements aren't in this map — IT-team gated
+  // (teamAccess.js) for creating, same as requireITTeam() in the
+  // original; reading is open to everyone signed in.
+
+  // --- Phase 9 (Robotics-company additions) ---
+  // Safety Incident / Near-Miss reporting — same "anyone logged in
+  // submits, Admin/Manager manages" tier as Complaints/Expenses, since
+  // a physical-safety report around robotics equipment needs the same
+  // "open to everyone, investigated by management" shape as a general
+  // complaint, just tracked separately so severity/injury data doesn't
+  // get diluted by IT/facilities complaints.
+  safety_submit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  safety_manage: [ROLE.ADMIN, ROLE.MANAGER],
+
+  // --- Phase 10 (company-wide departments: Sales, Production,
+  // Engineering, Logistics, Store) ---
+  // Same "everyone can create/submit, a smaller tier manages/decides"
+  // shape used throughout this app (Purchases, Complaints, Changes).
+  sales_create: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  sales_edit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER],
+  workorders_create: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  workorders_edit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER],
+  ecr_create: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  ecr_decide: [ROLE.ADMIN, ROLE.MANAGER],
+  shipments_create: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER],
+  shipments_edit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER],
+  material_requests_submit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
+  material_requests_issue: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK],
 };
 
 const ALL_ROLES_LIST = Object.values(ROLE);
