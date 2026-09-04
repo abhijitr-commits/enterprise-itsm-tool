@@ -9,7 +9,7 @@
 <form class="panel form-panel" method="post" action="/problems">
   <div class="form-grid">
     <label>Owner
-      <input type="text" name="owner" value="<%= form.owner || '' %>" placeholder="Unassigned" />
+      <input type="text" name="owner" list="employeeList" value="<%= form.owner || '' %>" placeholder="Unassigned" />
     </label>
     <label>Linked Incidents (optional)
       <input type="text" name="linkedIncidents" value="<%= form.linkedIncidents || '' %>" placeholder="e.g. INC-2026-000012, INC-2026-000015" />
