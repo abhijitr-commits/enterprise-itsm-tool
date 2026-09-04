@@ -1,0 +1,31 @@
+<%- include('../partials/header', { title: 'Software Licenses' }) %>
+
+<div class="page-header">
+  <h1>Software Licenses</h1>
+  <a class="btn btn-primary" href="/licenses/new">+ Add License</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>Software</th><th>Vendor</th><th>Type</th><th>Seats</th><th>Cost</th><th>Expiry</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      <% licenses.forEach(function(l) { %>
+        <tr>
+          <td><%= l.softwareName %></td>
+          <td><%= l.vendor || '—' %></td>
+          <td><%= l.licenseType || '—' %></td>
+          <td><%= l.seatsUsed %> / <%= l.seatsTotal %></td>
+          <td><%= l.cost || '—' %></td>
+          <td><%= l.expiryDate ? new Date(l.expiryDate).toLocaleDateString() : '—' %></td>
+          <td><span class="badge <%= l.status === 'Active' ? 'badge-status-open' : 'badge-status-closed' %>"><%= l.status %></span></td>
+          <td><a class="btn btn-secondary" href="/licenses/<%= l._id %>/edit">Edit</a></td>
+        </tr>
+      <% }) %>
+      <% if (licenses.length === 0) { %><tr><td colspan="8" class="empty-row">No software licenses yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>
