@@ -1,0 +1,119 @@
+<%- include('../partials/header', { title: 'Operations Hub' }) %>
+
+<div class="page-header">
+  <h1>Operations Hub</h1>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Sales, Production &amp; Logistics</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/sales">
+      <div class="admin-tile-title">Sales Orders</div>
+      <div class="admin-tile-sub">Track every sales order from booking to delivery.</div>
+    </a>
+    <a class="admin-tile" href="/work-orders">
+      <div class="admin-tile-title">Work Orders</div>
+      <div class="admin-tile-sub">Production work orders raised against sales orders.</div>
+    </a>
+    <a class="admin-tile" href="/engineering-changes">
+      <div class="admin-tile-title">Engineering Change Requests</div>
+      <div class="admin-tile-sub">Design/spec changes raised, reviewed, and decided.</div>
+    </a>
+    <a class="admin-tile" href="/shipments">
+      <div class="admin-tile-title">Shipments</div>
+      <div class="admin-tile-sub">Outbound shipments linked to a sales order.</div>
+    </a>
+    <a class="admin-tile" href="/material-requests">
+      <div class="admin-tile-title">Material Requests</div>
+      <div class="admin-tile-sub">Raise and issue material against a work order.</div>
+    </a>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Safety &amp; Compliance</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/safety/mine">
+      <div class="admin-tile-title">My Safety Reports</div>
+      <div class="admin-tile-sub">Report a safety incident and track your own reports.</div>
+    </a>
+    <% if (isManagerUp) { %>
+      <a class="admin-tile" href="/safety">
+        <div class="admin-tile-title">All Safety Incidents</div>
+        <div class="admin-tile-sub">Review and action every safety incident company-wide.</div>
+      </a>
+    <% } %>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Facilities &amp; Procurement</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/purchases">
+      <div class="admin-tile-title">Purchase Register</div>
+      <div class="admin-tile-sub">The full purchase order register.</div>
+    </a>
+    <a class="admin-tile" href="/stock">
+      <div class="admin-tile-title">Stock / Inventory</div>
+      <div class="admin-tile-sub">Stock levels, movements, and reorder points.</div>
+    </a>
+    <a class="admin-tile" href="/rooms/bookings">
+      <div class="admin-tile-title">Room / Equipment Booking</div>
+      <div class="admin-tile-sub">Book a meeting room or shared equipment.</div>
+    </a>
+    <a class="admin-tile" href="/maintenance">
+      <div class="admin-tile-title">Maintenance Announcements</div>
+      <div class="admin-tile-sub">Scheduled downtime and maintenance notices.</div>
+    </a>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Expenses &amp; Complaints</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/expenses/mine">
+      <div class="admin-tile-title">My Expense Claims</div>
+      <div class="admin-tile-sub">Submit and track your own expense claims.</div>
+    </a>
+    <a class="admin-tile" href="/complaints/mine">
+      <div class="admin-tile-title">My Complaints</div>
+      <div class="admin-tile-sub">Raise and track your own complaints.</div>
+    </a>
+    <% if (isManagerUp) { %>
+      <a class="admin-tile" href="/expenses">
+        <div class="admin-tile-title">All Expense Claims</div>
+        <div class="admin-tile-sub">Review and approve expense claims company-wide.</div>
+      </a>
+      <a class="admin-tile" href="/complaints">
+        <div class="admin-tile-title">All Complaints</div>
+        <div class="admin-tile-sub">Review and action every complaint company-wide.</div>
+      </a>
+    <% } %>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Wellness &amp; Engagement</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/wellness/programs">
+      <div class="admin-tile-title">Wellness Programs</div>
+      <div class="admin-tile-sub">Browse and join company wellness programs.</div>
+    </a>
+    <a class="admin-tile" href="/wellness/pulse">
+      <div class="admin-tile-title">Pulse Survey</div>
+      <div class="admin-tile-sub">The active pulse survey — quick, anonymous feedback.</div>
+    </a>
+    <a class="admin-tile" href="/wellness/kudos">
+      <div class="admin-tile-title">Kudos Wall</div>
+      <div class="admin-tile-sub">Give and view public shout-outs to teammates.</div>
+    </a>
+    <% if (isManagerUp) { %>
+      <a class="admin-tile" href="/wellness/pulse/results">
+        <div class="admin-tile-title">Pulse Results</div>
+        <div class="admin-tile-sub">Aggregated results from every pulse survey.</div>
+      </a>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
