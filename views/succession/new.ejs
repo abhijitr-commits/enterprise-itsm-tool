@@ -12,7 +12,7 @@
       <input type="text" name="position" value="<%= form.position || '' %>" required />
     </label>
     <label>Current Holder
-      <input type="text" name="currentHolder" value="<%= form.currentHolder || '' %>" required />
+      <input type="text" name="currentHolder" list="employeeList" value="<%= form.currentHolder || '' %>" required />
     </label>
     <label>Department
       <input type="text" name="department" list="departmentList" value="<%= form.department || '' %>" />
@@ -20,7 +20,7 @@
   </div>
   <div class="form-grid">
     <label>Successor 1
-      <input type="text" name="successor1" value="<%= form.successor1 || '' %>" />
+      <input type="text" name="successor1" list="employeeList" value="<%= form.successor1 || '' %>" />
     </label>
     <label>Successor 1 Readiness
       <select name="successor1Readiness">
@@ -33,7 +33,7 @@
   </div>
   <div class="form-grid">
     <label>Successor 2
-      <input type="text" name="successor2" value="<%= form.successor2 || '' %>" />
+      <input type="text" name="successor2" list="employeeList" value="<%= form.successor2 || '' %>" />
     </label>
     <label>Successor 2 Readiness
       <select name="successor2Readiness">
