@@ -1,0 +1,44 @@
+<%- include('../partials/header', { title: 'New Work Order' }) %>
+
+<div class="page-header">
+  <h1>New Work Order</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<p class="hint">Covers Production, Robotics, Electrical, Electronics, Technical and Software — enter the department that owns this job (governed by Master Data).</p>
+
+<form class="panel form-panel" method="post" action="/work-orders">
+  <div class="form-grid">
+    <label>Department
+      <input type="text" name="department" value="<%= form.department || '' %>" required />
+    </label>
+    <label>Quantity
+      <input type="number" name="quantity" min="1" value="<%= form.quantity || '1' %>" />
+    </label>
+    <label>Related Sales Order
+      <input type="text" name="relatedSalesOrder" value="<%= form.relatedSalesOrder || '' %>" placeholder="e.g. SO-2026-000001" />
+    </label>
+    <label>Related Robot / Equipment
+      <input type="text" name="relatedAsset" value="<%= form.relatedAsset || '' %>" />
+    </label>
+    <label>Assigned To
+      <input type="text" name="assignedTo" value="<%= form.assignedTo || '' %>" />
+    </label>
+    <label>Start Date
+      <input type="date" name="startDate" value="<%= form.startDate || '' %>" />
+    </label>
+    <label>Target Completion Date
+      <input type="date" name="targetCompletionDate" value="<%= form.targetCompletionDate || '' %>" />
+    </label>
+  </div>
+  <label>Item Description
+    <textarea name="itemDescription" rows="2" required><%= form.itemDescription || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/work-orders">Cancel</a>
+    <button type="submit" class="btn btn-primary">Create Work Order</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

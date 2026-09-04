@@ -1,0 +1,52 @@
+<%- include('../partials/header', { title: 'Work Orders' }) %>
+
+<div class="page-header">
+  <h1>Work Orders</h1>
+  <a href="/work-orders/new" class="btn btn-primary">New Work Order</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<form class="panel filter-bar" method="get" action="/work-orders">
+  <input type="text" name="department" placeholder="Department" value="<%= query.department %>" />
+  <select name="status">
+    <option value="">All Statuses</option>
+    <% Object.values(WORK_ORDER_STATUS).forEach(function(s) { %>
+      <option value="<%= s %>" <%= query.status === s ? 'selected' : '' %>><%= s %></option>
+    <% }) %>
+  </select>
+  <button type="submit" class="btn btn-secondary">Filter</button>
+</form>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>WO ID</th><th>Department</th><th>Item</th><th>Qty</th><th>Assigned To</th><th>Target Completion</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      <% orders.forEach(function(o) { %>
+        <tr>
+          <td><%= o.workOrderId %></td>
+          <td><%= o.department %></td>
+          <td><%= o.itemDescription %></td>
+          <td><%= o.quantity %></td>
+          <td><%= o.assignedTo || '—' %></td>
+          <td><%= o.targetCompletionDate ? new Date(o.targetCompletionDate).toLocaleDateString() : '—' %></td>
+          <td><span class="badge <%= o.status === 'Completed' ? 'badge-status-resolved' : (o.status === 'Cancelled' ? 'badge-status-cancelled' : 'badge-status-open') %>"><%= o.status %></span></td>
+          <td>
+            <form method="post" action="/work-orders/<%= o._id %>/status" class="filter-bar">
+              <select name="status">
+                <% Object.values(WORK_ORDER_STATUS).forEach(function(s) { %>
+                  <option value="<%= s %>" <%= o.status === s ? 'selected' : '' %>><%= s %></option>
+                <% }) %>
+              </select>
+              <input type="text" name="assignedTo" placeholder="Assign to" value="<%= o.assignedTo || '' %>" style="width:110px;" />
+              <button type="submit" class="btn btn-secondary">Update</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (orders.length === 0) { %><tr><td colspan="8" class="empty-row">No work orders yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>
