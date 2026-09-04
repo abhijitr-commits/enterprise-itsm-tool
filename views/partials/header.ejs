@@ -4,6 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title><%= typeof title !== "undefined" ? title + " · Enterprise ITSM" : "Enterprise ITSM" %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
@@ -14,32 +17,43 @@
     // actually on, without every controller having to pass it in.
     const cp = typeof currentPath !== "undefined" ? currentPath : "";
     const underPath = (p) => cp === p || cp.startsWith(p + "/");
+    const anyUnder = (paths) => paths.some((p) => underPath(p));
     const navClass = (p) => "nav-link" + (underPath(p) ? " active" : "");
     const topTabClass = (p) => "top-tab" + (underPath(p) ? " active" : "");
+    const initials = (name) => String(name || "?").trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
   %>
   <div class="page-shell">
     <% if (currentUser) { %>
       <nav class="top-tabs">
-        <a class="<%= cp === '/' ? 'top-tab active' : 'top-tab' %>" href="/">🏠 Dashboard</a>
-        <a class="<%= topTabClass('/hr') %>" href="/hr">🧑‍💼 HR Hub</a>
-        <a class="<%= topTabClass('/it') %>" href="/it">🖥️ IT Management Hub</a>
-        <a class="<%= topTabClass('/operations') %>" href="/operations">🏭 Operations Hub</a>
+        <a class="<%= cp === '/' ? 'top-tab active' : 'top-tab' %>" href="/"><%- icon('home') %> Dashboard</a>
+        <a class="<%= topTabClass('/hr') %>" href="/hr"><%- icon('users') %> HR Hub</a>
+        <a class="<%= topTabClass('/it') %>" href="/it"><%- icon('monitor') %> IT Management Hub</a>
+        <a class="<%= topTabClass('/operations') %>" href="/operations"><%- icon('factory') %> Operations Hub</a>
         <% if (currentUser.role === 'Administrator') { %>
-          <a class="<%= topTabClass('/admin') %>" href="/admin">⚙️ Admin Console</a>
+          <a class="<%= topTabClass('/admin') %>" href="/admin"><%- icon('settings') %> Admin Console</a>
         <% } %>
         <div class="top-tabs-spacer"></div>
         <form method="get" action="/search" class="top-tabs-search">
           <input type="text" name="q" placeholder="Search everything…" />
         </form>
         <div class="top-tabs-user">
-          <span class="user-chip"><%= currentUser.name %> <span class="role-badge"><%= currentUser.role %></span></span>
-          <form method="post" action="/logout"><button class="link-button">Sign out</button></form>
+          <span class="user-chip">
+            <span class="avatar"><%= initials(currentUser.name) %></span>
+            <span class="user-chip-text">
+              <span class="user-chip-name"><%= currentUser.name %></span>
+              <span class="role-badge"><%= currentUser.role %></span>
+            </span>
+          </span>
+          <form method="post" action="/logout"><button class="link-button" title="Sign out"><%- icon('log-out', {size:15}) %></button></form>
         </div>
       </nav>
     <% } %>
     <div class="app-shell">
     <nav class="sidebar">
-      <div class="brand">Enterprise ITSM</div>
+      <div class="brand">
+        <span class="brand-mark"><%- icon('grid', {size:16}) %></span>
+        Enterprise ITSM
+      </div>
       <%
         // Port of Navigation.gs's moduleVisibility: hides a link entirely
         // when the signed-in user's role has zero permissions left for
@@ -48,11 +62,10 @@
         const mv = typeof moduleVisibility !== "undefined" ? moduleVisibility : {};
         const canSee = (key) => mv[key] !== false;
       %>
-      <a href="/" class="<%= cp === '/' ? 'nav-link active' : 'nav-link' %>">Dashboard</a>
-      <% if (currentUser) { %>
-        <a href="/hr" class="<%= navClass('/hr') %>">HR Hub</a>
-        <a href="/it" class="<%= navClass('/it') %>">IT Management Hub</a>
-        <a href="/operations" class="<%= navClass('/operations') %>">Operations Hub</a>
+      <a href="/" class="<%= (cp === '/' ? 'nav-link active' : 'nav-link') + ' nav-link-top' %>"><%- icon('home') %> Dashboard</a>
+
+      <% if (canSee('incidents') || canSee('requests') || canSee('problems') || canSee('changes') || canSee('assets') || canSee('cmdb') || canSee('knowledge') || canSee('reports')) { %>
+        <div class="nav-section-label"><%- icon('layers', {size:13}) %> Core ITSM</div>
       <% } %>
       <% if (canSee('incidents')) { %><a href="/incidents" class="<%= navClass('/incidents') %>">Incidents</a><% } %>
       <% if (canSee('requests')) { %><a href="/requests" class="nav-link">Service Requests</a><% } %>
@@ -77,107 +90,130 @@
           (currentUser.role === 'Manager' && String(currentUser.department || '').trim().toLowerCase() === 'administration'));
         const isITTeamUser = currentUser && (currentUser.role === 'Administrator' ||
           (currentUser.role === 'Manager' && String(currentUser.department || '').trim().toLowerCase() === 'it'));
+        // Which collapsible group should start open — whichever hub the
+        // current page actually belongs to, so a deep link (e.g. a
+        // /leave page from an email) lands with the right group already
+        // expanded instead of forcing a click to find it.
+        const hrOpen = anyUnder(['/hr','/mywork','/profile','/orgchart','/employees','/leave','/attendance','/shifts','/resignations','/performance','/training','/policies','/documents','/onboarding','/recruitment','/referrals','/succession','/benefits','/letters','/system-policies']);
+        const itOpen = anyUnder(['/it','/access-requests','/vendors','/purchases','/stock','/licenses','/rooms','/complaints','/expenses','/maintenance','/helpdesk','/asset-allocation','/it-clearance','/vendor-service','/requirements']);
+        const opsOpen = anyUnder(['/operations','/safety','/sales','/work-orders','/engineering-changes','/shipments','/material-requests','/wellness']);
+        const adminOpen = anyUnder(['/admin','/masterdata']);
       %>
       <% if (currentUser) { %>
-        <div class="nav-section-label">HR</div>
-        <a href="/hr" class="nav-link">HR Hub</a>
-        <a href="/mywork" class="nav-link">My Work</a>
-        <a href="/profile" class="nav-link">My Profile</a>
-        <a href="/orgchart" class="nav-link">Org Chart</a>
-        <a href="/employees" class="nav-link">Employee Directory</a>
-        <a href="/leave" class="nav-link">Leave</a>
-        <a href="/attendance" class="nav-link">Attendance</a>
-        <a href="/shifts" class="nav-link">Shifts &amp; Roster</a>
-        <a href="/resignations" class="nav-link">Resignations</a>
-        <a href="/performance/goals" class="nav-link">Goals</a>
-        <a href="/performance/reviews" class="nav-link">Reviews</a>
-        <a href="/training/courses" class="nav-link">Training Catalog</a>
-        <a href="/training/certificates" class="nav-link">My Certificates</a>
-        <a href="/policies" class="nav-link">IT Policies</a>
-        <a href="/documents" class="nav-link">My Documents</a>
-        <% if (isHRTeamUser) { %>
-          <a href="/onboarding/pre-onboarding" class="nav-link">Pre-Onboarding</a>
-          <a href="/onboarding/onboarding" class="nav-link">Onboarding</a>
-          <a href="/onboarding/offboarding" class="nav-link">Offboarding</a>
-          <a href="/recruitment" class="nav-link">Recruitment</a>
-        <% } %>
-        <a href="/referrals" class="nav-link">Referrals</a>
-        <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
-          <a href="/succession" class="nav-link">Succession Planning</a>
-          <a href="/training/enrollments" class="nav-link">Training Enrollments</a>
-        <% } %>
-        <% if (isHRTeamUser) { %>
-          <a href="/benefits" class="nav-link">Benefits Enrollment</a>
-          <a href="/letters" class="nav-link">Letters</a>
-          <a href="/system-policies" class="nav-link">System Policies</a>
-        <% } %>
-        <% if (isAdminTeamUser) { %>
-          <a href="/onboarding/admin-onboarding" class="nav-link">Admin Onboarding</a>
-          <a href="/onboarding/admin-offboarding" class="nav-link">Admin Offboarding</a>
-        <% } %>
+        <details class="nav-group" <%= hrOpen ? 'open' : '' %>>
+          <summary><%- icon('users', {size:14}) %> HR<span class="chev"><%- icon('chevron-down', {size:14}) %></span></summary>
+          <a href="/hr" class="nav-link nav-link-hub">HR Hub</a>
+          <a href="/mywork" class="nav-link">My Work</a>
+          <a href="/profile" class="nav-link">My Profile</a>
+          <a href="/orgchart" class="nav-link">Org Chart</a>
+          <a href="/employees" class="nav-link">Employee Directory</a>
+          <a href="/leave" class="nav-link">Leave</a>
+          <a href="/attendance" class="nav-link">Attendance</a>
+          <a href="/shifts" class="nav-link">Shifts &amp; Roster</a>
+          <a href="/resignations" class="nav-link">Resignations</a>
+          <a href="/performance/goals" class="nav-link">Goals</a>
+          <a href="/performance/reviews" class="nav-link">Reviews</a>
+          <a href="/training/courses" class="nav-link">Training Catalog</a>
+          <a href="/training/certificates" class="nav-link">My Certificates</a>
+          <a href="/policies" class="nav-link">IT Policies</a>
+          <a href="/documents" class="nav-link">My Documents</a>
+          <% if (isHRTeamUser) { %>
+            <a href="/onboarding/pre-onboarding" class="nav-link">Pre-Onboarding</a>
+            <a href="/onboarding/onboarding" class="nav-link">Onboarding</a>
+            <a href="/onboarding/offboarding" class="nav-link">Offboarding</a>
+            <a href="/recruitment" class="nav-link">Recruitment</a>
+          <% } %>
+          <a href="/referrals" class="nav-link">Referrals</a>
+          <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
+            <a href="/succession" class="nav-link">Succession Planning</a>
+            <a href="/training/enrollments" class="nav-link">Training Enrollments</a>
+          <% } %>
+          <% if (isHRTeamUser) { %>
+            <a href="/benefits" class="nav-link">Benefits Enrollment</a>
+            <a href="/letters" class="nav-link">Letters</a>
+            <a href="/system-policies" class="nav-link">System Policies</a>
+          <% } %>
+          <% if (isAdminTeamUser) { %>
+            <a href="/onboarding/admin-onboarding" class="nav-link">Admin Onboarding</a>
+            <a href="/onboarding/admin-offboarding" class="nav-link">Admin Offboarding</a>
+          <% } %>
+        </details>
       <% } %>
       <% if (currentUser) { %>
-        <div class="nav-section-label">IT Operations</div>
-        <a href="/it" class="nav-link">IT Management Hub</a>
-        <a href="/access-requests/mine" class="nav-link">My Access Requests</a>
-        <a href="/vendors" class="nav-link">Vendors</a>
-        <a href="/purchases" class="nav-link">Purchase Register</a>
-        <a href="/stock" class="nav-link">Stock / Inventory</a>
-        <a href="/licenses" class="nav-link">Software Licenses</a>
-        <a href="/rooms/bookings" class="nav-link">Room / Equipment Booking</a>
-        <a href="/complaints/mine" class="nav-link">My Complaints</a>
-        <a href="/expenses/mine" class="nav-link">My Expense Claims</a>
-        <a href="/maintenance" class="nav-link">Maintenance Announcements</a>
-        <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
-          <a href="/complaints" class="nav-link">All Complaints</a>
-          <a href="/expenses" class="nav-link">All Expense Claims</a>
-        <% } %>
-        <% if (isITTeamUser) { %>
-          <a href="/helpdesk" class="nav-link">IT Helpdesk</a>
-          <a href="/asset-allocation" class="nav-link">Asset Allocation</a>
-          <a href="/it-clearance" class="nav-link">IT Clearance</a>
-          <a href="/access-requests" class="nav-link">Access Requests (All)</a>
-          <a href="/vendor-service" class="nav-link">Vendor Service Tracking</a>
-        <% } %>
-        <% if (isITTeamUser || isAdminTeamUser) { %>
-          <a href="/requirements" class="nav-link">Requirement Requests</a>
-        <% } %>
+        <details class="nav-group" <%= itOpen ? 'open' : '' %>>
+          <summary><%- icon('monitor', {size:14}) %> IT Operations<span class="chev"><%- icon('chevron-down', {size:14}) %></span></summary>
+          <a href="/it" class="nav-link nav-link-hub">IT Management Hub</a>
+          <a href="/access-requests/mine" class="nav-link">My Access Requests</a>
+          <a href="/vendors" class="nav-link">Vendors</a>
+          <a href="/purchases" class="nav-link">Purchase Register</a>
+          <a href="/stock" class="nav-link">Stock / Inventory</a>
+          <a href="/licenses" class="nav-link">Software Licenses</a>
+          <a href="/rooms/bookings" class="nav-link">Room / Equipment Booking</a>
+          <a href="/complaints/mine" class="nav-link">My Complaints</a>
+          <a href="/expenses/mine" class="nav-link">My Expense Claims</a>
+          <a href="/maintenance" class="nav-link">Maintenance Announcements</a>
+          <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
+            <a href="/complaints" class="nav-link">All Complaints</a>
+            <a href="/expenses" class="nav-link">All Expense Claims</a>
+          <% } %>
+          <% if (isITTeamUser) { %>
+            <a href="/helpdesk" class="nav-link">IT Helpdesk</a>
+            <a href="/asset-allocation" class="nav-link">Asset Allocation</a>
+            <a href="/it-clearance" class="nav-link">IT Clearance</a>
+            <a href="/access-requests" class="nav-link">Access Requests (All)</a>
+            <a href="/vendor-service" class="nav-link">Vendor Service Tracking</a>
+          <% } %>
+          <% if (isITTeamUser || isAdminTeamUser) { %>
+            <a href="/requirements" class="nav-link">Requirement Requests</a>
+          <% } %>
+        </details>
       <% } %>
       <% if (currentUser) { %>
-        <div class="nav-section-label">Safety</div>
-        <a href="/safety/mine" class="nav-link">My Safety Reports</a>
-        <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
-          <a href="/safety" class="nav-link">All Safety Incidents</a>
-        <% } %>
-      <% } %>
-      <% if (currentUser) { %>
-        <div class="nav-section-label">Sales, Production &amp; Logistics</div>
-        <a href="/sales" class="nav-link">Sales Orders</a>
-        <a href="/work-orders" class="nav-link">Work Orders</a>
-        <a href="/engineering-changes" class="nav-link">Engineering Change Requests</a>
-        <a href="/shipments" class="nav-link">Shipments</a>
-        <a href="/material-requests" class="nav-link">Material Requests</a>
-      <% } %>
-      <% if (currentUser) { %>
-        <div class="nav-section-label">Wellness &amp; Engagement</div>
-        <a href="/wellness/programs" class="nav-link">Wellness Programs</a>
-        <a href="/wellness/pulse" class="nav-link">Pulse Survey</a>
-        <a href="/wellness/kudos" class="nav-link">Kudos Wall</a>
-        <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
-          <a href="/wellness/pulse/results" class="nav-link">Pulse Results</a>
-        <% } %>
+        <details class="nav-group" <%= opsOpen ? 'open' : '' %>>
+          <summary><%- icon('factory', {size:14}) %> Operations<span class="chev"><%- icon('chevron-down', {size:14}) %></span></summary>
+          <a href="/operations" class="nav-link nav-link-hub">Operations Hub</a>
+
+          <div class="nav-subsection-label">Safety</div>
+          <a href="/safety/mine" class="nav-link">My Safety Reports</a>
+          <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
+            <a href="/safety" class="nav-link">All Safety Incidents</a>
+          <% } %>
+
+          <div class="nav-subsection-label">Sales, Production &amp; Logistics</div>
+          <a href="/sales" class="nav-link">Sales Orders</a>
+          <a href="/work-orders" class="nav-link">Work Orders</a>
+          <a href="/engineering-changes" class="nav-link">Engineering Change Requests</a>
+          <a href="/shipments" class="nav-link">Shipments</a>
+          <a href="/material-requests" class="nav-link">Material Requests</a>
+
+          <div class="nav-subsection-label">Wellness &amp; Engagement</div>
+          <a href="/wellness/programs" class="nav-link">Wellness Programs</a>
+          <a href="/wellness/pulse" class="nav-link">Pulse Survey</a>
+          <a href="/wellness/kudos" class="nav-link">Kudos Wall</a>
+          <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
+            <a href="/wellness/pulse/results" class="nav-link">Pulse Results</a>
+          <% } %>
+        </details>
       <% } %>
       <% if (currentUser && currentUser.role === 'Administrator') { %>
-        <div class="nav-section-label">Admin</div>
-        <a href="/admin" class="nav-link">Admin Console</a>
-        <a href="/admin/users" class="nav-link">Users</a>
-        <a href="/admin/permissions" class="nav-link">Permissions</a>
-        <a href="/admin/integrations" class="nav-link">Integration Settings</a>
-        <a href="/masterdata/departments" class="nav-link">Master Data</a>
+        <details class="nav-group" <%= adminOpen ? 'open' : '' %>>
+          <summary><%- icon('settings', {size:14}) %> Admin<span class="chev"><%- icon('chevron-down', {size:14}) %></span></summary>
+          <a href="/admin" class="nav-link nav-link-hub">Admin Console</a>
+          <a href="/admin/users" class="nav-link">Users</a>
+          <a href="/admin/permissions" class="nav-link">Permissions</a>
+          <a href="/admin/integrations" class="nav-link">Integration Settings</a>
+          <a href="/masterdata/departments" class="nav-link">Master Data</a>
+        </details>
       <% } %>
       <div class="sidebar-footer">
-        <div class="user-chip"><%= currentUser.name %> <span class="role-badge"><%= currentUser.role %></span></div>
-        <form method="post" action="/logout"><button class="link-button">Sign out</button></form>
+        <div class="user-chip">
+          <span class="avatar"><%= initials(currentUser.name) %></span>
+          <span class="user-chip-text">
+            <span class="user-chip-name"><%= currentUser.name %></span>
+            <span class="role-badge"><%= currentUser.role %></span>
+          </span>
+        </div>
+        <form method="post" action="/logout"><button class="link-button"><%- icon('log-out', {size:15}) %> Sign out</button></form>
       </div>
     </nav>
     <main class="content">
