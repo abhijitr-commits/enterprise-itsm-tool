@@ -21,7 +21,10 @@
           <input type="text" name="assetName" value="<%= asset.assetName %>" required />
         </label>
         <label>Type
-          <input type="text" name="type" value="<%= asset.type %>" required />
+          <input type="text" name="type" list="assetTypeList" value="<%= asset.type %>" required />
+          <datalist id="assetTypeList">
+            <% assetTypes.forEach(function(t) { %><option value="<%= t %>"><% }) %>
+          </datalist>
         </label>
         <label>Serial Number
           <input type="text" name="serialNumber" value="<%= asset.serialNumber || '' %>" />
@@ -30,7 +33,7 @@
           <input type="text" name="department" list="departmentList" value="<%= asset.department %>" required />
         </label>
         <label>Location
-          <input type="text" name="location" value="<%= asset.location %>" required />
+          <input type="text" name="location" list="locationList" value="<%= asset.location %>" required />
         </label>
         <label>Vendor
           <input type="text" name="vendor" value="<%= asset.vendor || '' %>" />
@@ -86,7 +89,7 @@
       <% } else { %>
         <form method="post" action="/assets/<%= asset._id %>/issue" class="form-grid">
           <label>Issue To
-            <input type="text" name="assignedTo" placeholder="Employee name" required />
+            <input type="text" name="assignedTo" list="employeeList" placeholder="Employee name" required />
           </label>
           <div class="form-actions" style="align-self:end">
             <button type="submit" class="btn btn-primary">Issue Asset</button>
