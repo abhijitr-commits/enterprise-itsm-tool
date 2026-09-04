@@ -1,0 +1,39 @@
+<%- include('../partials/header', { title: item.itemName + ' — Transactions' }) %>
+
+<div class="page-header">
+  <h1><%= item.itemName %> <span class="hint"><%= item.itemId %></span></h1>
+  <span class="badge <%= item.lowStock ? 'badge-status-cancelled' : 'badge-status-open' %>"><%= item.currentStock %> <%= item.unit %> in stock</span>
+</div>
+
+<div class="panel">
+  <dl class="meta-list">
+    <dt>Category</dt><dd><%= item.category %></dd>
+    <dt>Location</dt><dd><%= item.location || '—' %></dd>
+    <dt>Opening Stock</dt><dd><%= item.openingStock %> <%= item.unit %></dd>
+    <dt>Reorder Level</dt><dd><%= item.reorderLevel %> <%= item.unit %></dd>
+  </dl>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Transaction History</h2></div>
+  <table class="table">
+    <thead><tr><th>Transaction ID</th><th>Type</th><th>Quantity</th><th>Reason/Reference</th><th>Date</th><th>Performed By</th></tr></thead>
+    <tbody>
+      <% transactions.forEach(function(t) { %>
+        <tr>
+          <td><%= t.transactionId %></td>
+          <td><span class="badge <%= t.type === 'IN' ? 'badge-status-resolved' : 'badge-status-open' %>"><%= t.type %></span></td>
+          <td><%= t.quantity %></td>
+          <td><%= t.reason || '—' %></td>
+          <td><%= new Date(t.date).toLocaleString() %></td>
+          <td><%= t.performedBy %></td>
+        </tr>
+      <% }) %>
+      <% if (transactions.length === 0) { %><tr><td colspan="6" class="empty-row">No transactions recorded yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<a class="btn btn-secondary" href="/stock">Back to Stock / Inventory</a>
+
+<%- include('../partials/footer') %>
