@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Submit a Support Request · Enterprise ITSM</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="centered-page">
+  <div class="public-card">
+    <h1>Submit a Support Request</h1>
+    <p class="subtitle">Peppermint Robotics — IT Service Desk</p>
+
+    <% if (submitted) { %>
+      <div class="public-success">
+        <p class="alert alert-success" style="display:inline-block;font-weight:600;">
+          <% if (incidentId) { %>
+            Thank you — your request has been submitted as <%= incidentId %>.
+          <% } else { %>
+            Thank you — your request has been submitted.
+          <% } %>
+        </p>
+        <p class="hint">Keep your reference number for follow-up.</p>
+      </div>
+    <% } else { %>
+
+      <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+      <form class="form-panel" method="post" action="/support">
+        <div class="form-grid">
+          <label>Your Name
+            <input type="text" name="reporterName" value="<%= form.reporterName || '' %>" required />
+          </label>
+          <label>Your Email
+            <input type="email" name="reporterEmail" value="<%= form.reporterEmail || '' %>" />
+          </label>
+          <label>Category
+            <select name="category">
+              <% ["Hardware", "Software", "Network", "Email", "Printer", "Other"].forEach(function(c) { %>
+                <option value="<%= c %>" <%= form.category === c ? 'selected' : '' %>><%= c %></option>
+              <% }) %>
+            </select>
+          </label>
+          <label>Priority
+            <select name="priority">
+              <% Object.values(PRIORITY).forEach(function(p) { %>
+                <option value="<%= p %>" <%= (form.priority || 'Medium') === p ? 'selected' : '' %>><%= p %></option>
+              <% }) %>
+            </select>
+          </label>
+        </div>
+        <label>Subject
+          <input type="text" name="subject" value="<%= form.subject || '' %>" required />
+        </label>
+        <label>Description
+          <textarea name="description" rows="4" required><%= form.description || '' %></textarea>
+        </label>
+
+        <!-- Honeypot: invisible to real people, bots often fill every field -->
+        <div class="public-honeypot" aria-hidden="true">
+          <label>Leave this blank
+            <input type="text" name="website" tabindex="-1" autocomplete="off" />
+          </label>
+        </div>
+
+        <label>What is <%= challenge.num1 %> + <%= challenge.num2 %>?
+          <input type="text" name="captchaAnswer" placeholder="Answer" required autocomplete="off" />
+        </label>
+        <input type="hidden" name="captchaToken" value="<%= challenge.token %>" />
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-block">Submit Request</button>
+        </div>
+      </form>
+
+    <% } %>
+  </div>
+</body>
+</html>
