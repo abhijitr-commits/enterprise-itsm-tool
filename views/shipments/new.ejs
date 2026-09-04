@@ -1,0 +1,47 @@
+<%- include('../partials/header', { title: 'New Shipment' }) %>
+
+<div class="page-header">
+  <h1>New Shipment</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/shipments">
+  <div class="form-grid">
+    <label>Direction
+      <select name="direction" required>
+        <option value="">Select…</option>
+        <% Object.values(SHIPMENT_DIRECTION).forEach(function(d) { %>
+          <option value="<%= d %>" <%= form.direction === d ? 'selected' : '' %>><%= d %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Related Order
+      <input type="text" name="relatedOrder" value="<%= form.relatedOrder || '' %>" placeholder="e.g. SO-2026-000001 or PO-2026-000001" />
+    </label>
+    <label>Carrier
+      <input type="text" name="carrier" value="<%= form.carrier || '' %>" />
+    </label>
+    <label>Tracking Number
+      <input type="text" name="trackingNumber" value="<%= form.trackingNumber || '' %>" />
+    </label>
+    <label>Origin
+      <input type="text" name="origin" value="<%= form.origin || '' %>" />
+    </label>
+    <label>Destination
+      <input type="text" name="destination" value="<%= form.destination || '' %>" required />
+    </label>
+    <label>Expected Delivery Date
+      <input type="date" name="expectedDeliveryDate" value="<%= form.expectedDeliveryDate || '' %>" />
+    </label>
+  </div>
+  <label>Notes
+    <textarea name="notes" rows="2"><%= form.notes || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/shipments">Cancel</a>
+    <button type="submit" class="btn btn-primary">Create Shipment</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

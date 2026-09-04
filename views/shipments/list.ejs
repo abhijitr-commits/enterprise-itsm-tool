@@ -1,0 +1,57 @@
+<%- include('../partials/header', { title: 'Shipments' }) %>
+
+<div class="page-header">
+  <h1>Shipments (Logistics)</h1>
+  <a href="/shipments/new" class="btn btn-primary">New Shipment</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<form class="panel filter-bar" method="get" action="/shipments">
+  <select name="direction">
+    <option value="">All Directions</option>
+    <% Object.values(SHIPMENT_DIRECTION).forEach(function(d) { %>
+      <option value="<%= d %>" <%= query.direction === d ? 'selected' : '' %>><%= d %></option>
+    <% }) %>
+  </select>
+  <select name="status">
+    <option value="">All Statuses</option>
+    <% Object.values(SHIPMENT_STATUS).forEach(function(s) { %>
+      <option value="<%= s %>" <%= query.status === s ? 'selected' : '' %>><%= s %></option>
+    <% }) %>
+  </select>
+  <button type="submit" class="btn btn-secondary">Filter</button>
+</form>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>Shipment ID</th><th>Direction</th><th>Carrier</th><th>Tracking #</th><th>Origin</th><th>Destination</th><th>Expected Delivery</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      <% shipments.forEach(function(s) { %>
+        <tr>
+          <td><%= s.shipmentId %></td>
+          <td><%= s.direction %></td>
+          <td><%= s.carrier || '—' %></td>
+          <td><%= s.trackingNumber || '—' %></td>
+          <td><%= s.origin || '—' %></td>
+          <td><%= s.destination %></td>
+          <td><%= s.expectedDeliveryDate ? new Date(s.expectedDeliveryDate).toLocaleDateString() : '—' %></td>
+          <td><span class="badge <%= s.status === 'Delivered' ? 'badge-status-resolved' : (s.status === 'Cancelled' ? 'badge-status-cancelled' : (s.status === 'Delayed' ? 'badge-status-in-progress' : 'badge-status-open')) %>"><%= s.status %></span></td>
+          <td>
+            <form method="post" action="/shipments/<%= s._id %>/status" class="filter-bar">
+              <select name="status">
+                <% Object.values(SHIPMENT_STATUS).forEach(function(st) { %>
+                  <option value="<%= st %>" <%= s.status === st ? 'selected' : '' %>><%= st %></option>
+                <% }) %>
+              </select>
+              <button type="submit" class="btn btn-secondary">Update</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (shipments.length === 0) { %><tr><td colspan="9" class="empty-row">No shipments yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>
