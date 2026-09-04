@@ -23,6 +23,8 @@
  *************************************************************/
 const Letter = require("../models/Letter");
 const { LETTER_TYPE } = require("../models/Letter");
+const Candidate = require("../models/Candidate");
+const Employee = require("../models/Employee");
 const { getSetting, setSetting } = require("../utils/settings");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
@@ -120,9 +122,30 @@ async function listLetters(req, res) {
   res.render("letters/list", { letters, message: req.query.message || null });
 }
 
-function showOfferForm(req, res) {
+// "Select a name and ready to go": offer/interview-stage candidates,
+// so HR picks who to send an offer to instead of typing everything
+// from scratch — selecting one auto-fills email/designation via the
+// data-* attributes on the <option>s (see letters/offer-new.ejs).
+// Shared by showOfferForm and generateOfferLetter's error re-render,
+// so a validation error doesn't blow up on a missing `candidates` local.
+function getOfferCandidateOptions() {
+  return Candidate.find({ stage: { $in: ["Interview", "Offer", "Hired"] } })
+    .sort({ name: 1 })
+    .select("candidateId name email jobTitle")
+    .lean();
+}
+
+// Same idea for the Appointment Letter form's Employee Directory dropdown.
+function getAppointmentEmployeeOptions() {
+  return Employee.find().sort({ name: 1 }).select("employeeId name department designation").lean();
+}
+
+async function showOfferForm(req, res) {
+  const candidates = await getOfferCandidateOptions();
+
   res.render("letters/offer-new", {
     error: null,
+    candidates,
     form: {
       candidateName: req.query.candidateName || "",
       candidateEmail: req.query.candidateEmail || "",
@@ -165,13 +188,17 @@ async function generateOfferLetter(req, res) {
 
     res.redirect(`/letters/${letter.letterId}`);
   } catch (err) {
-    res.status(400).render("letters/offer-new", { error: err.message, form: req.body });
+    const candidates = await getOfferCandidateOptions();
+    res.status(400).render("letters/offer-new", { error: err.message, candidates, form: req.body });
   }
 }
 
-function showAppointmentForm(req, res) {
+async function showAppointmentForm(req, res) {
+  const employees = await getAppointmentEmployeeOptions();
+
   res.render("letters/appointment-new", {
     error: null,
+    employees,
     form: {
       employeeName: req.query.employeeName || "",
       department: req.query.department || "",
@@ -210,7 +237,8 @@ async function generateAppointmentLetter(req, res) {
 
     res.redirect(`/letters/${letter.letterId}`);
   } catch (err) {
-    res.status(400).render("letters/appointment-new", { error: err.message, form: req.body });
+    const employees = await getAppointmentEmployeeOptions();
+    res.status(400).render("letters/appointment-new", { error: err.message, employees, form: req.body });
   }
 }
 

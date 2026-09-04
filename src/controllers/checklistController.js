@@ -12,6 +12,9 @@ const { createChecklistIfMissing, markChecklistTaskDone } = require("../utils/ch
 const PreOnboardingDetail = require("../models/PreOnboardingDetail");
 const { WELCOME_KIT_ITEMS, BGV_STATUS, IT_PROVISIONING_STATUS } = require("../models/PreOnboardingDetail");
 const { logAudit } = require("../utils/auditLog");
+const Employee = require("../models/Employee");
+const Candidate = require("../models/Candidate");
+const { TASK_LISTS } = require("../config/checklistTasks");
 
 const TYPE_BY_SLUG = {
   "pre-onboarding": CHECKLIST_TYPE.PRE_ONBOARDING,
@@ -43,11 +46,33 @@ async function listChecklist(req, res) {
     byEmployee[item.employee].tasks.push(item);
   }
 
+  // "Select a name and ready to go" — offer a dropdown of real people
+  // instead of a blank free-text box, sourced from whoever a checklist
+  // of this type is actually for: Hired candidates (not yet a full
+  // Employee record) for Pre-Onboarding, the Employee Directory for
+  // everything else. Excludes names that already have this checklist
+  // type so the list only shows who's actually left to start.
+  const alreadyHas = new Set(Object.keys(byEmployee));
+  let candidateOptions = [];
+  if (type === CHECKLIST_TYPE.PRE_ONBOARDING) {
+    const hired = await Candidate.find({ stage: "Hired" }).sort({ name: 1 }).select("name jobTitle").lean();
+    candidateOptions = hired
+      .filter((c) => !alreadyHas.has(c.name))
+      .map((c) => ({ name: c.name, department: c.jobTitle || "" }));
+  }
+  const employees = await Employee.find().sort({ name: 1 }).select("name department").lean();
+  const employeeOptions = employees
+    .filter((e) => !alreadyHas.has(e.name))
+    .map((e) => ({ name: e.name, department: e.department || "" }));
+
   res.render("onboarding/checklist", {
     slug: req.params.slug,
     type,
     groups: Object.values(byEmployee),
     tabs: Object.entries(TYPE_BY_SLUG).map(([slug, t]) => ({ slug, label: t })),
+    candidateOptions,
+    employeeOptions,
+    standardTasks: TASK_LISTS[type] || [],
     message: req.query.message || null,
   });
 }
