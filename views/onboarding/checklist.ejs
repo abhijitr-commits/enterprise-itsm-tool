@@ -16,12 +16,61 @@
   <div class="panel-header">
     <h2>Start a New Checklist</h2>
   </div>
-  <form method="post" action="/onboarding/<%= slug %>" class="filter-bar">
-    <input type="text" name="employee" placeholder="Employee name" required />
-    <input type="text" name="department" placeholder="Department" />
+  <div class="alert alert-info">
+    Pick a name below and click Create — the standard <%= standardTasks.length %>-step <%= type %> checklist
+    (<%= standardTasks.map(function(t){ return t[0]; }).join(', ') %>) loads instantly, ready to check off. Nothing to build yourself.
+  </div>
+  <form method="post" action="/onboarding/<%= slug %>" class="filter-bar" id="checklist-create-form">
+    <select name="employee" id="checklist-employee-select" required>
+      <option value="">— Select a name —</option>
+      <% if (candidateOptions.length) { %>
+        <optgroup label="Hired Candidates">
+          <% candidateOptions.forEach(function(c) { %>
+            <option value="<%= c.name %>" data-department="<%= c.department %>"><%= c.name %></option>
+          <% }) %>
+        </optgroup>
+      <% } %>
+      <% if (employeeOptions.length) { %>
+        <optgroup label="Employee Directory">
+          <% employeeOptions.forEach(function(e) { %>
+            <option value="<%= e.name %>" data-department="<%= e.department %>"><%= e.name %></option>
+          <% }) %>
+        </optgroup>
+      <% } %>
+      <option value="__other__">Other (type a name manually)…</option>
+    </select>
+    <input type="text" name="employeeManual" id="checklist-employee-manual" placeholder="Name" style="display:none" />
+    <input type="text" name="department" id="checklist-department" placeholder="Department" />
     <button type="submit" class="btn btn-primary">Create</button>
   </form>
 </div>
+
+<script>
+  (function () {
+    var select = document.getElementById('checklist-employee-select');
+    var manual = document.getElementById('checklist-employee-manual');
+    var dept = document.getElementById('checklist-department');
+    var form = document.getElementById('checklist-create-form');
+    select.addEventListener('change', function () {
+      var opt = select.options[select.selectedIndex];
+      if (select.value === '__other__') {
+        manual.style.display = '';
+        manual.focus();
+        dept.value = '';
+      } else {
+        manual.style.display = 'none';
+        manual.value = '';
+        dept.value = (opt && opt.getAttribute('data-department')) || '';
+      }
+    });
+    form.addEventListener('submit', function () {
+      if (select.value === '__other__') {
+        select.name = '';
+        manual.name = 'employee';
+      }
+    });
+  })();
+</script>
 
 <% groups.forEach(function(group) { %>
   <div class="panel">
