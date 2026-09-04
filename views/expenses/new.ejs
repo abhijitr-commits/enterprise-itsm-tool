@@ -1,0 +1,33 @@
+<%- include('../partials/header', { title: 'Submit Expense Claim' }) %>
+
+<div class="page-header">
+  <h1>Submit Expense Claim</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/expenses">
+  <div class="form-grid">
+    <label>Category
+      <input type="text" name="category" value="<%= form.category || '' %>" placeholder="Travel, Meals, Supplies..." required />
+    </label>
+    <label>Amount
+      <input type="number" name="amount" min="0.01" step="0.01" value="<%= form.amount || '' %>" required />
+    </label>
+    <label>Expense Date
+      <input type="date" name="expenseDate" value="<%= form.expenseDate || '' %>" />
+    </label>
+    <label>Receipt URL
+      <input type="url" name="receiptUrl" value="<%= form.receiptUrl || '' %>" placeholder="Link to receipt (optional)" />
+    </label>
+  </div>
+  <label>Description
+    <textarea name="description" rows="3"><%= form.description || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/expenses/mine">Cancel</a>
+    <button type="submit" class="btn btn-primary">Submit Claim</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

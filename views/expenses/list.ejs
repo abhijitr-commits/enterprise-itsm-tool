@@ -1,0 +1,46 @@
+<%- include('../partials/header', { title: 'All Expense Claims' }) %>
+
+<div class="page-header">
+  <h1>All Expense Claims</h1>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>Claim ID</th><th>Employee</th><th>Category</th><th>Amount</th><th>Description</th><th>Status</th><% if (canApprove) { %><th></th><% } %></tr></thead>
+    <tbody>
+      <% claims.forEach(function(c) { %>
+        <tr>
+          <td><%= c.claimId %></td>
+          <td><%= c.employee %></td>
+          <td><%= c.category %></td>
+          <td><%= c.amount %></td>
+          <td><%= c.description || '—' %></td>
+          <td><span class="badge <%= c.status === 'Approved' || c.status === 'Reimbursed' ? 'badge-status-resolved' : (c.status === 'Rejected' ? 'badge-status-cancelled' : 'badge-status-open') %>"><%= c.status %></span></td>
+          <% if (canApprove) { %>
+            <td>
+              <% if (c.status === EXPENSE_STATUS.PENDING_APPROVAL) { %>
+                <form method="post" action="/expenses/<%= c._id %>/decision" class="filter-bar">
+                  <input type="hidden" name="decision" value="Approved" />
+                  <button type="submit" class="btn btn-secondary">Approve</button>
+                </form>
+                <form method="post" action="/expenses/<%= c._id %>/decision" style="margin-top:4px;">
+                  <input type="hidden" name="decision" value="Rejected" />
+                  <button type="submit" class="btn btn-secondary">Reject</button>
+                </form>
+              <% } else if (c.status === EXPENSE_STATUS.APPROVED) { %>
+                <form method="post" action="/expenses/<%= c._id %>/reimburse">
+                  <button type="submit" class="btn btn-secondary">Mark Reimbursed</button>
+                </form>
+              <% } %>
+            </td>
+          <% } %>
+        </tr>
+      <% }) %>
+      <% if (claims.length === 0) { %><tr><td colspan="<%= canApprove ? 7 : 6 %>" class="empty-row">No expense claims yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>
