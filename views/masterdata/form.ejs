@@ -17,6 +17,13 @@
             <option value="<%= opt %>" <%= form[f.name] === opt ? 'selected' : '' %>><%= opt %></option>
           <% }) %>
         </select>
+      <% } else if (f.type === 'date') { %>
+        <%
+          let dateValue = form[f.name] || '';
+          if (dateValue instanceof Date) dateValue = dateValue.toISOString().slice(0, 10);
+          else if (typeof dateValue === 'string' && dateValue.length > 10) dateValue = dateValue.slice(0, 10);
+        %>
+        <input type="date" name="<%= f.name %>" value="<%= dateValue %>" <%= f.required ? 'required' : '' %> />
       <% } else { %>
         <input type="<%= f.type %>" name="<%= f.name %>" value="<%= form[f.name] || '' %>" <%= f.required ? 'required' : '' %> />
       <% } %>

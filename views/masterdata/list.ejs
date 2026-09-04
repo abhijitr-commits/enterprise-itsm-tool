@@ -6,6 +6,7 @@
 </div>
 
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+<% if (typeof error !== "undefined" && error) { %><div class="alert alert-error"><%= error %></div><% } %>
 
 <div class="tab-bar">
   <% tables.forEach(function(t) { %>
@@ -25,7 +26,11 @@
       <% rows.forEach(function(row) { %>
         <tr>
           <% table.fields.forEach(function(f) { %>
-            <td><%= (row[f.name] === undefined || row[f.name] === null || row[f.name] === '') ? '—' : row[f.name] %></td>
+            <%
+              let cellValue = row[f.name];
+              if (cellValue instanceof Date) cellValue = cellValue.toLocaleDateString();
+            %>
+            <td><%= (cellValue === undefined || cellValue === null || cellValue === '') ? '—' : cellValue %></td>
           <% }) %>
           <td>
             <a class="btn btn-secondary" href="/masterdata/<%= tableKey %>/<%= row._id %>/edit">Edit</a>
