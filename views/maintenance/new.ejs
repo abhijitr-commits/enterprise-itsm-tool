@@ -1,0 +1,36 @@
+<%- include('../partials/header', { title: 'New Maintenance Announcement' }) %>
+
+<div class="page-header">
+  <h1>New Maintenance Announcement</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/maintenance">
+  <label>Title
+    <input type="text" name="title" value="<%= form.title || '' %>" required />
+  </label>
+  <label>Description
+    <textarea name="description" rows="3" required><%= form.description || '' %></textarea>
+  </label>
+  <div class="form-grid">
+    <label>Site/Location
+      <input type="text" name="site" value="<%= form.site || '' %>" placeholder="All" />
+    </label>
+    <label>Scheduled Start
+      <input type="datetime-local" name="scheduledStart" value="<%= form.scheduledStart || '' %>" />
+    </label>
+    <label>Scheduled End
+      <input type="datetime-local" name="scheduledEnd" value="<%= form.scheduledEnd || '' %>" />
+    </label>
+  </div>
+  <div class="alert alert-info">
+    Posted to this list for everyone to see. No email provider is wired up yet (see MIGRATION.md), so this isn't broadcast by email — share the link directly if it's urgent.
+  </div>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/maintenance">Cancel</a>
+    <button type="submit" class="btn btn-primary">Post Announcement</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

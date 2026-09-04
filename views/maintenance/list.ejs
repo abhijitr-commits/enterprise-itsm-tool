@@ -1,0 +1,33 @@
+<%- include('../partials/header', { title: 'Maintenance Announcements' }) %>
+
+<div class="page-header">
+  <h1>Maintenance Announcements</h1>
+  <a class="btn btn-primary" href="/maintenance/new">+ New Announcement</a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <table class="table">
+    <thead><tr><th>Title</th><th>Description</th><th>Site/Location</th><th>Scheduled</th><th>Created By</th><th>Posted</th></tr></thead>
+    <tbody>
+      <% announcements.forEach(function(a) { %>
+        <tr>
+          <td><%= a.title %></td>
+          <td><%= a.description %></td>
+          <td><%= a.site %></td>
+          <td>
+            <%= a.scheduledStart ? new Date(a.scheduledStart).toLocaleString() : 'TBD' %>
+            to
+            <%= a.scheduledEnd ? new Date(a.scheduledEnd).toLocaleString() : 'TBD' %>
+          </td>
+          <td><%= a.createdBy %></td>
+          <td><%= new Date(a.createdDate).toLocaleDateString() %></td>
+        </tr>
+      <% }) %>
+      <% if (announcements.length === 0) { %><tr><td colspan="6" class="empty-row">No maintenance announcements yet.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>
