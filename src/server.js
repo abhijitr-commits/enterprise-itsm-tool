@@ -86,6 +86,7 @@ async function autoSeed() {
   const SLAMatrix = require("./models/SLAMatrix");
   const User = require("./models/User");
   const Room = require("./models/Room");
+  const Department = require("./models/Department");
   const { generateSequentialId } = require("./utils/idGenerator");
   const { DEFAULT_PERMISSIONS_MAP } = require("./config/permissions");
   const { PRIORITY, ROLE, COMPANY_EMAIL_DOMAIN } = require("./config/constants");
@@ -120,6 +121,39 @@ async function autoSeed() {
       await Room.create({ roomId, roomName });
     }
     console.log(`[auto-seed] First run: created ${defaultRooms.length} default conference room(s).`);
+  }
+
+  // Seeds the Department master list (Admin Console -> Master Data ->
+  // Departments) so every "Department" field across the app — Employee
+  // Directory, Incidents, Assets, Work Orders, and the rest — has a
+  // real list to pick from instead of a blank free-text box. Names
+  // match exactly what src/utils/teamAccess.js compares against
+  // (case-insensitive) for HR/IT/Administration team gating, plus the
+  // real business departments this company's other modules (Sales,
+  // Work Orders, Safety, etc.) already assume. Idempotent: only runs
+  // when the Department collection is completely empty, so an Admin's
+  // own edits/additions on the Master Data page are never overwritten.
+  const departmentCount = await Department.countDocuments();
+  if (departmentCount === 0) {
+    const defaultDepartments = [
+      "HR",
+      "IT",
+      "Administration",
+      "Sales",
+      "Production",
+      "Engineering",
+      "Robotics",
+      "Electrical",
+      "Electronics",
+      "Software",
+      "Technical",
+      "Logistics",
+      "Safety",
+      "Finance",
+      "Quality",
+    ];
+    await Department.insertMany(defaultDepartments.map((name) => ({ name })));
+    console.log(`[auto-seed] First run: created ${defaultDepartments.length} default department(s).`);
   }
 
   const userCount = await User.countDocuments();
