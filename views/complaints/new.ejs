@@ -11,7 +11,7 @@
 <form class="panel form-panel" method="post" action="/complaints">
   <div class="form-grid">
     <label>Department
-      <input type="text" name="department" value="<%= form.department || '' %>" />
+      <input type="text" name="department" list="departmentList" value="<%= form.department || '' %>" />
     </label>
     <label>Category
       <input type="text" name="category" value="<%= form.category || '' %>" placeholder="General" />
