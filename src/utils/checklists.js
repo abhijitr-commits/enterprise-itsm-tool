@@ -39,4 +39,32 @@ async function createChecklistIfMissing(type, employeeName, department, actorId)
   return { created: true, message: `${type} checklist created for ${employeeName}.` };
 }
 
-module.exports = { createChecklistIfMissing };
+/**
+ * Port of markPreOnboardingTaskDone() — flips one checklist task to
+ * "Done" by exact task text, used by lettersController.js to check
+ * off "Offer Letter Sent" automatically once the offer letter is
+ * generated. Silently no-ops if the task/employee combination isn't
+ * found (matches the original — a missing checklist row shouldn't
+ * break the calling action).
+ */
+async function markChecklistTaskDone(type, employeeName, taskName, actorId) {
+  const item = await ChecklistItem.findOneAndUpdate(
+    { type, employee: employeeName, task: taskName },
+    { $set: { status: "Done", completedDate: new Date() } },
+    { new: true }
+  );
+
+  if (item) {
+    await logAudit({
+      user: actorId,
+      action: "Checklist Task Done",
+      entityType: type,
+      entityId: item._id,
+      details: `${employeeName}: ${taskName}`,
+    });
+  }
+
+  return !!item;
+}
+
+module.exports = { createChecklistIfMissing, markChecklistTaskDone };
