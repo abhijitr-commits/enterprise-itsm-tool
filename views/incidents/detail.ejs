@@ -26,10 +26,13 @@
         <input type="text" name="department" list="departmentList" value="<%= incident.department %>" required />
       </label>
       <label>Location
-        <input type="text" name="location" value="<%= incident.location %>" required />
+        <input type="text" name="location" list="locationList" value="<%= incident.location %>" required />
       </label>
       <label>Category
-        <input type="text" name="category" value="<%= incident.category %>" required />
+        <input type="text" name="category" list="incidentCategoryList" value="<%= incident.category %>" required />
+        <datalist id="incidentCategoryList">
+          <% categories.forEach(function(c) { %><option value="<%= c %>"><% }) %>
+        </datalist>
       </label>
       <label>Priority
         <select name="priority">

@@ -9,16 +9,19 @@
 <form class="panel form-panel" method="post" action="/incidents">
   <div class="form-grid">
     <label>Employee Name
-      <input type="text" name="employeeName" value="<%= form.employeeName || '' %>" required />
+      <input type="text" name="employeeName" list="employeeList" value="<%= form.employeeName || '' %>" required />
     </label>
     <label>Department
       <input type="text" name="department" list="departmentList" value="<%= form.department || '' %>" required />
     </label>
     <label>Location
-      <input type="text" name="location" value="<%= form.location || '' %>" required />
+      <input type="text" name="location" list="locationList" value="<%= form.location || '' %>" required />
     </label>
     <label>Category
-      <input type="text" name="category" value="<%= form.category || '' %>" required />
+      <input type="text" name="category" list="incidentCategoryList" value="<%= form.category || '' %>" required />
+      <datalist id="incidentCategoryList">
+        <% categories.forEach(function(c) { %><option value="<%= c %>"><% }) %>
+      </datalist>
     </label>
     <label>Priority
       <select name="priority" required>
