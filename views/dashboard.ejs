@@ -8,21 +8,33 @@
   <div class="panel-header"><h2>Departments</h2></div>
   <div class="admin-tile-grid">
     <a class="admin-tile" href="/hr">
-      <div class="admin-tile-title">🧑‍💼 HR Hub</div>
-      <div class="admin-tile-sub">People, Time Off, Onboarding/Offboarding, Letters, Training, and more.</div>
+      <span class="admin-tile-icon"><%- icon('users') %></span>
+      <div class="admin-tile-body">
+        <div class="admin-tile-title">HR Hub</div>
+        <div class="admin-tile-sub">People, Time Off, Onboarding/Offboarding, Letters, Training, and more.</div>
+      </div>
     </a>
     <a class="admin-tile" href="/it">
-      <div class="admin-tile-title">🖥️ IT Management Hub</div>
-      <div class="admin-tile-sub">Helpdesk, Assets, Licensing, Vendors, and IT operations.</div>
+      <span class="admin-tile-icon"><%- icon('monitor') %></span>
+      <div class="admin-tile-body">
+        <div class="admin-tile-title">IT Management Hub</div>
+        <div class="admin-tile-sub">Helpdesk, Assets, Licensing, Vendors, and IT operations.</div>
+      </div>
     </a>
     <a class="admin-tile" href="/operations">
-      <div class="admin-tile-title">🏭 Operations Hub</div>
-      <div class="admin-tile-sub">Sales, Production, Logistics, Safety, Facilities, Wellness.</div>
+      <span class="admin-tile-icon"><%- icon('factory') %></span>
+      <div class="admin-tile-body">
+        <div class="admin-tile-title">Operations Hub</div>
+        <div class="admin-tile-sub">Sales, Production, Logistics, Safety, Facilities, Wellness.</div>
+      </div>
     </a>
     <% if (currentUser && currentUser.role === 'Administrator') { %>
       <a class="admin-tile" href="/admin">
-        <div class="admin-tile-title">⚙️ Admin Console</div>
-        <div class="admin-tile-sub">Users, Permissions, Integrations, and Master Data.</div>
+        <span class="admin-tile-icon"><%- icon('settings') %></span>
+        <div class="admin-tile-body">
+          <div class="admin-tile-title">Admin Console</div>
+          <div class="admin-tile-sub">Users, Permissions, Integrations, and Master Data.</div>
+        </div>
       </a>
     <% } %>
   </div>
@@ -30,24 +42,39 @@
 
 <div class="stat-grid">
   <div class="stat-card">
-    <div class="stat-value"><%= open %></div>
-    <div class="stat-label">Open Incidents</div>
+    <div class="stat-card-body">
+      <div class="stat-value"><%= open %></div>
+      <div class="stat-label">Open Incidents</div>
+    </div>
+    <span class="stat-icon"><%- icon('alert-circle') %></span>
   </div>
   <div class="stat-card">
-    <div class="stat-value"><%= inProgress %></div>
-    <div class="stat-label">In Progress</div>
+    <div class="stat-card-body">
+      <div class="stat-value"><%= inProgress %></div>
+      <div class="stat-label">In Progress</div>
+    </div>
+    <span class="stat-icon"><%- icon('clock') %></span>
   </div>
   <div class="stat-card stat-danger">
-    <div class="stat-value"><%= breached %></div>
-    <div class="stat-label">SLA Breached</div>
+    <div class="stat-card-body">
+      <div class="stat-value"><%= breached %></div>
+      <div class="stat-label">SLA Breached</div>
+    </div>
+    <span class="stat-icon"><%- icon('alert-triangle') %></span>
   </div>
   <div class="stat-card stat-success">
-    <div class="stat-value"><%= closedToday %></div>
-    <div class="stat-label">Closed Today</div>
+    <div class="stat-card-body">
+      <div class="stat-value"><%= closedToday %></div>
+      <div class="stat-label">Closed Today</div>
+    </div>
+    <span class="stat-icon"><%- icon('check-circle') %></span>
   </div>
   <div class="stat-card">
-    <div class="stat-value"><%= pendingApprovals %></div>
-    <div class="stat-label">Pending Approvals</div>
+    <div class="stat-card-body">
+      <div class="stat-value"><%= pendingApprovals %></div>
+      <div class="stat-label">Pending Approvals</div>
+    </div>
+    <span class="stat-icon"><%- icon('clipboard-check') %></span>
   </div>
 </div>
 

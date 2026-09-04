@@ -4,13 +4,19 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sign in · Enterprise ITSM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body class="centered-page">
+  <div class="brand-lockup">
+    <span class="brand-mark"><%- icon('grid', {size:22}) %></span>
+  </div>
   <form class="login-card" method="post" action="/login">
     <h1>Enterprise ITSM</h1>
     <p class="subtitle">Sign in to continue</p>
-    <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+    <% if (error) { %><div class="alert alert-error"><%- icon('alert-circle', {size:15}) %> <%= error %></div><% } %>
     <label>Email
       <input type="email" name="email" required autofocus />
     </label>
