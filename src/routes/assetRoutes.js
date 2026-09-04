@@ -22,5 +22,6 @@ router.post("/:id", guard("assets_edit"), assetController.updateAsset);
 router.post("/:id/issue", guard("assets_issue"), assetController.issueAsset);
 router.post("/:id/return", guard("assets_issue"), assetController.returnAsset);
 router.post("/:id/decommission", guard("assets_edit"), assetController.decommissionAsset);
+router.post("/:id/maintenance", guard("assets_edit"), assetController.logMaintenance);
 
 module.exports = router;

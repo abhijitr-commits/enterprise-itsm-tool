@@ -25,4 +25,12 @@ router.get("/:slug", checklistController.listChecklist);
 router.post("/:slug", checklistController.createChecklist);
 router.post("/:slug/:id/toggle", checklistController.toggleTask);
 
+// Pre-Onboarding Detail — only meaningful under the "pre-onboarding"
+// slug (the controller itself 404s any other slug); nested under
+// "/:slug" so it inherits guardForSlug's HR-team gate above.
+router.get("/:slug/:employee/detail", checklistController.showPreOnboardingDetail);
+router.post("/:slug/:employee/detail/contact", checklistController.savePreOnboardingContact);
+router.post("/:slug/:employee/detail/joining-date", checklistController.confirmJoiningDate);
+router.post("/:slug/:employee/detail/welcome-kit", checklistController.saveWelcomeKit);
+
 module.exports = router;

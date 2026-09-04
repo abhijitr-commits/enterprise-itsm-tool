@@ -29,4 +29,9 @@ router.post("/users/:id", guard("admin_manage_users"), adminController.updateUse
 router.get("/permissions", guard("admin_manage_settings"), adminController.showPermissionMatrix);
 router.post("/permissions", guard("admin_manage_settings"), adminController.updatePermissionMatrix);
 
+router.get("/integrations", guard("admin_manage_settings"), adminController.showIntegrationSettings);
+router.post("/integrations", guard("admin_manage_settings"), adminController.saveIntegrationSettings);
+router.post("/integrations/test", guard("admin_manage_settings"), adminController.sendTestNotification);
+router.post("/integrations/send-digest", guard("admin_manage_settings"), adminController.sendExpiryDigest);
+
 module.exports = router;

@@ -1,9 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const reportController = require("../controllers/reportController");
-const executiveSummaryController = require("../controllers/executiveSummaryController");
-const { hasPermission } = require("../utils/permissions");
+const purchaseController = require("../controllers/purchaseController");
 const { requireLogin } = require("../middleware/auth");
+const { hasPermission } = require("../utils/permissions");
 
 function guard(action) {
   return async (req, res, next) => {
@@ -15,7 +14,8 @@ function guard(action) {
 
 router.use(requireLogin);
 
-router.get("/", guard("reports_view"), reportController.showReports);
-router.get("/executive-summary", guard("reports_view"), executiveSummaryController.showExecutiveSummary);
+router.get("/", guard("purchases_create"), purchaseController.listPurchases);
+router.post("/", guard("purchases_create"), purchaseController.createPurchase);
+router.post("/:id/status", guard("purchases_edit"), purchaseController.updateStatus);
 
 module.exports = router;
