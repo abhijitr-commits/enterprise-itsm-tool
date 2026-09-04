@@ -3,6 +3,7 @@ const Department = require("../models/Department");
 const Employee = require("../models/Employee");
 const Location = require("../models/Location");
 const Asset = require("../models/Asset");
+const { icon } = require("../utils/icons");
 
 // Short in-memory cache for the Department master list (Admin Console ->
 // Master Data -> Departments), so every "Department" field across the
@@ -61,6 +62,10 @@ async function attachUser(req, res, next) {
       }
     }
     res.locals.currentUser = req.user || null;
+    // Shared inline-SVG icon helper (src/utils/icons.js) — available on
+    // every page, signed in or not, so header.ejs/login.ejs/etc. can call
+    // `<%- icon('home') %>` instead of hardcoding emoji or markup per view.
+    res.locals.icon = icon;
     // Bare path (no query string) so header.ejs's top tab bar can
     // highlight whichever department tab the current page belongs to
     // (e.g. "/operations/..." keeps the Operations tab lit) without
