@@ -9,7 +9,7 @@
 <form class="panel form-panel" method="post" action="/performance/reviews">
   <div class="form-grid">
     <label>Employee (name)
-      <input type="text" name="employee" value="<%= form.employee || '' %>" required />
+      <input type="text" name="employee" list="employeeList" value="<%= form.employee || '' %>" required />
     </label>
     <label>Review Period
       <input type="text" name="reviewPeriod" placeholder="e.g. H1 2026" value="<%= form.reviewPeriod || '' %>" required />

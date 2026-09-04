@@ -9,7 +9,7 @@
 <form class="panel form-panel" method="post" action="/performance/goals">
   <div class="form-grid">
     <label>Employee (name)
-      <input type="text" name="employee" value="<%= form.employee || '' %>" required />
+      <input type="text" name="employee" list="employeeList" value="<%= form.employee || '' %>" required />
     </label>
     <label>Goal Title
       <input type="text" name="goalTitle" value="<%= form.goalTitle || '' %>" required />
