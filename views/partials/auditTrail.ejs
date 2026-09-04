@@ -1,0 +1,17 @@
+<%
+  // Shared partial — include with local: auditEntries (array, oldest
+  // first, each with a populated .user {name} where available). Port
+  // of RecordEngine.gs's getAuditTrailForRecord(id) display.
+%>
+<div class="panel">
+  <div class="panel-header"><h2>Audit Trail</h2></div>
+  <div class="comment-list">
+    <% (auditEntries || []).forEach(function(e) { %>
+      <div class="comment">
+        <div class="comment-meta"><%= new Date(e.createdAt).toLocaleString() %> · <%= (e.user && e.user.name) || 'System' %> · <%= e.action %></div>
+        <% if (e.details) { %><div class="comment-text"><%= typeof e.details === 'string' ? e.details : JSON.stringify(e.details) %></div><% } %>
+      </div>
+    <% }) %>
+    <% if ((auditEntries || []).length === 0) { %><p class="empty-row">No audit history yet.</p><% } %>
+  </div>
+</div>

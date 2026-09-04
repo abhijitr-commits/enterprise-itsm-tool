@@ -19,6 +19,11 @@
         const canSee = (key) => mv[key] !== false;
       %>
       <a href="/" class="nav-link">Dashboard</a>
+      <% if (currentUser) { %>
+        <form method="get" action="/search" class="sidebar-search">
+          <input type="text" name="q" placeholder="Search everything…" />
+        </form>
+      <% } %>
       <% if (canSee('incidents')) { %><a href="/incidents" class="nav-link">Incidents</a><% } %>
       <% if (canSee('requests')) { %><a href="/requests" class="nav-link">Service Requests</a><% } %>
       <% if (canSee('problems')) { %><a href="/problems" class="nav-link">Problems</a><% } %>
@@ -74,6 +79,7 @@
         <% if (isHRTeamUser) { %>
           <a href="/benefits" class="nav-link">Benefits Enrollment</a>
           <a href="/letters" class="nav-link">Letters</a>
+          <a href="/system-policies" class="nav-link">System Policies</a>
         <% } %>
         <% if (isAdminTeamUser) { %>
           <a href="/onboarding/admin-onboarding" class="nav-link">Admin Onboarding</a>
@@ -82,9 +88,20 @@
       <% } %>
       <% if (currentUser) { %>
         <div class="nav-section-label">IT Operations</div>
+        <a href="/it" class="nav-link">IT Management Hub</a>
         <a href="/access-requests/mine" class="nav-link">My Access Requests</a>
         <a href="/vendors" class="nav-link">Vendors</a>
         <a href="/purchases" class="nav-link">Purchase Register</a>
+        <a href="/stock" class="nav-link">Stock / Inventory</a>
+        <a href="/licenses" class="nav-link">Software Licenses</a>
+        <a href="/rooms/bookings" class="nav-link">Room / Equipment Booking</a>
+        <a href="/complaints/mine" class="nav-link">My Complaints</a>
+        <a href="/expenses/mine" class="nav-link">My Expense Claims</a>
+        <a href="/maintenance" class="nav-link">Maintenance Announcements</a>
+        <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
+          <a href="/complaints" class="nav-link">All Complaints</a>
+          <a href="/expenses" class="nav-link">All Expense Claims</a>
+        <% } %>
         <% if (isITTeamUser) { %>
           <a href="/helpdesk" class="nav-link">IT Helpdesk</a>
           <a href="/asset-allocation" class="nav-link">Asset Allocation</a>
@@ -95,6 +112,21 @@
         <% if (isITTeamUser || isAdminTeamUser) { %>
           <a href="/requirements" class="nav-link">Requirement Requests</a>
         <% } %>
+      <% } %>
+      <% if (currentUser) { %>
+        <div class="nav-section-label">Safety</div>
+        <a href="/safety/mine" class="nav-link">My Safety Reports</a>
+        <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
+          <a href="/safety" class="nav-link">All Safety Incidents</a>
+        <% } %>
+      <% } %>
+      <% if (currentUser) { %>
+        <div class="nav-section-label">Sales, Production &amp; Logistics</div>
+        <a href="/sales" class="nav-link">Sales Orders</a>
+        <a href="/work-orders" class="nav-link">Work Orders</a>
+        <a href="/engineering-changes" class="nav-link">Engineering Change Requests</a>
+        <a href="/shipments" class="nav-link">Shipments</a>
+        <a href="/material-requests" class="nav-link">Material Requests</a>
       <% } %>
       <% if (currentUser) { %>
         <div class="nav-section-label">Wellness &amp; Engagement</div>
@@ -110,6 +142,7 @@
         <a href="/admin" class="nav-link">Admin Console</a>
         <a href="/admin/users" class="nav-link">Users</a>
         <a href="/admin/permissions" class="nav-link">Permissions</a>
+        <a href="/admin/integrations" class="nav-link">Integration Settings</a>
         <a href="/masterdata/departments" class="nav-link">Master Data</a>
       <% } %>
       <div class="sidebar-footer">
