@@ -9,7 +9,7 @@
 <form class="panel form-panel" method="post" action="/changes">
   <div class="form-grid">
     <label>Requested By
-      <input type="text" name="requestedBy" value="<%= form.requestedBy || '' %>" required />
+      <input type="text" name="requestedBy" list="employeeList" value="<%= form.requestedBy || '' %>" required />
     </label>
     <label>Department
       <input type="text" name="department" list="departmentList" value="<%= form.department || '' %>" required />
