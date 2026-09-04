@@ -58,6 +58,12 @@
     <label>Remarks
       <textarea name="remarks" rows="2"><%= incident.remarks || '' %></textarea>
     </label>
+    <label>Related Robot / Equipment (optional)
+      <input type="text" name="relatedAsset" value="<%= incident.relatedAsset || '' %>" list="assetNamesList" placeholder="Search by name or asset ID" />
+      <datalist id="assetNamesList">
+        <% assetNames.forEach(function(n) { %><option value="<%= n %>"></option><% }) %>
+      </datalist>
+    </label>
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">Save Changes</button>
     </div>
@@ -88,6 +94,9 @@
       <button type="submit" class="btn btn-secondary btn-block">Add Comment</button>
     </form>
   </div>
+
+  <%- include('../partials/attachments', { attachments, moduleKey, recordId: incident._id, canUpload }) %>
+  <%- include('../partials/auditTrail', { auditEntries }) %>
 </div>
 
 <%- include('../partials/footer') %>
