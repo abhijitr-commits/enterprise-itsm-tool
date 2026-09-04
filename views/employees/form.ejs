@@ -31,13 +31,13 @@
       <input type="text" id="employee-department-manual" value="<%= (form.department && !deptIsKnown) ? form.department : '' %>" />
     </label>
     <label>Location
-      <input type="text" name="location" value="<%= form.location || '' %>" />
+      <input type="text" name="location" list="locationList" value="<%= form.location || '' %>" />
     </label>
     <label>Designation
       <input type="text" name="designation" value="<%= form.designation || '' %>" />
     </label>
     <label>Reports To (employee name)
-      <input type="text" name="reportsTo" value="<%= form.reportsTo || '' %>" />
+      <input type="text" name="reportsTo" list="employeeList" value="<%= form.reportsTo || '' %>" />
     </label>
     <label>Status
       <select name="status">
