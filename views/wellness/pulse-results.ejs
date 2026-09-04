@@ -11,6 +11,11 @@
   <div class="panel">
     <div class="panel-header">
       <h2><%= r.survey.question %> <span class="badge <%= r.survey.status === 'Open' ? 'badge-status-open' : 'badge-status-closed' %>"><%= r.survey.status %></span></h2>
+      <% if (r.survey.status === 'Open') { %>
+        <form method="post" action="/wellness/pulse/<%= r.survey._id %>/close" onsubmit="return confirm('Close this survey? Employees will no longer be able to respond.')">
+          <button type="submit" class="btn btn-secondary">Close Survey</button>
+        </form>
+      <% } %>
     </div>
     <div class="stat-grid">
       <div class="stat-card"><div class="stat-value"><%= r.average %></div><div class="stat-label">Average Rating</div></div>
