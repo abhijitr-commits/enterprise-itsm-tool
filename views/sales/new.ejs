@@ -1,0 +1,39 @@
+<%- include('../partials/header', { title: 'New Sales Order' }) %>
+
+<div class="page-header">
+  <h1>New Sales Order</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/sales">
+  <div class="form-grid">
+    <label>Customer Name
+      <input type="text" name="customerName" value="<%= form.customerName || '' %>" required />
+    </label>
+    <label>Customer Email
+      <input type="email" name="customerEmail" value="<%= form.customerEmail || '' %>" />
+    </label>
+    <label>Quantity
+      <input type="number" name="quantity" min="1" value="<%= form.quantity || '' %>" required />
+    </label>
+    <label>Amount
+      <input type="number" name="amount" min="0" step="0.01" value="<%= form.amount || '' %>" />
+    </label>
+    <label>Expected Delivery Date
+      <input type="date" name="expectedDeliveryDate" value="<%= form.expectedDeliveryDate || '' %>" />
+    </label>
+  </div>
+  <label>Item Description
+    <textarea name="itemDescription" rows="2" required><%= form.itemDescription || '' %></textarea>
+  </label>
+  <label>Notes
+    <textarea name="notes" rows="2"><%= form.notes || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/sales">Cancel</a>
+    <button type="submit" class="btn btn-primary">Create Sales Order</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>
