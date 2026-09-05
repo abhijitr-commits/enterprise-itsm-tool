@@ -9,9 +9,11 @@ const { STATUS } = require("../config/constants");
 const { APPROVAL } = require("../models/ServiceRequest");
 
 router.get("/", requireLogin, async (req, res) => {
-  const [open, inProgress, breached, closedToday, pendingRequests, pendingChanges, pendingLeave] = await Promise.all([
+  const [open, inProgress, onHold, resolved, breached, closedToday, pendingRequests, pendingChanges, pendingLeave] = await Promise.all([
     Incident.countDocuments({ status: STATUS.OPEN }),
     Incident.countDocuments({ status: STATUS.IN_PROGRESS }),
+    Incident.countDocuments({ status: STATUS.ON_HOLD }),
+    Incident.countDocuments({ status: STATUS.RESOLVED }),
     Incident.countDocuments({ status: { $ne: STATUS.CLOSED }, slaDue: { $lt: new Date() } }),
     Incident.countDocuments({
       status: STATUS.CLOSED,
@@ -27,6 +29,8 @@ router.get("/", requireLogin, async (req, res) => {
   res.render("dashboard", {
     open,
     inProgress,
+    onHold,
+    resolved,
     breached,
     closedToday,
     pendingApprovals: pendingRequests + pendingChanges + pendingLeave,
