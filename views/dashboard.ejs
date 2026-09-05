@@ -27,6 +27,16 @@
     }
   });
   var donutStyle = dTotal > 0 ? ('background: conic-gradient(' + donutParts.join(', ') + ');') : '';
+
+  var chartW = 600, chartH = 120;
+  var maxCount = Math.max.apply(null, trend.map(function (t) { return t.count; }).concat([1]));
+  var stepX = chartW / (trend.length - 1);
+  var trendPoints = trend.map(function (t, i) {
+    return { x: i * stepX, y: (chartH - 8) * (1 - t.count / maxCount) + 4, count: t.count };
+  });
+  var trendLinePath = trendPoints.map(function (p, i) { return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ' ' + p.y.toFixed(1); }).join(' ');
+  var trendAreaPath = trendLinePath + ' L ' + trendPoints[trendPoints.length - 1].x.toFixed(1) + ' ' + chartH + ' L 0 ' + chartH + ' Z';
+  var trendTotal = trend.reduce(function (sum, t) { return sum + t.count; }, 0);
 %>
 <div class="dashboard-grid">
   <div class="panel">
@@ -89,8 +99,40 @@
           <% }) %>
         </div>
       </div>
+      <div class="breakdown-bars">
+        <% donutSegs.forEach(function(s) { %>
+          <% if (s.value > 0) { %>
+            <% var pct = (s.value / dTotal * 100); %>
+            <div class="breakdown-bar-row">
+              <div class="breakdown-bar-label"><span><%= s.label %></span><span><%= pct.toFixed(0) %>%</span></div>
+              <div class="breakdown-bar-track"><div class="breakdown-bar-fill" style="width: <%= pct.toFixed(1) %>%; background: <%= s.color %>;"></div></div>
+            </div>
+          <% } %>
+        <% }) %>
+      </div>
     <% } %>
   </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Incident Volume — Last 14 Days</h2></div>
+  <div class="trend-chart-head">
+    <span class="trend-chart-value"><%= trendTotal %></span>
+    <span class="trend-chart-sub">new incidents logged</span>
+  </div>
+  <svg class="trend-chart-svg" viewBox="0 0 <%= chartW %> <%= chartH %>">
+    <defs>
+      <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#f97316" stop-opacity="0.32"/>
+        <stop offset="100%" stop-color="#f97316" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path class="trend-area" d="<%= trendAreaPath %>"></path>
+    <path class="trend-line" d="<%= trendLinePath %>"></path>
+    <% trendPoints.forEach(function(p) { %>
+      <circle class="trend-dot" cx="<%= p.x.toFixed(1) %>" cy="<%= p.y.toFixed(1) %>" r="2.5"></circle>
+    <% }) %>
+  </svg>
 </div>
 
 <div class="stat-grid">
