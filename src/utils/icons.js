@@ -56,4 +56,20 @@ function icon(name, opts) {
   );
 }
 
-module.exports = { icon, ICONS };
+/**
+ * Two-letter initials for an avatar circle, e.g. "Priya Sharma" -> "PS".
+ * Shared here (alongside icon()) so any view — not just header.ejs, which
+ * has its own copy for the top-bar avatar — can render one consistently:
+ * `<span class="avatar avatar-sm"><%= initials(name) %></span>`.
+ */
+function initials(name) {
+  return String(name || "?")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+}
+
+module.exports = { icon, ICONS, initials };
