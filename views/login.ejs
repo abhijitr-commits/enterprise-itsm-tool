@@ -7,26 +7,52 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/style.css?v=<%= typeof assetVersion !== 'undefined' ? assetVersion : '1' %>" />
 </head>
-<body class="centered-page">
-  <div class="brand-lockup">
-    <span class="brand-mark"><%- icon('grid', {size:22}) %></span>
+<body>
+  <div class="login-shell">
+    <div class="login-visual">
+      <div class="login-visual-inner">
+        <div class="login-orbit">
+          <div class="login-orbit-ring"></div>
+          <div class="login-orbit-hub">
+            <div class="login-orbit-hub-bar"></div>
+            <div class="login-orbit-hub-bar"></div>
+            <div class="login-orbit-hub-bar"></div>
+          </div>
+          <div class="login-orbit-node login-orbit-node-1"><%- icon('alert-circle', {size:20}) %><span class="node-label">Incidents</span></div>
+          <div class="login-orbit-node login-orbit-node-2"><%- icon('layers', {size:20}) %><span class="node-label">Knowledge</span></div>
+          <div class="login-orbit-node login-orbit-node-3"><%- icon('check-circle', {size:20}) %><span class="node-label">Changes</span></div>
+          <div class="login-orbit-node login-orbit-node-4"><%- icon('users', {size:20}) %><span class="node-label">HR Hub</span></div>
+          <div class="login-orbit-node login-orbit-node-5"><%- icon('monitor', {size:20}) %><span class="node-label">Assets</span></div>
+          <div class="login-orbit-node login-orbit-node-6"><%- icon('factory', {size:20}) %><span class="node-label">Operations</span></div>
+        </div>
+        <div class="login-visual-copy">
+          <h2>Every department, one workspace.</h2>
+          <p>Incidents, requests, HR, assets, and approvals — tracked in one shared, role-aware system.</p>
+        </div>
+      </div>
+    </div>
+    <div class="login-form-side">
+      <div class="brand-lockup">
+        <span class="brand-mark"><%- icon('grid', {size:22}) %></span>
+      </div>
+      <form class="login-card" method="post" action="/login">
+        <h1>Enterprise ITSM</h1>
+        <p class="subtitle">Sign in to continue</p>
+        <% if (error) { %><div class="alert alert-error"><%- icon('alert-circle', {size:15}) %> <%= error %></div><% } %>
+        <label>Email
+          <input type="email" name="email" required autofocus />
+        </label>
+        <label>Password
+          <input type="password" name="password" required />
+        </label>
+        <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+        <p class="hint" style="text-align:center;">
+          Not an employee? <a href="/support">Submit a support request</a> without signing in.
+        </p>
+      </form>
+    </div>
   </div>
-  <form class="login-card" method="post" action="/login">
-    <h1>Enterprise ITSM</h1>
-    <p class="subtitle">Sign in to continue</p>
-    <% if (error) { %><div class="alert alert-error"><%- icon('alert-circle', {size:15}) %> <%= error %></div><% } %>
-    <label>Email
-      <input type="email" name="email" required autofocus />
-    </label>
-    <label>Password
-      <input type="password" name="password" required />
-    </label>
-    <button type="submit" class="btn btn-primary btn-block">Sign in</button>
-    <p class="hint" style="text-align:center;">
-      Not an employee? <a href="/support">Submit a support request</a> without signing in.
-    </p>
-  </form>
 </body>
 </html>
