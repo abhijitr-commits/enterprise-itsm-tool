@@ -38,13 +38,13 @@
   --sidebar-active-bg: rgba(129, 140, 248, 0.16);
   --sidebar-border: rgba(255, 255, 255, 0.08);
 
-  --radius: 14px;
-  --radius-sm: 9px;
-  --radius-lg: 20px;
+  --radius: 8px;
+  --radius-sm: 6px;
+  --radius-lg: 12px;
 
-  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
-  --shadow-md: 0 6px 16px rgba(16, 24, 40, 0.08);
-  --shadow-lg: 0 20px 40px -8px rgba(16, 24, 40, 0.18);
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-md: 0 2px 8px rgba(16, 24, 40, 0.07);
+  --shadow-lg: 0 8px 24px -6px rgba(16, 24, 40, 0.14);
   --ring: 0 0 0 3px var(--primary-light);
 }
 
@@ -254,7 +254,7 @@ a:hover { color: var(--primary-dark); }
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #818cf8, #4f46e5);
+  background: var(--primary-dark);
   color: #fff;
   font-size: 11.5px;
   font-weight: 700;
@@ -269,10 +269,9 @@ a:hover { color: var(--primary-dark); }
   justify-content: center;
   width: 30px;
   height: 30px;
-  border-radius: 9px;
+  border-radius: 7px;
   flex-shrink: 0;
-  background: linear-gradient(135deg, #818cf8, #4f46e5 60%, #4338ca);
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  background: var(--primary-dark);
   color: #fff;
 }
 
@@ -334,7 +333,7 @@ a:hover { color: var(--primary-dark); }
   justify-content: space-between;
   gap: 12px;
 }
-.stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: var(--border-strong); }
+.stat-card:hover { box-shadow: var(--shadow-md); border-color: var(--border-strong); }
 .stat-card-body { min-width: 0; }
 .stat-value { font-size: 28px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
 .stat-label { font-size: 12.5px; color: var(--text-muted); margin-top: 5px; font-weight: 500; }
@@ -548,7 +547,6 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
 .admin-tile:hover {
   border-color: var(--primary);
   box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
   background: #fff;
 }
 .admin-tile-icon {
@@ -590,10 +588,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background:
-    radial-gradient(circle at 15% 10%, rgba(129, 140, 248, 0.16) 0%, transparent 45%),
-    radial-gradient(circle at 85% 90%, rgba(99, 102, 241, 0.12) 0%, transparent 45%),
-    var(--bg);
+  background: var(--bg);
   padding: 30px 16px;
   font-family: var(--font-sans);
 }
