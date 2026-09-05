@@ -7,38 +7,88 @@
   </div>
 </div>
 
-<div class="panel">
-  <div class="panel-header"><h2>Departments</h2></div>
-  <div class="admin-tile-grid">
-    <a class="admin-tile" href="/hr">
-      <span class="admin-tile-icon"><%- icon('users') %></span>
-      <div class="admin-tile-body">
-        <div class="admin-tile-title">HR Hub</div>
-        <div class="admin-tile-sub">People, Time Off, Onboarding/Offboarding, Letters, Training, and more.</div>
-      </div>
-    </a>
-    <a class="admin-tile" href="/it">
-      <span class="admin-tile-icon"><%- icon('monitor') %></span>
-      <div class="admin-tile-body">
-        <div class="admin-tile-title">IT Management Hub</div>
-        <div class="admin-tile-sub">Helpdesk, Assets, Licensing, Vendors, and IT operations.</div>
-      </div>
-    </a>
-    <a class="admin-tile" href="/operations">
-      <span class="admin-tile-icon"><%- icon('factory') %></span>
-      <div class="admin-tile-body">
-        <div class="admin-tile-title">Operations Hub</div>
-        <div class="admin-tile-sub">Sales, Production, Logistics, Safety, Facilities, Wellness.</div>
-      </div>
-    </a>
-    <% if (currentUser && currentUser.role === 'Administrator') { %>
-      <a class="admin-tile" href="/admin">
-        <span class="admin-tile-icon"><%- icon('settings') %></span>
+<%
+  var dOpen = open, dProg = inProgress, dHold = onHold, dRes = resolved;
+  var dTotal = dOpen + dProg + dHold + dRes;
+  var donutSegs = [
+    { label: 'Open', value: dOpen, color: 'var(--primary)' },
+    { label: 'In Progress', value: dProg, color: 'var(--info)' },
+    { label: 'On Hold', value: dHold, color: 'var(--warning)' },
+    { label: 'Resolved', value: dRes, color: 'var(--success)' }
+  ];
+  var donutCum = 0;
+  var donutParts = [];
+  donutSegs.forEach(function(s) {
+    if (dTotal > 0 && s.value > 0) {
+      var start = (donutCum / dTotal) * 100;
+      donutCum += s.value;
+      var end = (donutCum / dTotal) * 100;
+      donutParts.push(s.color + ' ' + start.toFixed(2) + '% ' + end.toFixed(2) + '%');
+    }
+  });
+  var donutStyle = dTotal > 0 ? ('background: conic-gradient(' + donutParts.join(', ') + ');') : '';
+%>
+<div class="dashboard-grid">
+  <div class="panel">
+    <div class="panel-header"><h2>Departments</h2></div>
+    <div class="admin-tile-grid">
+      <a class="admin-tile" href="/hr">
+        <span class="admin-tile-icon"><%- icon('users') %></span>
         <div class="admin-tile-body">
-          <div class="admin-tile-title">Admin Console</div>
-          <div class="admin-tile-sub">Users, Permissions, Integrations, and Master Data.</div>
+          <div class="admin-tile-title">HR Hub</div>
+          <div class="admin-tile-sub">People, Time Off, Onboarding/Offboarding, Letters, Training, and more.</div>
         </div>
       </a>
+      <a class="admin-tile" href="/it">
+        <span class="admin-tile-icon admin-tile-icon-blue"><%- icon('monitor') %></span>
+        <div class="admin-tile-body">
+          <div class="admin-tile-title">IT Management Hub</div>
+          <div class="admin-tile-sub">Helpdesk, Assets, Licensing, Vendors, and IT operations.</div>
+        </div>
+      </a>
+      <a class="admin-tile" href="/operations">
+        <span class="admin-tile-icon admin-tile-icon-teal"><%- icon('factory') %></span>
+        <div class="admin-tile-body">
+          <div class="admin-tile-title">Operations Hub</div>
+          <div class="admin-tile-sub">Sales, Production, Logistics, Safety, Facilities, Wellness.</div>
+        </div>
+      </a>
+      <% if (currentUser && currentUser.role === 'Administrator') { %>
+        <a class="admin-tile" href="/admin">
+          <span class="admin-tile-icon admin-tile-icon-amber"><%- icon('settings') %></span>
+          <div class="admin-tile-body">
+            <div class="admin-tile-title">Admin Console</div>
+            <div class="admin-tile-sub">Users, Permissions, Integrations, and Master Data.</div>
+          </div>
+        </a>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>Active Ticket Status</h2></div>
+    <% if (dTotal === 0) { %>
+      <p class="donut-empty">No active incidents right now — nice work!</p>
+    <% } else { %>
+      <div class="donut-wrap">
+        <div class="donut" style="<%= donutStyle %>">
+          <div class="donut-center">
+            <div class="donut-center-value"><%= dTotal %></div>
+            <div class="donut-center-label">Active</div>
+          </div>
+        </div>
+        <div class="donut-legend">
+          <% donutSegs.forEach(function(s) { %>
+            <% if (s.value > 0) { %>
+            <div class="donut-legend-item">
+              <span class="donut-legend-dot" style="background: <%= s.color %>"></span>
+              <span class="donut-legend-label"><%= s.label %></span>
+              <span class="donut-legend-value"><%= s.value %></span>
+            </div>
+            <% } %>
+          <% }) %>
+        </div>
+      </div>
     <% } %>
   </div>
 </div>
@@ -51,7 +101,7 @@
     </div>
     <span class="stat-icon"><%- icon('alert-circle') %></span>
   </div>
-  <div class="stat-card">
+  <div class="stat-card stat-info">
     <div class="stat-card-body">
       <div class="stat-value"><%= inProgress %></div>
       <div class="stat-label">In Progress</div>
@@ -72,7 +122,7 @@
     </div>
     <span class="stat-icon"><%- icon('check-circle') %></span>
   </div>
-  <div class="stat-card">
+  <div class="stat-card stat-warning">
     <div class="stat-card-body">
       <div class="stat-value"><%= pendingApprovals %></div>
       <div class="stat-label">Pending Approvals</div>
