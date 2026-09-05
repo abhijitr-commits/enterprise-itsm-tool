@@ -26,6 +26,26 @@ router.get("/", requireLogin, async (req, res) => {
 
   const recent = await Incident.find().sort({ createdDate: -1 }).limit(8).lean();
 
+  // 14-day incident volume trend for the Dashboard's area chart — grouped
+  // by calendar day so the chart reads as "new incidents per day" rather
+  // than a running total.
+  const trendStart = new Date();
+  trendStart.setDate(trendStart.getDate() - 13);
+  trendStart.setHours(0, 0, 0, 0);
+  const trendRaw = await Incident.aggregate([
+    { $match: { createdDate: { $gte: trendStart } } },
+    { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdDate" } }, count: { $sum: 1 } } },
+  ]);
+  const trendMap = {};
+  trendRaw.forEach((r) => { trendMap[r._id] = r.count; });
+  const trend = [];
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(trendStart);
+    d.setDate(d.getDate() + i);
+    const key = d.toISOString().slice(0, 10);
+    trend.push({ date: key, count: trendMap[key] || 0 });
+  }
+
   res.render("dashboard", {
     open,
     inProgress,
@@ -35,6 +55,7 @@ router.get("/", requireLogin, async (req, res) => {
     closedToday,
     pendingApprovals: pendingRequests + pendingChanges + pendingLeave,
     recent,
+    trend,
   });
 });
 
