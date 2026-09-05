@@ -3,15 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Submit a Support Request · Enterprise ITSM</title>
+  <title>Submit a Support Request · Peppermint Robotics</title>
+  <link rel="icon" href="/images/logo-mark.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/style.css?v=<%= typeof assetVersion !== 'undefined' ? assetVersion : '1' %>" />
 </head>
 <body class="centered-page">
   <div class="brand-lockup">
-    <span class="brand-mark"><%- icon('grid', {size:22}) %></span>
+    <img class="brand-mark" src="/images/logo-mark.png" alt="Peppermint Robotics" />
+    <span class="brand-lockup-name">Peppermint Robotics</span>
   </div>
   <div class="public-card">
     <h1>Submit a Support Request</h1>
