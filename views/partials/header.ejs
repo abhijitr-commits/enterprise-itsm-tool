@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title><%= typeof title !== "undefined" ? title + " · Enterprise ITSM" : "Enterprise ITSM" %></title>
+  <title><%= typeof title !== "undefined" ? title + " · Peppermint Robotics" : "Peppermint Robotics" %></title>
+  <link rel="icon" href="/images/logo-mark.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -23,6 +24,10 @@
     const panelLinkClass = (p) => "panel-link" + (underPath(p) ? " active" : "");
     const initials = (name) => String(name || "?").trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
   %>
+  <div class="brand-watermark" aria-hidden="true">
+    <img src="/images/logo-mark.png" alt="" />
+    <span>Peppermint Robotics</span>
+  </div>
   <div class="page-shell">
     <% if (currentUser) { %>
       <%
@@ -56,8 +61,8 @@
            of duplicating the same links again in a separate sidebar. -->
       <nav class="top-tabs">
         <a class="brand-inline" href="/">
-          <span class="brand-mark"><%- icon('grid', {size:14}) %></span>
-          <span class="brand-inline-text">Enterprise ITSM</span>
+          <img class="brand-mark" src="/images/logo-mark.png" alt="Peppermint Robotics" />
+          <span class="brand-inline-text">Peppermint Robotics</span>
         </a>
         <a class="<%= cp === '/' ? 'top-tab active' : 'top-tab' %>" href="/"><%- icon('home') %> Dashboard</a>
 
