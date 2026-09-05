@@ -5,11 +5,15 @@
 %>
 <div class="panel">
   <div class="panel-header"><h2>Audit Trail</h2></div>
-  <div class="comment-list">
+  <div class="timeline">
     <% (auditEntries || []).forEach(function(e) { %>
-      <div class="comment">
-        <div class="comment-meta"><%= new Date(e.createdAt).toLocaleString() %> · <%= (e.user && e.user.name) || 'System' %> · <%= e.action %></div>
-        <% if (e.details) { %><div class="comment-text"><%= typeof e.details === 'string' ? e.details : JSON.stringify(e.details) %></div><% } %>
+      <% var actorName = (e.user && e.user.name) || 'System'; %>
+      <div class="timeline-item">
+        <span class="avatar avatar-sm"><%= initials(actorName) %></span>
+        <div class="timeline-content">
+          <div class="timeline-meta"><strong><%= actorName %></strong> <span class="timeline-action"><%= e.action %></span><span class="timeline-time"><%= new Date(e.createdAt).toLocaleString() %></span></div>
+          <% if (e.details) { %><div class="timeline-details"><%= typeof e.details === 'string' ? e.details : JSON.stringify(e.details) %></div><% } %>
+        </div>
       </div>
     <% }) %>
     <% if ((auditEntries || []).length === 0) { %><p class="empty-row">No audit history yet.</p><% } %>

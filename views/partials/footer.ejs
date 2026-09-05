@@ -23,6 +23,21 @@
         });
       });
     })();
+
+    // Flash messages (.alert-success / .alert-info only — these are always
+    // transient post-redirect notices in this app's pattern) auto-dismiss
+    // as a toast after a few seconds. .alert-error is left alone: it's
+    // usually on a form the user is actively fixing and needs to keep
+    // seeing until they resolve it themselves.
+    (function () {
+      var toasts = document.querySelectorAll(".alert-success, .alert-info");
+      toasts.forEach(function (t) {
+        setTimeout(function () {
+          t.classList.add("alert-hide");
+          t.addEventListener("animationend", function () { t.remove(); }, { once: true });
+        }, 4000);
+      });
+    })();
   </script>
 </body>
 </html>
