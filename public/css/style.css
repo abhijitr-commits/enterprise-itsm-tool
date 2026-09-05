@@ -354,6 +354,50 @@ a:hover { color: var(--primary-dark); }
 .stat-success .stat-icon { background: var(--success-light); color: var(--success); }
 .stat-warning .stat-value { color: var(--warning); }
 .stat-warning .stat-icon { background: var(--warning-light); color: var(--warning); }
+.stat-info .stat-value { color: var(--info); }
+.stat-info .stat-icon { background: var(--info-light); color: var(--info); }
+
+/* ---------- Dashboard bento grid + ticket-status donut ---------- */
+.dashboard-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: stretch; }
+.dashboard-grid .panel { margin-bottom: 0; height: 100%; }
+@media (max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } }
+
+.donut-wrap { display: flex; align-items: center; gap: 26px; flex-wrap: wrap; }
+.donut {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.donut::before {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  background: var(--panel);
+  border-radius: 50%;
+}
+.donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.donut-center-value { font-size: 21px; font-weight: 800; letter-spacing: -.01em; line-height: 1.1; }
+.donut-center-label { font-size: 9.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; margin-top: 2px; }
+.donut-legend { display: flex; flex-direction: column; gap: 11px; font-size: 13px; flex: 1; min-width: 160px; }
+.donut-legend-item { display: flex; align-items: center; gap: 9px; }
+.donut-legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.donut-legend-label { color: var(--text-muted); font-weight: 500; }
+.donut-legend-value { margin-left: auto; font-weight: 700; color: var(--text); }
+.donut-empty { color: var(--text-muted); font-size: 13.5px; padding: 20px 0; }
+
+.admin-tile-icon-blue { background: var(--info-light); color: var(--info); }
+.admin-tile-icon-teal { background: var(--success-light); color: var(--success); }
+.admin-tile-icon-amber { background: var(--warning-light); color: var(--warning); }
 
 .panel {
   background: var(--panel);
