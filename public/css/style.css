@@ -76,7 +76,33 @@ a:hover { color: var(--primary-dark); }
 
 .icon { flex-shrink: 0; display: inline-block; vertical-align: middle; }
 
-.page-shell { display: flex; flex-direction: column; min-height: 100vh; }
+.page-shell { display: flex; flex-direction: column; min-height: 100vh; position: relative; z-index: 1; }
+
+/* ---------- App-wide brand watermark ----------
+ * A faint, fixed Peppermint Robotics mark behind every authenticated page
+ * (rendered once in partials/header.ejs, ahead of .page-shell so it sits
+ * behind the real content via z-index) — the "every module's background
+ * carries the logo" branding request, applied app-wide instead of per-page. */
+.brand-watermark {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  pointer-events: none;
+}
+.brand-watermark img { width: 300px; height: 300px; object-fit: contain; opacity: 0.045; }
+.brand-watermark span {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  opacity: 0.5;
+}
 
 /* ---------- Top bar ----------
  * Every department ("head") — HR / IT Management / Operations / Admin —
@@ -113,13 +139,7 @@ a:hover { color: var(--primary-dark); }
   white-space: nowrap;
 }
 .brand-inline:hover { color: #fff; }
-.brand-inline .brand-mark {
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
-}
+.brand-inline .brand-mark { width: 30px; height: 30px; }
 .top-tab {
   display: flex;
   align-items: center;
@@ -278,15 +298,11 @@ a:hover { color: var(--primary-dark); }
 .avatar-xs { width: 20px; height: 20px; font-size: 9.5px; vertical-align: middle; margin-right: 1px; }
 .avatar-sm { width: 30px; height: 30px; font-size: 12px; }
 .brand-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
   width: 30px;
   height: 30px;
-  border-radius: 7px;
+  object-fit: contain;
   flex-shrink: 0;
-  background: var(--primary-dark);
-  color: #fff;
 }
 
 .user-chip {
@@ -667,7 +683,8 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
   font-family: var(--font-sans);
 }
 .brand-lockup { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 6px; }
-.brand-lockup .brand-mark { width: 46px; height: 46px; border-radius: 13px; }
+.brand-lockup .brand-mark { width: 56px; height: 56px; }
+.brand-lockup-name { font-size: 19px; font-weight: 800; color: var(--text); letter-spacing: -.01em; }
 .login-card, .public-card {
   background: var(--panel);
   border: 1px solid var(--border);
