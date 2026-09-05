@@ -250,6 +250,12 @@ const PORT = process.env.PORT || 3000;
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "..", "views"));
 
+// Cache-busting suffix for the stylesheet <link> (see partials/header.ejs) —
+// picks up Render's auto-set commit SHA so every deploy forces browsers to
+// fetch the new CSS instead of an old cached copy; falls back to process
+// start time locally where that env var isn't set.
+app.locals.assetVersion = process.env.RENDER_GIT_COMMIT || String(Date.now());
+
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
