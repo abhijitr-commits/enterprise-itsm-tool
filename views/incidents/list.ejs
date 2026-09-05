@@ -36,7 +36,9 @@
           <td><span class="badge badge-priority-<%= inc.priority.toLowerCase() %>"><%= inc.priority %></span></td>
           <td><span class="badge badge-status-<%= inc.status.toLowerCase().replace(/ /g,'-') %>"><%= inc.status %></span></td>
           <td><%= inc.slaDue ? new Date(inc.slaDue).toLocaleString() : '—' %></td>
-          <td><%= inc.engineer || '—' %></td>
+          <td>
+            <% if (inc.engineer) { %><span class="avatar avatar-xs"><%= initials(inc.engineer) %></span> <%= inc.engineer %><% } else { %>—<% } %>
+          </td>
         </tr>
       <% }) %>
       <% if (incidents.length === 0) { %>
