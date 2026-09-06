@@ -57,6 +57,10 @@ async function withCurrentStock(items) {
     const status = closingStock <= item.minBufferStock ? "CRITICAL" : "OK";
     const qtyToOrder = status === "CRITICAL" ? Math.max(0, item.minBufferStock - closingStock) : 0;
     return {
+      // orderFlag falls back to "Hold" for any item created before this
+      // field existed — .lean() reads don't backfill schema defaults on
+      // documents already in the database, only on new inserts.
+      orderFlag: "Hold",
       ...item,
       issuedUsed,
       closingStock,
