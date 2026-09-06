@@ -1,0 +1,45 @@
+<%- include('../partials/header', { title: 'Admin Asset Register' }) %>
+
+<div class="page-header">
+  <h1>Admin Asset Register</h1>
+  <a class="btn btn-primary" href="/admin/assets/new">+ Add Asset</a>
+</div>
+
+<p class="hint">Office &amp; facility assets — furniture, office equipment, pantry appliances — separate from the IT Asset Register.</p>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <div class="table-scroll">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Asset ID</th><th>Asset Name</th><th>Type</th><th>Serial Number</th><th>Assigned To</th>
+        <th>Location</th><th>Status</th><th>Purchase Date</th><th>Warranty Expiry</th><th>Vendor</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% assets.forEach(function(a) { %>
+        <tr>
+          <td><%= a.assetId %></td>
+          <td><%= a.assetName %></td>
+          <td><%= a.type %></td>
+          <td><%= a.serialNumber || '—' %></td>
+          <td><%= a.assignedTo || '—' %></td>
+          <td><%= a.location %></td>
+          <td>
+            <span class="badge <%= a.status === 'In Service' ? 'badge-status-open' : (a.status === 'Decommissioned' ? 'badge-status-closed' : 'badge-status-in-progress') %>"><%= a.status %></span>
+          </td>
+          <td><%= a.purchaseDate ? new Date(a.purchaseDate).toLocaleDateString() : '—' %></td>
+          <td><%= a.warrantyExpiry ? new Date(a.warrantyExpiry).toLocaleDateString() : '—' %></td>
+          <td><%= a.vendor || '—' %></td>
+          <td><a class="btn btn-secondary" href="/admin/assets/<%= a.assetId %>/edit">Edit</a></td>
+        </tr>
+      <% }) %>
+      <% if (assets.length === 0) { %><tr><td colspan="11" class="empty-row">No admin assets yet.</td></tr><% } %>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

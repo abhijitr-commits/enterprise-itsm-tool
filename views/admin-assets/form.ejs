@@ -1,0 +1,55 @@
+<%- include('../partials/header', { title: editing ? 'Edit Admin Asset' : 'Add Admin Asset' }) %>
+
+<div class="page-header">
+  <h1><%= editing ? 'Edit Asset' : 'Add Asset' %></h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="<%= editing ? '/admin/assets/' + form.assetId + '/edit' : '/admin/assets' %>">
+  <div class="form-grid">
+    <label>Asset Name
+      <input type="text" name="assetName" value="<%= form.assetName || '' %>" required />
+    </label>
+    <label>Type
+      <input type="text" name="type" value="<%= form.type || '' %>" placeholder="Furniture / Appliance / Equipment" required />
+    </label>
+    <label>Serial Number
+      <input type="text" name="serialNumber" value="<%= form.serialNumber || '' %>" />
+    </label>
+    <label>Assigned To
+      <input type="text" name="assignedTo" list="employeeList" value="<%= form.assignedTo || '' %>" />
+    </label>
+    <label>Department
+      <input type="text" name="department" value="<%= form.department || 'Administration' %>" />
+    </label>
+    <label>Location
+      <input type="text" name="location" value="<%= form.location || '' %>" required />
+    </label>
+    <label>Status
+      <select name="status">
+        <% Object.values(ADMIN_ASSET_STATUS).forEach(function(s) { %>
+          <option value="<%= s %>" <%= form.status === s ? 'selected' : '' %>><%= s %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Purchase Date
+      <input type="date" name="purchaseDate" value="<%= form.purchaseDate ? new Date(form.purchaseDate).toISOString().slice(0,10) : '' %>" />
+    </label>
+    <label>Warranty Expiry
+      <input type="date" name="warrantyExpiry" value="<%= form.warrantyExpiry ? new Date(form.warrantyExpiry).toISOString().slice(0,10) : '' %>" />
+    </label>
+    <label>Vendor
+      <input type="text" name="vendor" value="<%= form.vendor || '' %>" />
+    </label>
+  </div>
+  <label>Remarks
+    <textarea name="remarks" rows="3"><%= form.remarks || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/admin/assets">Cancel</a>
+    <button type="submit" class="btn btn-primary">Save</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>
