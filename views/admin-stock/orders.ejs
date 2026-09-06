@@ -1,0 +1,71 @@
+<%- include('../partials/header', { title: 'Stock Orders' }) %>
+
+<div class="page-header">
+  <h1>Stock Order Management</h1>
+  <div style="display:flex; gap:8px;">
+    <a class="btn btn-secondary" href="/admin/stock">Stock Management</a>
+    <a class="btn btn-primary" href="/admin/stock/orders/new">+ Raise Order</a>
+  </div>
+</div>
+
+<p class="hint">The order register — raise a stock order against an item, then mark it received once goods arrive to update stock and record the bill/payment.</p>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <div class="table-scroll">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Order ID</th><th>Item</th><th>Order Date</th><th>Decision</th><th>Status</th>
+        <th>Received</th><th>Bill No</th><th>Payment</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% orders.forEach(function(o) { %>
+        <tr>
+          <td><%= o.orderId %></td>
+          <td><%= o.itemName %></td>
+          <td><%= o.orderDate ? new Date(o.orderDate).toLocaleDateString() : '—' %></td>
+          <td><span class="badge <%= o.decision === 'Done' ? 'badge-status-resolved' : (o.decision === 'Hold' ? 'badge-status-on-hold' : 'badge-status-open') %>"><%= o.decision %></span></td>
+          <td><span class="badge <%= o.status === 'Received' ? 'badge-status-resolved' : 'badge-status-in-progress' %>"><%= o.status %></span></td>
+          <td><%= o.status === 'Received' ? (o.receivedStockPieces + ' pc') : '—' %></td>
+          <td><%= o.referenceBillNo || '—' %></td>
+          <td>
+            <% if (o.status === 'Received') { %>
+              <span class="badge <%= o.paymentStatus === 'Paid' ? 'badge-status-resolved' : 'badge-status-cancelled' %>"><%= o.paymentStatus %></span>
+            <% } else { %>—<% } %>
+          </td>
+          <td>
+            <% if (o.status === 'Pending') { %>
+              <details>
+                <summary class="btn btn-secondary" style="display:inline-block; cursor:pointer;">Mark Received</summary>
+                <form method="post" action="/admin/stock/orders/<%= o.orderId %>/receive" class="filter-bar" style="margin-top:8px; flex-wrap:wrap;">
+                  <input type="number" name="receivedBoxes" min="0" placeholder="Boxes" style="width:70px;" />
+                  <input type="number" name="receivedLoosePieces" min="0" placeholder="Loose Pc" style="width:80px;" />
+                  <input type="text" name="referenceBillNo" placeholder="Bill No" style="width:110px;" />
+                  <select name="paymentStatus">
+                    <option value="Pending">Payment Pending</option>
+                    <option value="Paid">Paid</option>
+                  </select>
+                  <input type="date" name="paymentDate" style="width:140px;" />
+                  <button type="submit" class="btn btn-primary">Confirm</button>
+                </form>
+              </details>
+            <% } else if (o.paymentStatus !== 'Paid') { %>
+              <form method="post" action="/admin/stock/orders/<%= o.orderId %>/payment" class="filter-bar">
+                <input type="hidden" name="paymentStatus" value="Paid" />
+                <input type="date" name="paymentDate" style="width:140px;" />
+                <button type="submit" class="btn btn-secondary">Mark Paid</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (orders.length === 0) { %><tr><td colspan="9" class="empty-row">No stock orders yet.</td></tr><% } %>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

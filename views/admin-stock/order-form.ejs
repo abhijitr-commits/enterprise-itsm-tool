@@ -1,0 +1,42 @@
+<%- include('../partials/header', { title: 'Raise Stock Order' }) %>
+
+<div class="page-header">
+  <h1>Raise Stock Order</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/admin/stock/orders">
+  <div class="form-grid">
+    <label>Item
+      <select name="itemId" required>
+        <option value="">Select an item…</option>
+        <% items.forEach(function(i) { %>
+          <option value="<%= i.itemId %>" <%= form.itemId === i.itemId ? 'selected' : '' %>><%= i.itemName %><%= i.itemCode ? ' (' + i.itemCode + ')' : '' %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Order Date
+      <input type="date" name="orderDate" value="<%= form.orderDate || new Date().toISOString().slice(0,10) %>" />
+    </label>
+    <label>Decision
+      <select name="decision">
+        <option value="Order" <%= (form.decision || 'Order') === 'Order' ? 'selected' : '' %>>Order</option>
+        <option value="Hold" <%= form.decision === 'Hold' ? 'selected' : '' %>>Hold</option>
+      </select>
+    </label>
+  </div>
+  <label>Remarks
+    <textarea name="remarks" rows="2"><%= form.remarks || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/admin/stock/orders">Cancel</a>
+    <button type="submit" class="btn btn-primary">Raise Order</button>
+  </div>
+</form>
+
+<% if (items.length === 0) { %>
+  <p class="hint">No stock items exist yet — <a href="/admin/stock/new">add one first</a>.</p>
+<% } %>
+
+<%- include('../partials/footer') %>
