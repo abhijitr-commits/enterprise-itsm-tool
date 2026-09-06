@@ -141,16 +141,16 @@
 <div class="panel">
   <div class="panel-header"><h2>Admin Stock — Critical / Low Items</h2></div>
   <table class="table">
-    <thead><tr><th>Item</th><th>Category</th><th>Current Stock</th><th>Min Buffer</th><th>Urgency</th></tr></thead>
+    <thead><tr><th>Item</th><th>Category</th><th>Closing Stock (PC)</th><th>Minimum Buffer Stock</th><th>Qty to Order</th><th>Urgency</th></tr></thead>
     <tbody>
       <% adminStockCritical.forEach(function(s){ %>
         <tr>
           <td><%= s.itemName %></td><td><%= s.category %></td>
-          <td><%= s.currentStock %> <%= s.unit %></td><td><%= s.minBufferStock %> <%= s.unit %></td>
+          <td><%= s.closingStock %> <%= s.unit %></td><td><%= s.minBufferStock %> <%= s.unit %></td><td><%= s.qtyToOrder %></td>
           <td><span class="badge badge-approval-<%= s.urgency === 'Out of Stock' ? 'rejected' : 'pending-approval' %>"><%= s.urgency %></span></td>
         </tr>
       <% }) %>
-      <% if (adminStockCritical.length === 0) { %><tr><td colspan="5" class="empty-row">No admin stock items are critical or low.</td></tr><% } %>
+      <% if (adminStockCritical.length === 0) { %><tr><td colspan="6" class="empty-row">No admin stock items are critical or low.</td></tr><% } %>
     </tbody>
   </table>
 </div>
@@ -158,16 +158,31 @@
 <div class="panel">
   <div class="panel-header"><h2>Pending Stock Orders</h2></div>
   <table class="table">
-    <thead><tr><th>Order ID</th><th>Item</th><th>Order Date</th><th>Decision</th><th>Raised By</th></tr></thead>
+    <thead><tr><th>Order ID</th><th>Item Code</th><th>Item Name</th><th>Order Date</th><th>Raised By</th></tr></thead>
     <tbody>
       <% adminPendingOrders.forEach(function(o){ %>
         <tr>
-          <td><%= o.orderId %></td><td><%= o.itemName %></td><td><%= o.orderDate %></td>
-          <td><span class="badge badge-status-<%= o.decision === 'Hold' ? 'on-hold' : 'open' %>"><%= o.decision %></span></td>
+          <td><%= o.orderId %></td><td><%= o.itemCode %></td><td><%= o.itemName %></td><td><%= o.orderDate %></td>
           <td><%= o.raisedBy %></td>
         </tr>
       <% }) %>
       <% if (adminPendingOrders.length === 0) { %><tr><td colspan="5" class="empty-row">No pending stock orders.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Scrap Management — Pending Approval</h2></div>
+  <table class="table">
+    <thead><tr><th>Scrap ID</th><th>Item</th><th>Category</th><th>Quantity</th><th>Reason</th><th>Scrap Date</th><th>Raised By</th></tr></thead>
+    <tbody>
+      <% adminScrapPending.forEach(function(s){ %>
+        <tr>
+          <td><%= s.scrapId %></td><td><%= s.itemName %></td><td><%= s.category %></td><td><%= s.quantity %></td>
+          <td><%= s.reason %></td><td><%= s.scrapDate %></td><td><%= s.raisedBy %></td>
+        </tr>
+      <% }) %>
+      <% if (adminScrapPending.length === 0) { %><tr><td colspan="7" class="empty-row">No scrap entries pending approval.</td></tr><% } %>
     </tbody>
   </table>
 </div>
