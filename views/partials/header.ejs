@@ -54,7 +54,7 @@
         const IT_PATHS = ['/it','/access-requests','/vendors','/purchases','/stock','/licenses','/rooms','/complaints','/expenses','/maintenance','/helpdesk','/asset-allocation','/it-clearance','/vendor-service','/requirements'];
         const OPS_PATHS = ['/operations','/safety','/sales','/work-orders','/engineering-changes','/shipments','/material-requests','/wellness'];
         const ADMIN_PATHS = ['/admin','/masterdata'];
-        const ADMIN_OPS_PATHS = ['/admin/vendors','/admin/stock','/admin/scrap'];
+        const ADMIN_OPS_PATHS = ['/admin/vendors','/admin/stock','/admin/scrap','/admin/assets','/admin/purchases','/admin/helpdesk','/admin/facility-tasks'];
         const anyItsm = canSee('incidents') || canSee('requests') || canSee('problems') || canSee('changes') || canSee('assets') || canSee('cmdb') || canSee('knowledge') || canSee('reports');
       %>
       <!-- Every department ("head") lives under exactly one button in this
@@ -190,6 +190,10 @@
             <a href="/admin/stock" class="<%= panelLinkClass('/admin/stock') %>"><%- icon('grid', {size:15}) %> Stock Management</a>
             <a href="/admin/stock/orders" class="<%= panelLinkClass('/admin/stock/orders') %>"><%- icon('clipboard-check', {size:15}) %> Stock Orders</a>
             <a href="/admin/scrap" class="<%= panelLinkClass('/admin/scrap') %>"><%- icon('alert-triangle', {size:15}) %> Scrap Management</a>
+            <a href="/admin/assets" class="<%= panelLinkClass('/admin/assets') %>"><%- icon('monitor', {size:15}) %> Asset Register</a>
+            <a href="/admin/purchases" class="<%= panelLinkClass('/admin/purchases') %>"><%- icon('layers', {size:15}) %> Purchase / Procurement</a>
+            <a href="/admin/helpdesk" class="<%= panelLinkClass('/admin/helpdesk') %>"><%- icon('alert-circle', {size:15}) %> Facility Helpdesk</a>
+            <a href="/admin/facility-tasks" class="<%= panelLinkClass('/admin/facility-tasks') %>"><%- icon('calendar', {size:15}) %> Facility Ops Tasks</a>
           </div>
         </details>
         <% } %>
