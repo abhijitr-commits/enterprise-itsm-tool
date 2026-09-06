@@ -54,7 +54,7 @@
         const IT_PATHS = ['/it','/access-requests','/vendors','/purchases','/stock','/licenses','/rooms','/complaints','/expenses','/maintenance','/helpdesk','/asset-allocation','/it-clearance','/vendor-service','/requirements'];
         const OPS_PATHS = ['/operations','/safety','/sales','/work-orders','/engineering-changes','/shipments','/material-requests','/wellness'];
         const ADMIN_PATHS = ['/admin','/masterdata'];
-        const ADMIN_OPS_PATHS = ['/admin/vendors','/admin/stock'];
+        const ADMIN_OPS_PATHS = ['/admin/vendors','/admin/stock','/admin/scrap'];
         const anyItsm = canSee('incidents') || canSee('requests') || canSee('problems') || canSee('changes') || canSee('assets') || canSee('cmdb') || canSee('knowledge') || canSee('reports');
       %>
       <!-- Every department ("head") lives under exactly one button in this
@@ -189,6 +189,7 @@
             <a href="/admin/vendors" class="<%= panelLinkClass('/admin/vendors') %>"><%- icon('truck', {size:15}) %> Vendor Management</a>
             <a href="/admin/stock" class="<%= panelLinkClass('/admin/stock') %>"><%- icon('grid', {size:15}) %> Stock Management</a>
             <a href="/admin/stock/orders" class="<%= panelLinkClass('/admin/stock/orders') %>"><%- icon('clipboard-check', {size:15}) %> Stock Orders</a>
+            <a href="/admin/scrap" class="<%= panelLinkClass('/admin/scrap') %>"><%- icon('alert-triangle', {size:15}) %> Scrap Management</a>
           </div>
         </details>
         <% } %>
