@@ -123,6 +123,56 @@
 </div>
 
 <div class="panel">
+  <div class="panel-header"><h2>Admin Vendor AMC Expiry (next 90 days)</h2></div>
+  <table class="table">
+    <thead><tr><th>Vendor</th><th>Category</th><th>AMC Expiry</th><th>Urgency</th></tr></thead>
+    <tbody>
+      <% adminAmcs.forEach(function(a){ %>
+        <tr>
+          <td><%= a.vendorName %></td><td><%= a.category %></td><td><%= a.amcExpiry %></td>
+          <td><span class="badge badge-approval-<%= a.urgency === 'Expired' ? 'rejected' : 'pending-approval' %>"><%= a.urgency %></span></td>
+        </tr>
+      <% }) %>
+      <% if (adminAmcs.length === 0) { %><tr><td colspan="4" class="empty-row">No admin vendor AMCs expiring soon.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Admin Stock — Critical / Low Items</h2></div>
+  <table class="table">
+    <thead><tr><th>Item</th><th>Category</th><th>Current Stock</th><th>Min Buffer</th><th>Urgency</th></tr></thead>
+    <tbody>
+      <% adminStockCritical.forEach(function(s){ %>
+        <tr>
+          <td><%= s.itemName %></td><td><%= s.category %></td>
+          <td><%= s.currentStock %> <%= s.unit %></td><td><%= s.minBufferStock %> <%= s.unit %></td>
+          <td><span class="badge badge-approval-<%= s.urgency === 'Out of Stock' ? 'rejected' : 'pending-approval' %>"><%= s.urgency %></span></td>
+        </tr>
+      <% }) %>
+      <% if (adminStockCritical.length === 0) { %><tr><td colspan="5" class="empty-row">No admin stock items are critical or low.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Pending Stock Orders</h2></div>
+  <table class="table">
+    <thead><tr><th>Order ID</th><th>Item</th><th>Order Date</th><th>Decision</th><th>Raised By</th></tr></thead>
+    <tbody>
+      <% adminPendingOrders.forEach(function(o){ %>
+        <tr>
+          <td><%= o.orderId %></td><td><%= o.itemName %></td><td><%= o.orderDate %></td>
+          <td><span class="badge badge-status-<%= o.decision === 'Hold' ? 'on-hold' : 'open' %>"><%= o.decision %></span></td>
+          <td><%= o.raisedBy %></td>
+        </tr>
+      <% }) %>
+      <% if (adminPendingOrders.length === 0) { %><tr><td colspan="5" class="empty-row">No pending stock orders.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
   <div class="panel-header"><h2>Software License Expiry (next 90 days)</h2></div>
   <table class="table">
     <thead><tr><th>Software</th><th>Vendor</th><th>Expiry</th><th>Urgency</th></tr></thead>
