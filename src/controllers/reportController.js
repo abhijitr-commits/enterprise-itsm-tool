@@ -19,6 +19,10 @@ const AdminVendor = require("../models/AdminVendor");
 const AdminStockItem = require("../models/AdminStockItem");
 const AdminStockOrder = require("../models/AdminStockOrder");
 const AdminScrapItem = require("../models/AdminScrapItem");
+const AdminAsset = require("../models/AdminAsset");
+const AdminPurchase = require("../models/AdminPurchase");
+const AdminComplaint = require("../models/AdminComplaint");
+const AdminFacilityTask = require("../models/AdminFacilityTask");
 const adminStockController = require("./adminStockController");
 const { STATUS } = require("../config/constants");
 
@@ -351,8 +355,60 @@ function scrapPendingApprovalReport(scrapItems) {
     .sort((a, b) => new Date(a.scrapDate) - new Date(b.scrapDate));
 }
 
+/** Admin Asset Register warranty expiry — reuses assetWarrantyReport() since AdminAsset shares the same field shape as Asset. */
+
+/** Pending Purchase Approvals — the procurement register's own "awaiting decision" queue, oldest first. */
+function pendingPurchaseApprovalsReport(purchases) {
+  return purchases
+    .filter((p) => p.status === "Pending Approval")
+    .map((p) => ({
+      poId: p.poId,
+      itemDescription: p.itemDescription,
+      category: p.category,
+      quantity: p.quantity,
+      estimatedAmount: p.estimatedAmount,
+      vendor: p.vendor || "—",
+      raisedBy: p.raisedBy || "—",
+    }))
+    .sort((a, b) => a.poId < b.poId ? -1 : 1);
+}
+
+/** Admin Facility Helpdesk — open/in-progress requests, oldest first. */
+function openFacilityHelpdeskReport(complaints) {
+  return complaints
+    .filter((c) => c.status === "Open" || c.status === "In Progress")
+    .map((c) => ({
+      complaintId: c.complaintId,
+      complainant: c.complainant,
+      category: c.category,
+      subject: c.subject,
+      status: c.status,
+      createdDate: c.createdDate ? new Date(c.createdDate).toLocaleDateString() : "—",
+    }))
+    .sort((a, b) => new Date(a.createdDate) - new Date(b.createdDate));
+}
+
+/** Facility Ops Tasks — pending tasks due, soonest first. */
+function pendingFacilityTasksReport(tasks) {
+  return tasks
+    .filter((t) => t.status === "Pending")
+    .map((t) => ({
+      taskId: t.taskId,
+      taskName: t.taskName,
+      area: t.area,
+      assignedStaff: t.assignedStaff || "—",
+      frequency: t.frequency,
+      scheduledDate: t.scheduledDate ? new Date(t.scheduledDate).toLocaleDateString() : "—",
+    }))
+    .sort((a, b) => new Date(a.scheduledDate) - new Date(b.scheduledDate));
+}
+
 async function showReports(req, res) {
-  const [incidents, requests, assets, employees, vendors, licenses, purchases, expenses, adminVendors, adminStockItems, adminStockOrders, adminScrapItems] = await Promise.all([
+  const [
+    incidents, requests, assets, employees, vendors, licenses, purchases, expenses,
+    adminVendors, adminStockItems, adminStockOrders, adminScrapItems,
+    adminAssets, adminPurchases, adminComplaints, adminFacilityTasks,
+  ] = await Promise.all([
     Incident.find().lean(),
     ServiceRequest.find().lean(),
     Asset.find().lean(),
@@ -365,6 +421,10 @@ async function showReports(req, res) {
     AdminStockItem.find().lean(),
     AdminStockOrder.find().lean(),
     AdminScrapItem.find().lean(),
+    AdminAsset.find().lean(),
+    AdminPurchase.find().lean(),
+    AdminComplaint.find().lean(),
+    AdminFacilityTask.find().lean(),
   ]);
 
   const adminStockCritical = await adminStockCriticalReport(adminStockItems);
@@ -386,6 +446,10 @@ async function showReports(req, res) {
     adminStockCritical,
     adminPendingOrders: pendingStockOrdersReport(adminStockOrders),
     adminScrapPending: scrapPendingApprovalReport(adminScrapItems),
+    adminAssetWarranty: assetWarrantyReport(adminAssets),
+    adminPendingPurchases: pendingPurchaseApprovalsReport(adminPurchases),
+    adminHelpdeskOpen: openFacilityHelpdeskReport(adminComplaints),
+    adminFacilityTasksPending: pendingFacilityTasksReport(adminFacilityTasks),
   });
 }
 
@@ -402,4 +466,7 @@ module.exports = {
   adminStockCriticalReport,
   pendingStockOrdersReport,
   scrapPendingApprovalReport,
+  pendingPurchaseApprovalsReport,
+  openFacilityHelpdeskReport,
+  pendingFacilityTasksReport,
 };
