@@ -1,0 +1,32 @@
+<%- include('../partials/header', { title: 'Raise Facility Request' }) %>
+
+<div class="page-header">
+  <h1>Raise Facility Request</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<p class="hint">Housekeeping, pantry, seating, AC, courier, or any other office/facility need.</p>
+
+<form class="panel form-panel" method="post" action="/admin/helpdesk">
+  <div class="form-grid">
+    <label>Department
+      <input type="text" name="department" list="departmentList" value="<%= form.department || '' %>" />
+    </label>
+    <label>Category
+      <input type="text" name="category" value="<%= form.category || '' %>" placeholder="Facility" />
+    </label>
+  </div>
+  <label>Subject
+    <input type="text" name="subject" value="<%= form.subject || '' %>" required />
+  </label>
+  <label>Description
+    <textarea name="description" rows="4" required><%= form.description || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/admin/helpdesk">Cancel</a>
+    <button type="submit" class="btn btn-primary">Submit Request</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>
