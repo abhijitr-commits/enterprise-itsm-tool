@@ -53,8 +53,16 @@
         const HR_PATHS = ['/hr','/mywork','/profile','/orgchart','/employees','/leave','/attendance','/shifts','/resignations','/performance','/training','/policies','/documents','/onboarding','/recruitment','/referrals','/succession','/benefits','/letters','/system-policies'];
         const IT_PATHS = ['/it','/access-requests','/vendors','/purchases','/stock','/licenses','/rooms','/complaints','/expenses','/maintenance','/helpdesk','/asset-allocation','/it-clearance','/vendor-service','/requirements'];
         const OPS_PATHS = ['/operations','/safety','/sales','/work-orders','/engineering-changes','/shipments','/material-requests','/wellness'];
+        // Single Admin dropdown for everything under /admin (+ Master Data)
+        // — operational registers and console/system-settings links used to
+        // live in two separate top-nav dropdowns ("Admin Ops" / "Admin
+        // Console"), which read as two different things even though both
+        // are just "Admin". Same underlying gates as before, just one menu:
+        // the dropdown itself shows for isAdminTeamUser (Administrator, or
+        // an Administration-department Manager); the console/system-settings
+        // links inside it (Users, Permissions, Integration Settings, Master
+        // Data) stay Administrator-only, unchanged from before.
         const ADMIN_PATHS = ['/admin','/masterdata'];
-        const ADMIN_OPS_PATHS = ['/admin/vendors','/admin/stock','/admin/scrap','/admin/assets','/admin/purchases','/admin/helpdesk','/admin/facility-tasks'];
         const anyItsm = canSee('incidents') || canSee('requests') || canSee('problems') || canSee('changes') || canSee('assets') || canSee('cmdb') || canSee('knowledge') || canSee('reports');
       %>
       <!-- Every department ("head") lives under exactly one button in this
@@ -183,9 +191,12 @@
         </details>
 
         <% if (isAdminTeamUser) { %>
-        <details class="nav-dropdown">
-          <summary class="<%= topTabClassAny(ADMIN_OPS_PATHS) %>"><%- icon('briefcase') %> Admin Ops<span class="chev"><%- icon('chevron-down', {size:13}) %></span></summary>
+        <details class="nav-dropdown nav-dropdown-right">
+          <summary class="<%= topTabClassAny(ADMIN_PATHS) %>"><%- icon('settings') %> Admin<span class="chev"><%- icon('chevron-down', {size:13}) %></span></summary>
           <div class="nav-dropdown-panel">
+            <% if (currentUser.role === 'Administrator') { %>
+              <a href="/admin" class="panel-link hub-link">Hub Overview</a>
+            <% } %>
             <a href="/admin/vendors" class="<%= panelLinkClass('/admin/vendors') %>"><%- icon('truck', {size:15}) %> Vendor Management</a>
             <a href="/admin/stock" class="<%= panelLinkClass('/admin/stock') %>"><%- icon('grid', {size:15}) %> Stock Management</a>
             <a href="/admin/stock/orders" class="<%= panelLinkClass('/admin/stock/orders') %>"><%- icon('clipboard-check', {size:15}) %> Stock Orders</a>
@@ -194,20 +205,13 @@
             <a href="/admin/purchases" class="<%= panelLinkClass('/admin/purchases') %>"><%- icon('layers', {size:15}) %> Purchase / Procurement</a>
             <a href="/admin/helpdesk" class="<%= panelLinkClass('/admin/helpdesk') %>"><%- icon('alert-circle', {size:15}) %> Facility Helpdesk</a>
             <a href="/admin/facility-tasks" class="<%= panelLinkClass('/admin/facility-tasks') %>"><%- icon('calendar', {size:15}) %> Facility Ops Tasks</a>
-          </div>
-        </details>
-        <% } %>
-
-        <% if (currentUser.role === 'Administrator') { %>
-        <details class="nav-dropdown nav-dropdown-right">
-          <summary class="<%= topTabClassAny(ADMIN_PATHS) %>"><%- icon('settings') %> Admin Console<span class="chev"><%- icon('chevron-down', {size:13}) %></span></summary>
-          <div class="nav-dropdown-panel">
-            <a href="/admin" class="panel-link hub-link">Hub Overview</a>
-            <a href="/admin/users" class="<%= panelLinkClass('/admin/users') %>">Users</a>
-            <a href="/admin/permissions" class="<%= panelLinkClass('/admin/permissions') %>">Permissions</a>
-            <a href="/admin/integrations" class="<%= panelLinkClass('/admin/integrations') %>">Integration Settings</a>
-            <a href="/masterdata/departments" class="<%= panelLinkClass('/masterdata') %>">Master Data</a>
-            <a href="/rooms/bookings" class="<%= panelLinkClass('/rooms/bookings') %>"><%- icon('calendar', {size:15}) %> Room Bookings</a>
+            <% if (currentUser.role === 'Administrator') { %>
+              <a href="/admin/users" class="<%= panelLinkClass('/admin/users') %>">Users</a>
+              <a href="/admin/permissions" class="<%= panelLinkClass('/admin/permissions') %>">Permissions</a>
+              <a href="/admin/integrations" class="<%= panelLinkClass('/admin/integrations') %>">Integration Settings</a>
+              <a href="/masterdata/departments" class="<%= panelLinkClass('/masterdata') %>">Master Data</a>
+              <a href="/rooms/bookings" class="<%= panelLinkClass('/rooms/bookings') %>"><%- icon('calendar', {size:15}) %> Room Bookings</a>
+            <% } %>
           </div>
         </details>
         <% } %>
