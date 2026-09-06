@@ -15,6 +15,10 @@ const Vendor = require("../models/Vendor");
 const SoftwareLicense = require("../models/SoftwareLicense");
 const PurchaseOrder = require("../models/PurchaseOrder");
 const ExpenseClaim = require("../models/ExpenseClaim");
+const AdminVendor = require("../models/AdminVendor");
+const AdminStockItem = require("../models/AdminStockItem");
+const AdminStockTransaction = require("../models/AdminStockTransaction");
+const AdminStockOrder = require("../models/AdminStockOrder");
 const { STATUS } = require("../config/constants");
 
 function slaComplianceReport(incidents) {
@@ -292,8 +296,54 @@ function financeSpendReport(purchases, expenses) {
     .sort((a, b) => new Date(b.month) - new Date(a.month));
 }
 
+/**
+ * Admin Stock — Critical/Low Items report. Same "derive current stock
+ * from the ledger, never trust a stored number" rule as
+ * adminStockController.js's withCurrentStock(), duplicated here in
+ * report-shape (name/category/currentStock/minBuffer/urgency) rather
+ * than imported, matching how every other report on this page is a
+ * small self-contained function over plain data.
+ */
+function adminStockCriticalReport(items, transactions) {
+  const inTotals = {};
+  const outTotals = {};
+  transactions.forEach((t) => {
+    if (t.type === "IN") inTotals[t.itemId] = (inTotals[t.itemId] || 0) + t.quantity;
+    else if (t.type === "OUT") outTotals[t.itemId] = (outTotals[t.itemId] || 0) + t.quantity;
+  });
+
+  return items
+    .map((i) => {
+      const currentStock = i.openingStock + (inTotals[i.itemId] || 0) - (outTotals[i.itemId] || 0);
+      return {
+        itemName: i.itemName,
+        category: i.category,
+        currentStock,
+        minBufferStock: i.minBufferStock,
+        unit: i.unit,
+        urgency: currentStock <= 0 ? "Out of Stock" : "Critical",
+      };
+    })
+    .filter((i) => i.currentStock <= i.minBufferStock)
+    .sort((a, b) => a.currentStock - b.currentStock);
+}
+
+/** Pending Stock Orders report — the order register's own "not yet received" queue, oldest first. */
+function pendingStockOrdersReport(orders) {
+  return orders
+    .filter((o) => o.status === "Pending")
+    .map((o) => ({
+      orderId: o.orderId,
+      itemName: o.itemName,
+      orderDate: o.orderDate ? new Date(o.orderDate).toLocaleDateString() : "—",
+      decision: o.decision,
+      raisedBy: o.raisedBy || "—",
+    }))
+    .sort((a, b) => new Date(a.orderDate) - new Date(b.orderDate));
+}
+
 async function showReports(req, res) {
-  const [incidents, requests, assets, employees, vendors, licenses, purchases, expenses] = await Promise.all([
+  const [incidents, requests, assets, employees, vendors, licenses, purchases, expenses, adminVendors, adminStockItems, adminStockTransactions, adminStockOrders] = await Promise.all([
     Incident.find().lean(),
     ServiceRequest.find().lean(),
     Asset.find().lean(),
@@ -302,6 +352,10 @@ async function showReports(req, res) {
     SoftwareLicense.find().lean(),
     PurchaseOrder.find().lean(),
     ExpenseClaim.find().lean(),
+    AdminVendor.find().lean(),
+    AdminStockItem.find().lean(),
+    AdminStockTransaction.find().lean(),
+    AdminStockOrder.find().lean(),
   ]);
 
   res.render("reports/index", {
@@ -317,6 +371,9 @@ async function showReports(req, res) {
     maintenanceDue: maintenanceDueReport(assets),
     fleetReliability: assetReliabilityReport(incidents),
     financeSpend: financeSpendReport(purchases, expenses),
+    adminAmcs: amcExpiryReport(adminVendors),
+    adminStockCritical: adminStockCriticalReport(adminStockItems, adminStockTransactions),
+    adminPendingOrders: pendingStockOrdersReport(adminStockOrders),
   });
 }
 
@@ -330,4 +387,6 @@ module.exports = {
   maintenanceDueReport,
   assetReliabilityReport,
   financeSpendReport,
+  adminStockCriticalReport,
+  pendingStockOrdersReport,
 };
