@@ -9,13 +9,22 @@
   </div>
 </div>
 
-<p class="hint">Facilities/pantry/stationery inventory, tracked in Boxes + Loose Pieces. Current stock is always calculated as Opening Stock + all IN − all OUT transactions, never stored as an editable number.</p>
+<p class="hint">Same fields and calculations as the Inventory sheet: Closing Stock (PC) = Opening Stock + Received − Issued/Used, never stored as an editable number. Status is CRITICAL once Closing Stock falls to or below Minimum Buffer Stock.</p>
 
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <div class="panel">
+  <div class="table-scroll">
   <table class="table">
-    <thead><tr><th>Item Code</th><th>Item Name</th><th>Category</th><th>Location</th><th>Current Stock</th><th>Min Buffer</th><th></th></tr></thead>
+    <thead>
+      <tr>
+        <th>Item Code</th><th>Item Name</th><th>Category</th><th>Location</th>
+        <th>PC per Box</th><th>Minimum Buffer Stock</th>
+        <th>Issued / Used (PC)</th><th>Closing Stock (PC)</th><th>Display Stock</th>
+        <th>Status</th><th>Order</th><th>Qty to Order</th>
+        <th></th>
+      </tr>
+    </thead>
     <tbody>
       <% items.forEach(function(i) { %>
         <tr>
@@ -23,11 +32,14 @@
           <td><%= i.itemName %></td>
           <td><%= i.category %></td>
           <td><%= i.location || '—' %></td>
-          <td>
-            <%= i.displayStock %>
-            <% if (i.critical) { %><span class="badge badge-status-cancelled">Critical</span><% } %>
-          </td>
+          <td><%= i.piecesPerBox %></td>
           <td><%= i.minBufferStock %> <%= i.unit %></td>
+          <td><%= i.issuedUsed %></td>
+          <td><%= i.closingStock %> <%= i.unit %></td>
+          <td><%= i.displayStock %></td>
+          <td><span class="badge <%= i.status === 'CRITICAL' ? 'badge-status-cancelled' : 'badge-status-open' %>"><%= i.status %></span></td>
+          <td><span class="badge <%= i.orderFlag === 'Done' ? 'badge-status-resolved' : (i.orderFlag === 'Order' ? 'badge-status-in-progress' : 'badge-status-on-hold') %>"><%= i.orderFlag.toUpperCase() %></span></td>
+          <td><%= i.qtyToOrder %></td>
           <td>
             <form method="post" action="/admin/stock/<%= i.itemId %>/transactions" class="filter-bar">
               <select name="type">
@@ -41,9 +53,10 @@
           </td>
         </tr>
       <% }) %>
-      <% if (items.length === 0) { %><tr><td colspan="7" class="empty-row">No stock items yet.</td></tr><% } %>
+      <% if (items.length === 0) { %><tr><td colspan="13" class="empty-row">No stock items yet.</td></tr><% } %>
     </tbody>
   </table>
+  </div>
 </div>
 
 <%- include('../partials/footer') %>

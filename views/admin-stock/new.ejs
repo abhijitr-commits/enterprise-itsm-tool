@@ -8,7 +8,7 @@
 
 <form class="panel form-panel" method="post" action="/admin/stock">
   <div class="form-grid">
-    <label>Item Code (optional)
+    <label>Item Code
       <input type="text" name="itemCode" value="<%= form.itemCode || '' %>" />
     </label>
     <label>Item Name
@@ -20,17 +20,24 @@
     <label>Unit
       <input type="text" name="unit" value="<%= form.unit || '' %>" placeholder="pcs" />
     </label>
-    <label>Pieces per Box
+    <label>PC per Box
       <input type="number" name="piecesPerBox" min="1" value="<%= form.piecesPerBox || 1 %>" />
     </label>
     <label>Opening Boxes
       <input type="number" name="openingBoxes" min="0" value="<%= form.openingBoxes || 0 %>" />
     </label>
-    <label>Opening Loose Pieces
+    <label>Opening Loose PC
       <input type="number" name="openingLoosePieces" min="0" value="<%= form.openingLoosePieces || 0 %>" />
     </label>
     <label>Minimum Buffer Stock
       <input type="number" name="minBufferStock" min="0" value="<%= form.minBufferStock || 0 %>" />
+    </label>
+    <label>Order
+      <select name="orderFlag">
+        <option value="Hold" <%= (form.orderFlag || 'Hold') === 'Hold' ? 'selected' : '' %>>Hold</option>
+        <option value="Order" <%= form.orderFlag === 'Order' ? 'selected' : '' %>>Order</option>
+        <option value="Done" <%= form.orderFlag === 'Done' ? 'selected' : '' %>>Done</option>
+      </select>
     </label>
     <label>Location
       <input type="text" name="location" value="<%= form.location || '' %>" />

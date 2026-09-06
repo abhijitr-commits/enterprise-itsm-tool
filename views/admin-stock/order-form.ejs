@@ -19,14 +19,9 @@
     <label>Order Date
       <input type="date" name="orderDate" value="<%= form.orderDate || new Date().toISOString().slice(0,10) %>" />
     </label>
-    <label>Decision
-      <select name="decision">
-        <option value="Order" <%= (form.decision || 'Order') === 'Order' ? 'selected' : '' %>>Order</option>
-        <option value="Hold" <%= form.decision === 'Hold' ? 'selected' : '' %>>Hold</option>
-      </select>
-    </label>
   </div>
-  <label>Remarks
+  <p class="hint">Raising this order sets the item's own Order flag (on the Stock Management list) to ORDER.</p>
+  <label>Remark
     <textarea name="remarks" rows="2"><%= form.remarks || '' %></textarea>
   </label>
   <div class="form-actions">

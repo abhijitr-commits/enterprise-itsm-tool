@@ -2,16 +2,20 @@
 
 <div class="page-header">
   <h1><%= item.itemName %> <span class="hint"><%= item.itemCode || item.itemId %></span></h1>
-  <span class="badge <%= item.critical ? 'badge-status-cancelled' : 'badge-status-open' %>"><%= item.displayStock %> in stock</span>
+  <span class="badge <%= item.status === 'CRITICAL' ? 'badge-status-cancelled' : 'badge-status-open' %>"><%= item.displayStock %> — <%= item.status %></span>
 </div>
 
 <div class="panel">
   <dl class="meta-list">
     <dt>Category</dt><dd><%= item.category %></dd>
     <dt>Location</dt><dd><%= item.location || '—' %></dd>
-    <dt>Pieces per Box</dt><dd><%= item.piecesPerBox %></dd>
+    <dt>PC per Box</dt><dd><%= item.piecesPerBox %></dd>
     <dt>Opening Stock</dt><dd><%= item.openingStock %> <%= item.unit %></dd>
     <dt>Minimum Buffer Stock</dt><dd><%= item.minBufferStock %> <%= item.unit %></dd>
+    <dt>Issued / Used (PC)</dt><dd><%= item.issuedUsed %></dd>
+    <dt>Closing Stock (PC)</dt><dd><%= item.closingStock %> <%= item.unit %></dd>
+    <dt>Qty to Order</dt><dd><%= item.qtyToOrder %></dd>
+    <dt>Order</dt><dd><span class="badge <%= item.orderFlag === 'Done' ? 'badge-status-resolved' : (item.orderFlag === 'Order' ? 'badge-status-in-progress' : 'badge-status-on-hold') %>"><%= item.orderFlag.toUpperCase() %></span></dd>
     <dt>Remarks</dt><dd><%= item.remarks || '—' %></dd>
   </dl>
 </div>
