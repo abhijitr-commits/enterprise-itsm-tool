@@ -1,0 +1,44 @@
+<%- include('../partials/header', { title: 'Raise Scrap Entry' }) %>
+
+<div class="page-header">
+  <h1>Raise Scrap Entry</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/admin/scrap">
+  <div class="form-grid">
+    <label>Item Code (if from Stock Management)
+      <input type="text" name="itemCode" value="<%= form.itemCode || '' %>" />
+    </label>
+    <label>Item Name
+      <input type="text" name="itemName" value="<%= form.itemName || '' %>" required />
+    </label>
+    <label>Category
+      <input type="text" name="category" value="<%= form.category || '' %>" placeholder="General" />
+    </label>
+    <label>Quantity
+      <input type="number" name="quantity" min="1" value="<%= form.quantity || 1 %>" />
+    </label>
+    <label>Unit
+      <input type="text" name="unit" value="<%= form.unit || '' %>" placeholder="pcs" />
+    </label>
+    <label>Scrap Date
+      <input type="date" name="scrapDate" value="<%= form.scrapDate || new Date().toISOString().slice(0,10) %>" />
+    </label>
+  </div>
+  <label>Reason
+    <textarea name="reason" rows="2" required><%= form.reason || '' %></textarea>
+  </label>
+  <label>Remarks
+    <textarea name="remarks" rows="2"><%= form.remarks || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/admin/scrap">Cancel</a>
+    <button type="submit" class="btn btn-primary">Raise Scrap Entry</button>
+  </div>
+</form>
+
+<p class="hint">If the Item Code matches a Stock Management item, marking this entry Disposed will automatically reduce that item's Closing Stock (PC) by the quantity scrapped.</p>
+
+<%- include('../partials/footer') %>
