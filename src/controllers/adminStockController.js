@@ -1,13 +1,16 @@
 /*************************************************************
  * adminStockController.js — Administration-department Stock
- * Management + Stock Order Management, modeled on the user-supplied
- * Pashan Stock Register spreadsheet (Inventory sheet + Order sheet).
+ * Management + Stock Order Management, a field-for-field port of the
+ * user-supplied Pashan Stock Register spreadsheet's Inventory sheet +
+ * Order sheet — same column names, same calculations, throughout.
  *
  * Same "never store current stock as an editable number" rule as
- * stockController.js — see withCurrentStock() below — plus a box/
- * loose-piece unit conversion the plain Stock module doesn't have,
- * and a real Order Register (AdminStockOrder) with a receive step
- * that writes a real IN transaction instead of just editing a count.
+ * stockController.js — see withCurrentStock() below, which is also
+ * where every one of the sheet's formula-driven columns (Issued/Used
+ * (PC), Closing Stock (PC), Critical Flag/Status, Qty to Order,
+ * Display Stock) gets computed, since none of them are stored — plus a
+ * real Order Register (AdminStockOrder) with a receive step that
+ * writes a real IN transaction instead of just editing a count.
  *************************************************************/
 const AdminStockItem = require("../models/AdminStockItem");
 const AdminStockTransaction = require("../models/AdminStockTransaction");
@@ -15,7 +18,7 @@ const AdminStockOrder = require("../models/AdminStockOrder");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 
-/** Box + loose-piece display, e.g. "3 Box + 4 Pc" — same idea as the sheet's "Display Stock" column. */
+/** Box + loose-piece display, e.g. "3 Box + 4 Pc" — same format as the sheet's "Display Stock" column. */
 function boxDisplay(pieces, piecesPerBox) {
   const perBox = piecesPerBox && piecesPerBox > 1 ? piecesPerBox : null;
   if (!perBox) return `${pieces} pc`;
@@ -24,7 +27,20 @@ function boxDisplay(pieces, piecesPerBox) {
   return `${boxes} Box + ${loose} Pc`;
 }
 
-/** Same pattern as stockController.js's withCurrentStock() — sums the ledger once for every item instead of querying per item. */
+/**
+ * Same pattern as stockController.js's withCurrentStock() — sums the
+ * ledger once for every item instead of querying per item — but also
+ * reproduces every formula column the sheet's Inventory tab computed:
+ *   Issued / Used (PC)  = total of all OUT transactions
+ *   Closing Stock (PC)  = Opening Stock + Received (IN) − Issued/Used (OUT)
+ *   Status               = "CRITICAL" when Closing Stock <= Minimum Buffer
+ *                           Stock, else "OK" (the sheet's "Critical Flag"
+ *                           and "Status" columns were the same value
+ *                           under two names — this app surfaces it once)
+ *   Qty to Order          = how many more pieces are needed to reach the
+ *                           buffer minimum again (0 unless CRITICAL)
+ *   Display Stock         = the Closing Stock, formatted as Boxes + Loose PC
+ */
 async function withCurrentStock(items) {
   const transactions = await AdminStockTransaction.find({ itemId: { $in: items.map((i) => i.itemId) } }).lean();
 
@@ -36,12 +52,17 @@ async function withCurrentStock(items) {
   });
 
   return items.map((item) => {
-    const currentStock = item.openingStock + (inTotals[item.itemId] || 0) - (outTotals[item.itemId] || 0);
+    const issuedUsed = outTotals[item.itemId] || 0;
+    const closingStock = item.openingStock + (inTotals[item.itemId] || 0) - issuedUsed;
+    const status = closingStock <= item.minBufferStock ? "CRITICAL" : "OK";
+    const qtyToOrder = status === "CRITICAL" ? Math.max(0, item.minBufferStock - closingStock) : 0;
     return {
       ...item,
-      currentStock,
-      critical: currentStock <= item.minBufferStock,
-      displayStock: boxDisplay(currentStock, item.piecesPerBox),
+      issuedUsed,
+      closingStock,
+      status,
+      qtyToOrder,
+      displayStock: boxDisplay(closingStock, item.piecesPerBox),
     };
   });
 }
@@ -51,7 +72,7 @@ async function listStock(req, res) {
   let withStock = await withCurrentStock(items);
 
   const criticalOnly = req.query.critical === "1";
-  if (criticalOnly) withStock = withStock.filter((i) => i.critical);
+  if (criticalOnly) withStock = withStock.filter((i) => i.status === "CRITICAL");
 
   res.render("admin-stock/list", {
     items: withStock,
@@ -86,6 +107,7 @@ async function createItem(req, res) {
       openingLoosePieces,
       openingStock,
       minBufferStock: Number(data.minBufferStock) || 0,
+      orderFlag: ["Hold", "Order", "Done"].includes(data.orderFlag) ? data.orderFlag : "Hold",
       location: data.location || "",
       remarks: data.remarks || "",
     });
@@ -109,8 +131,8 @@ async function recordTransaction(req, res) {
     if (!item) throw new Error(`Stock item ${itemId} not found.`);
 
     const [withStock] = await withCurrentStock([item]);
-    if (type === "OUT" && qty > withStock.currentStock) {
-      throw new Error(`Cannot remove ${qty} — only ${withStock.currentStock} ${item.unit} currently in stock.`);
+    if (type === "OUT" && qty > withStock.closingStock) {
+      throw new Error(`Cannot remove ${qty} — only ${withStock.closingStock} ${item.unit} currently in stock.`);
     }
 
     const transactionId = await generateSequentialId("ASTKTX");
@@ -154,6 +176,13 @@ async function showNewOrderForm(req, res) {
   res.render("admin-stock/order-form", { error: null, form: {}, items });
 }
 
+/**
+ * Raising an order also flips the item's own "Order" flag (sheet's
+ * per-row Hold/Order/Done column) to "Order" — the quick-glance signal
+ * on the Stock Management list that this item currently has an order
+ * in flight, kept in sync automatically rather than needing a second
+ * manual edit.
+ */
 async function createOrder(req, res) {
   try {
     const data = req.body;
@@ -166,12 +195,15 @@ async function createOrder(req, res) {
     await AdminStockOrder.create({
       orderId,
       itemId: item.itemId,
+      itemCode: item.itemCode || "",
       itemName: item.itemName,
+      piecesPerBox: item.piecesPerBox,
       orderDate: data.orderDate ? new Date(data.orderDate) : new Date(),
-      decision: data.decision || "Order",
       remarks: data.remarks || "",
       raisedBy: req.user.email,
     });
+
+    await AdminStockItem.updateOne({ itemId: item.itemId }, { $set: { orderFlag: "Order" } });
 
     await logAudit({ user: req.user._id, action: "Create Order", entityType: "AdminStockOrder", details: item.itemName });
 
@@ -184,11 +216,12 @@ async function createOrder(req, res) {
 
 /**
  * Marks a Pending order Received: computes the received quantity in
- * pieces from Received Boxes/Loose PC against the item's piecesPerBox
- * (same conversion as createItem()), records payment/bill details, and
- * — the whole point of a real Order Register instead of just a status
- * flag — writes a genuine AdminStockTransaction IN so the item's
- * current stock actually reflects the goods received.
+ * pieces from Received Boxes/Loose PC against the item's PC per Box
+ * (same conversion as createItem()), records payment/bill details,
+ * flips the item's Order flag to "Done", and — the whole point of a
+ * real Order Register instead of just a status flag — writes a
+ * genuine AdminStockTransaction IN so the item's Closing Stock (PC)
+ * actually reflects the goods received.
  */
 async function markReceived(req, res) {
   try {
@@ -214,8 +247,9 @@ async function markReceived(req, res) {
     order.paymentDate = data.paymentDate ? new Date(data.paymentDate) : undefined;
     if (data.remarks) order.remarks = data.remarks;
     order.status = "Received";
-    order.decision = "Done";
     await order.save();
+
+    await AdminStockItem.updateOne({ itemId: item.itemId }, { $set: { orderFlag: "Done" } });
 
     const transactionId = await generateSequentialId("ASTKTX");
     await AdminStockTransaction.create({
@@ -255,6 +289,7 @@ async function updatePayment(req, res) {
 }
 
 module.exports = {
+  withCurrentStock,
   listStock,
   showNewForm,
   createItem,

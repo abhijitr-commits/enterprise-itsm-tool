@@ -17,8 +17,9 @@ const PurchaseOrder = require("../models/PurchaseOrder");
 const ExpenseClaim = require("../models/ExpenseClaim");
 const AdminVendor = require("../models/AdminVendor");
 const AdminStockItem = require("../models/AdminStockItem");
-const AdminStockTransaction = require("../models/AdminStockTransaction");
 const AdminStockOrder = require("../models/AdminStockOrder");
+const AdminScrapItem = require("../models/AdminScrapItem");
+const adminStockController = require("./adminStockController");
 const { STATUS } = require("../config/constants");
 
 function slaComplianceReport(incidents) {
@@ -297,35 +298,27 @@ function financeSpendReport(purchases, expenses) {
 }
 
 /**
- * Admin Stock — Critical/Low Items report. Same "derive current stock
- * from the ledger, never trust a stored number" rule as
- * adminStockController.js's withCurrentStock(), duplicated here in
- * report-shape (name/category/currentStock/minBuffer/urgency) rather
- * than imported, matching how every other report on this page is a
- * small self-contained function over plain data.
+ * Admin Stock — Critical/Low Items report. Reuses
+ * adminStockController.js's withCurrentStock() (the same Issued/Used
+ * (PC), Closing Stock (PC), Status calculation used on the Stock
+ * Management page) instead of re-deriving it here, so the two never
+ * drift apart — same cross-controller reuse pattern purchaseController.js
+ * uses for assetController.js's logAssetHistory().
  */
-function adminStockCriticalReport(items, transactions) {
-  const inTotals = {};
-  const outTotals = {};
-  transactions.forEach((t) => {
-    if (t.type === "IN") inTotals[t.itemId] = (inTotals[t.itemId] || 0) + t.quantity;
-    else if (t.type === "OUT") outTotals[t.itemId] = (outTotals[t.itemId] || 0) + t.quantity;
-  });
-
-  return items
-    .map((i) => {
-      const currentStock = i.openingStock + (inTotals[i.itemId] || 0) - (outTotals[i.itemId] || 0);
-      return {
-        itemName: i.itemName,
-        category: i.category,
-        currentStock,
-        minBufferStock: i.minBufferStock,
-        unit: i.unit,
-        urgency: currentStock <= 0 ? "Out of Stock" : "Critical",
-      };
-    })
-    .filter((i) => i.currentStock <= i.minBufferStock)
-    .sort((a, b) => a.currentStock - b.currentStock);
+async function adminStockCriticalReport(items) {
+  const withStock = await adminStockController.withCurrentStock(items);
+  return withStock
+    .filter((i) => i.status === "CRITICAL")
+    .map((i) => ({
+      itemName: i.itemName,
+      category: i.category,
+      closingStock: i.closingStock,
+      minBufferStock: i.minBufferStock,
+      unit: i.unit,
+      qtyToOrder: i.qtyToOrder,
+      urgency: i.closingStock <= 0 ? "Out of Stock" : "Critical",
+    }))
+    .sort((a, b) => a.closingStock - b.closingStock);
 }
 
 /** Pending Stock Orders report — the order register's own "not yet received" queue, oldest first. */
@@ -334,16 +327,32 @@ function pendingStockOrdersReport(orders) {
     .filter((o) => o.status === "Pending")
     .map((o) => ({
       orderId: o.orderId,
+      itemCode: o.itemCode || "—",
       itemName: o.itemName,
       orderDate: o.orderDate ? new Date(o.orderDate).toLocaleDateString() : "—",
-      decision: o.decision,
       raisedBy: o.raisedBy || "—",
     }))
     .sort((a, b) => new Date(a.orderDate) - new Date(b.orderDate));
 }
 
+/** Scrap Management — entries awaiting approval, oldest first. */
+function scrapPendingApprovalReport(scrapItems) {
+  return scrapItems
+    .filter((s) => s.status === "Pending Approval")
+    .map((s) => ({
+      scrapId: s.scrapId,
+      itemName: s.itemName,
+      category: s.category,
+      quantity: `${s.quantity} ${s.unit}`,
+      reason: s.reason,
+      scrapDate: s.scrapDate ? new Date(s.scrapDate).toLocaleDateString() : "—",
+      raisedBy: s.raisedBy || "—",
+    }))
+    .sort((a, b) => new Date(a.scrapDate) - new Date(b.scrapDate));
+}
+
 async function showReports(req, res) {
-  const [incidents, requests, assets, employees, vendors, licenses, purchases, expenses, adminVendors, adminStockItems, adminStockTransactions, adminStockOrders] = await Promise.all([
+  const [incidents, requests, assets, employees, vendors, licenses, purchases, expenses, adminVendors, adminStockItems, adminStockOrders, adminScrapItems] = await Promise.all([
     Incident.find().lean(),
     ServiceRequest.find().lean(),
     Asset.find().lean(),
@@ -354,9 +363,11 @@ async function showReports(req, res) {
     ExpenseClaim.find().lean(),
     AdminVendor.find().lean(),
     AdminStockItem.find().lean(),
-    AdminStockTransaction.find().lean(),
     AdminStockOrder.find().lean(),
+    AdminScrapItem.find().lean(),
   ]);
+
+  const adminStockCritical = await adminStockCriticalReport(adminStockItems);
 
   res.render("reports/index", {
     sla: slaComplianceReport(incidents),
@@ -372,8 +383,9 @@ async function showReports(req, res) {
     fleetReliability: assetReliabilityReport(incidents),
     financeSpend: financeSpendReport(purchases, expenses),
     adminAmcs: amcExpiryReport(adminVendors),
-    adminStockCritical: adminStockCriticalReport(adminStockItems, adminStockTransactions),
+    adminStockCritical,
     adminPendingOrders: pendingStockOrdersReport(adminStockOrders),
+    adminScrapPending: scrapPendingApprovalReport(adminScrapItems),
   });
 }
 
@@ -389,4 +401,5 @@ module.exports = {
   financeSpendReport,
   adminStockCriticalReport,
   pendingStockOrdersReport,
+  scrapPendingApprovalReport,
 };
