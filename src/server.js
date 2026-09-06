@@ -70,6 +70,10 @@ const operationsHubRoutes = require("./routes/operationsHubRoutes");
 const adminVendorRoutes = require("./routes/adminVendorRoutes");
 const adminStockRoutes = require("./routes/adminStockRoutes");
 const adminScrapRoutes = require("./routes/adminScrapRoutes");
+const adminAssetRoutes = require("./routes/adminAssetRoutes");
+const adminPurchaseRoutes = require("./routes/adminPurchaseRoutes");
+const adminHelpdeskRoutes = require("./routes/adminHelpdeskRoutes");
+const adminFacilityTaskRoutes = require("./routes/adminFacilityTaskRoutes");
 
 /*************************************************************
  * Auto-seed on boot — runs automatically every time the server
@@ -343,6 +347,10 @@ async function start() {
   app.use("/admin/vendors", adminVendorRoutes);
   app.use("/admin/stock", adminStockRoutes);
   app.use("/admin/scrap", adminScrapRoutes);
+  app.use("/admin/assets", adminAssetRoutes);
+  app.use("/admin/purchases", adminPurchaseRoutes);
+  app.use("/admin/helpdesk", adminHelpdeskRoutes);
+  app.use("/admin/facility-tasks", adminFacilityTaskRoutes);
 
   app.use((req, res) => res.status(404).render("errors/404"));
 
