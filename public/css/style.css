@@ -512,6 +512,12 @@ a:hover { color: var(--primary-dark); }
 .btn-secondary:hover { background: #f6f7fb; border-color: #c7cbe0; }
 .btn-danger { background: #fff; color: var(--danger); border-color: #fecaca; }
 .btn-danger:hover { background: var(--danger-light); border-color: #fca5a5; }
+/* A <summary class="btn ..."> used as an inline disclosure trigger (e.g.
+   Stock Orders' "Mark Received" row action) — same marker-hiding trick as
+   .nav-dropdown summary, scoped to just the button-styled case so it never
+   affects any other <summary>. */
+summary.btn { list-style: none; }
+summary.btn::-webkit-details-marker { display: none; }
 .btn-block { width: 100%; justify-content: center; }
 
 .filter-bar { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
