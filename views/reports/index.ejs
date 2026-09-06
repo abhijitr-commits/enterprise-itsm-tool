@@ -188,6 +188,69 @@
 </div>
 
 <div class="panel">
+  <div class="panel-header"><h2>Admin Asset Warranty Expiry (next 90 days)</h2></div>
+  <table class="table">
+    <thead><tr><th>Asset</th><th>Type</th><th>Department</th><th>Vendor</th><th>Warranty Expiry</th><th>Urgency</th></tr></thead>
+    <tbody>
+      <% adminAssetWarranty.forEach(function(a){ %>
+        <tr>
+          <td><%= a.assetName %></td><td><%= a.type %></td><td><%= a.department %></td><td><%= a.vendor || '—' %></td><td><%= a.warrantyExpiry %></td>
+          <td><span class="badge badge-approval-<%= a.urgency === 'Expired' ? 'rejected' : 'pending-approval' %>"><%= a.urgency %></span></td>
+        </tr>
+      <% }) %>
+      <% if (adminAssetWarranty.length === 0) { %><tr><td colspan="6" class="empty-row">No admin assets expiring soon.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Pending Purchase Approvals</h2></div>
+  <table class="table">
+    <thead><tr><th>PO ID</th><th>Item Description</th><th>Category</th><th>Quantity</th><th>Estimated Amount</th><th>Vendor</th><th>Raised By</th></tr></thead>
+    <tbody>
+      <% adminPendingPurchases.forEach(function(p){ %>
+        <tr>
+          <td><%= p.poId %></td><td><%= p.itemDescription %></td><td><%= p.category %></td><td><%= p.quantity %></td>
+          <td><%= p.estimatedAmount %></td><td><%= p.vendor %></td><td><%= p.raisedBy %></td>
+        </tr>
+      <% }) %>
+      <% if (adminPendingPurchases.length === 0) { %><tr><td colspan="7" class="empty-row">No purchase requests pending approval.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Facility Helpdesk — Open Requests</h2></div>
+  <table class="table">
+    <thead><tr><th>Complaint ID</th><th>Complainant</th><th>Category</th><th>Subject</th><th>Status</th><th>Raised On</th></tr></thead>
+    <tbody>
+      <% adminHelpdeskOpen.forEach(function(c){ %>
+        <tr>
+          <td><%= c.complaintId %></td><td><%= c.complainant %></td><td><%= c.category %></td><td><%= c.subject %></td>
+          <td><span class="badge <%= c.status === 'Open' ? 'badge-status-open' : 'badge-status-in-progress' %>"><%= c.status %></span></td><td><%= c.createdDate %></td>
+        </tr>
+      <% }) %>
+      <% if (adminHelpdeskOpen.length === 0) { %><tr><td colspan="6" class="empty-row">No open facility requests.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Facility Ops — Pending Tasks</h2></div>
+  <table class="table">
+    <thead><tr><th>Task ID</th><th>Task Name</th><th>Area</th><th>Assigned Staff</th><th>Frequency</th><th>Scheduled Date</th></tr></thead>
+    <tbody>
+      <% adminFacilityTasksPending.forEach(function(t){ %>
+        <tr>
+          <td><%= t.taskId %></td><td><%= t.taskName %></td><td><%= t.area %></td><td><%= t.assignedStaff %></td><td><%= t.frequency %></td><td><%= t.scheduledDate %></td>
+        </tr>
+      <% }) %>
+      <% if (adminFacilityTasksPending.length === 0) { %><tr><td colspan="6" class="empty-row">No pending facility tasks.</td></tr><% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel">
   <div class="panel-header"><h2>Software License Expiry (next 90 days)</h2></div>
   <table class="table">
     <thead><tr><th>Software</th><th>Vendor</th><th>Expiry</th><th>Urgency</th></tr></thead>
