@@ -1,0 +1,40 @@
+<%- include('../partials/header', { title: 'Add Facility Task' }) %>
+
+<div class="page-header">
+  <h1>Add Facility Task</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/admin/facility-tasks">
+  <div class="form-grid">
+    <label>Task Name
+      <input type="text" name="taskName" value="<%= form.taskName || '' %>" placeholder="e.g. Restroom Cleaning" required />
+    </label>
+    <label>Area
+      <input type="text" name="area" value="<%= form.area || '' %>" placeholder="e.g. 2nd Floor" required />
+    </label>
+    <label>Assigned Staff
+      <input type="text" name="assignedStaff" value="<%= form.assignedStaff || '' %>" />
+    </label>
+    <label>Frequency
+      <select name="frequency">
+        <% Object.values(FACILITY_TASK_FREQUENCY).forEach(function(f) { %>
+          <option value="<%= f %>" <%= form.frequency === f ? 'selected' : '' %>><%= f %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Scheduled Date
+      <input type="date" name="scheduledDate" value="<%= form.scheduledDate || new Date().toISOString().slice(0,10) %>" />
+    </label>
+  </div>
+  <label>Remarks
+    <textarea name="remarks" rows="3"><%= form.remarks || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/admin/facility-tasks">Cancel</a>
+    <button type="submit" class="btn btn-primary">Add Task</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

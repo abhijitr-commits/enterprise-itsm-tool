@@ -1,0 +1,53 @@
+<%- include('../partials/header', { title: 'Facility Ops Tasks' }) %>
+
+<div class="page-header">
+  <h1>Facility Ops Tasks</h1>
+  <a class="btn btn-primary" href="/admin/facility-tasks/new">+ Add Task</a>
+</div>
+
+<p class="hint">Daily/weekly/monthly housekeeping and facility-upkeep rounds — cleaning, pantry restocking, servicing checks.</p>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <div class="table-scroll">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Task ID</th><th>Task Name</th><th>Area</th><th>Assigned Staff</th><th>Frequency</th>
+        <th>Scheduled Date</th><th>Status</th><th>Completed Date</th><th>Remarks</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% tasks.forEach(function(t) { %>
+        <tr>
+          <td><%= t.taskId %></td>
+          <td><%= t.taskName %></td>
+          <td><%= t.area %></td>
+          <td><%= t.assignedStaff || '—' %></td>
+          <td><%= t.frequency %></td>
+          <td><%= t.scheduledDate ? new Date(t.scheduledDate).toLocaleDateString() : '—' %></td>
+          <td>
+            <span class="badge <%= t.status === 'Completed' ? 'badge-status-resolved' : (t.status === 'Skipped' ? 'badge-status-closed' : 'badge-status-on-hold') %>"><%= t.status %></span>
+          </td>
+          <td><%= t.completedDate ? new Date(t.completedDate).toLocaleDateString() : '—' %></td>
+          <td><%= t.remarks || '—' %></td>
+          <td>
+            <% if (t.status === 'Pending') { %>
+              <form method="post" action="/admin/facility-tasks/<%= t.taskId %>/complete" style="display:inline-block;">
+                <button type="submit" class="btn btn-secondary">Complete</button>
+              </form>
+              <form method="post" action="/admin/facility-tasks/<%= t.taskId %>/skip" style="display:inline-block;">
+                <button type="submit" class="btn btn-secondary">Skip</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (tasks.length === 0) { %><tr><td colspan="10" class="empty-row">No facility tasks yet.</td></tr><% } %>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
