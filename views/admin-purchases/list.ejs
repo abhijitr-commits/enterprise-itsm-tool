@@ -1,0 +1,71 @@
+<%- include('../partials/header', { title: 'Admin Purchase / Procurement' }) %>
+
+<div class="page-header">
+  <h1>Admin Purchase / Procurement</h1>
+  <a class="btn btn-primary" href="/admin/purchases/new">+ Raise Purchase Request</a>
+</div>
+
+<p class="hint">Non-stock purchases — furniture, equipment, services — request, approve, then mark received and paid.</p>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <div class="table-scroll">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>PO ID</th><th>Item Description</th><th>Category</th><th>Quantity</th><th>Vendor</th>
+        <th>Estimated Amount</th><th>Status</th><th>Reference Bill No</th><th>Actual Amount</th><th>Payment Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% purchases.forEach(function(p) { %>
+        <tr>
+          <td><%= p.poId %></td>
+          <td><%= p.itemDescription %></td>
+          <td><%= p.category %></td>
+          <td><%= p.quantity %></td>
+          <td><%= p.vendor || '—' %></td>
+          <td><%= p.estimatedAmount %></td>
+          <td>
+            <span class="badge <%= p.status === 'Received' ? 'badge-status-resolved' : (p.status === 'Cancelled' ? 'badge-status-closed' : (p.status === 'Approved' ? 'badge-status-in-progress' : 'badge-status-on-hold')) %>"><%= p.status %></span>
+          </td>
+          <td><%= p.referenceBillNo || '—' %></td>
+          <td><%= p.actualAmount != null ? p.actualAmount : '—' %></td>
+          <td><span class="badge <%= p.paymentStatus === 'Paid' ? 'badge-status-resolved' : 'badge-status-on-hold' %>"><%= p.paymentStatus %></span></td>
+          <td>
+            <% if (p.status === 'Pending Approval') { %>
+              <form method="post" action="/admin/purchases/<%= p.poId %>/approve" style="display:inline-block;">
+                <button type="submit" class="btn btn-secondary">Approve</button>
+              </form>
+              <form method="post" action="/admin/purchases/<%= p.poId %>/cancel" style="display:inline-block;">
+                <button type="submit" class="btn btn-secondary">Cancel</button>
+              </form>
+            <% } else if (p.status === 'Approved') { %>
+              <details>
+                <summary class="btn btn-secondary" style="display:inline-block; cursor:pointer;">Mark Received</summary>
+                <form method="post" action="/admin/purchases/<%= p.poId %>/receive" class="filter-bar" style="margin-top:8px; flex-wrap:wrap;">
+                  <input type="text" name="referenceBillNo" placeholder="Reference Bill No" style="width:140px;" />
+                  <input type="number" name="actualAmount" min="0" step="0.01" placeholder="Actual Amount" style="width:130px;" />
+                  <button type="submit" class="btn btn-primary">Confirm</button>
+                </form>
+              </details>
+              <form method="post" action="/admin/purchases/<%= p.poId %>/cancel" style="display:inline-block;">
+                <button type="submit" class="btn btn-secondary">Cancel</button>
+              </form>
+            <% } else if (p.status === 'Received' && p.paymentStatus === 'Unpaid') { %>
+              <form method="post" action="/admin/purchases/<%= p.poId %>/pay">
+                <button type="submit" class="btn btn-secondary">Mark Paid</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+      <% if (purchases.length === 0) { %><tr><td colspan="11" class="empty-row">No purchase requests yet.</td></tr><% } %>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

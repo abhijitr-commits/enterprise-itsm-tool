@@ -1,0 +1,36 @@
+<%- include('../partials/header', { title: 'Raise Purchase Request' }) %>
+
+<div class="page-header">
+  <h1>Raise Purchase Request</h1>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<form class="panel form-panel" method="post" action="/admin/purchases">
+  <div class="form-grid">
+    <label>Item Description
+      <input type="text" name="itemDescription" value="<%= form.itemDescription || '' %>" required />
+    </label>
+    <label>Category
+      <input type="text" name="category" value="<%= form.category || '' %>" placeholder="General" />
+    </label>
+    <label>Quantity
+      <input type="number" name="quantity" min="1" value="<%= form.quantity || 1 %>" />
+    </label>
+    <label>Estimated Amount
+      <input type="number" name="estimatedAmount" min="0" step="0.01" value="<%= form.estimatedAmount || '' %>" />
+    </label>
+    <label>Vendor
+      <input type="text" name="vendor" value="<%= form.vendor || '' %>" />
+    </label>
+  </div>
+  <label>Remarks
+    <textarea name="remarks" rows="3"><%= form.remarks || '' %></textarea>
+  </label>
+  <div class="form-actions">
+    <a class="btn btn-secondary" href="/admin/purchases">Cancel</a>
+    <button type="submit" class="btn btn-primary">Raise Request</button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>
