@@ -32,14 +32,17 @@
           <td><%= s.reason %></td>
           <td><%= s.scrapDate ? new Date(s.scrapDate).toLocaleDateString() : '—' %></td>
           <td>
-            <span class="badge <%= s.status === 'Disposed' ? 'badge-status-resolved' : (s.status === 'Approved' ? 'badge-status-in-progress' : 'badge-status-on-hold') %>"><%= s.status %></span>
+            <span class="badge <%= s.status === 'Disposed' ? 'badge-status-resolved' : (s.status === 'Cancelled' ? 'badge-status-closed' : (s.status === 'Approved' ? 'badge-status-in-progress' : 'badge-status-on-hold')) %>"><%= s.status %></span>
           </td>
           <td><%= s.disposalMethod || '—' %></td>
           <td><%= s.status === 'Disposed' ? s.valueRecovered : '—' %></td>
           <td>
             <% if (s.status === 'Pending Approval') { %>
-              <form method="post" action="/admin/scrap/<%= s.scrapId %>/approve">
+              <form method="post" action="/admin/scrap/<%= s.scrapId %>/approve" style="display:inline-block;">
                 <button type="submit" class="btn btn-secondary">Approve</button>
+              </form>
+              <form method="post" action="/admin/scrap/<%= s.scrapId %>/cancel" style="display:inline-block;">
+                <button type="submit" class="btn btn-secondary">Cancel</button>
               </form>
             <% } else if (s.status === 'Approved') { %>
               <details>
@@ -52,6 +55,9 @@
                   <button type="submit" class="btn btn-primary">Confirm</button>
                 </form>
               </details>
+              <form method="post" action="/admin/scrap/<%= s.scrapId %>/cancel" style="display:inline-block;">
+                <button type="submit" class="btn btn-secondary">Cancel</button>
+              </form>
             <% } %>
           </td>
           <td><a class="btn btn-secondary" href="/admin-attachments/admin-scrap/<%= s._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
