@@ -42,6 +42,7 @@ const ICONS = {
   "arrow-left": '<path d="M19 12H5"/><path d="m11 18-6-6 6-6"/>',
   upload: '<path d="M12 21V9"/><path d="m7 13.5 5-5 5 5"/><path d="M4.5 20h15"/>',
   paperclip: '<path d="M8 12.5V7a4 4 0 0 1 8 0v9.5a2.5 2.5 0 0 1-5 0V8"/>',
+  bell: '<path d="M6 8.5a6 6 0 0 1 12 0c0 6.3 2.5 8 2.5 8h-17s2.5-1.7 2.5-8Z" stroke-linejoin="round"/><path d="M10.2 20.5a1.9 1.9 0 0 0 3.6 0"/>',
 };
 
 /**
