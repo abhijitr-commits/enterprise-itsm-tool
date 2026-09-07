@@ -1,6 +1,7 @@
 require("dotenv").config();
 const path = require("path");
 const express = require("express");
+const helmet = require("helmet");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const morgan = require("morgan");
@@ -265,6 +266,15 @@ app.set("views", path.join(__dirname, "..", "views"));
 // start time locally where that env var isn't set.
 app.locals.assetVersion = process.env.RENDER_GIT_COMMIT || String(Date.now());
 
+// Baseline HTTP-header hardening (X-Frame-Options, X-Content-Type-Options,
+// a locked-down Referrer-Policy, HSTS on HTTPS, etc.) with the default
+// Content-Security-Policy turned off — every view here relies on inline
+// <script> blocks (nav dropdown behavior, dashboard charts) and an
+// external Google Fonts stylesheet, and helmet's default CSP would
+// silently break all of it without a much larger nonce-based rewrite.
+// The other protections below still apply with CSP off.
+app.use(helmet({ contentSecurityPolicy: false }));
+
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -360,8 +370,13 @@ async function start() {
 
   // eslint-disable-next-line no-unused-vars
   app.use((err, req, res, next) => {
+    // Full error (message + stack) still goes to the server log for
+    // debugging — only a generic, friendly message reaches the browser.
+    // The old version sent err.message straight to the client, which
+    // could leak internal details (a Mongo validation string, a file
+    // path, etc.) into the page.
     console.error(err);
-    res.status(500).send(`Something went wrong: ${err.message}`);
+    res.status(500).render("errors/500", { message: null });
   });
 
   app.listen(PORT, () => {
