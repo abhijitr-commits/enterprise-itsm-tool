@@ -15,7 +15,7 @@
 
 <div class="panel">
   <table class="table">
-    <thead><tr><th>ID</th><th>Position</th><th>Current Holder</th><th>Department</th><th>Successor 1</th><th>Successor 2</th><th>Last Updated</th><th></th></tr></thead>
+    <thead><tr><th>ID</th><th>Position</th><th>Current Holder</th><th>Department</th><th>Successor 1</th><th>Successor 2</th><th>Last Updated</th><th></th><th></th></tr></thead>
     <tbody>
       <% plans.forEach(function(p) { %>
         <tr>
@@ -27,9 +27,10 @@
           <td><%= p.successor2 || '—' %><% if (p.successor2Readiness) { %> <span class="badge badge-status-open"><%= p.successor2Readiness %></span><% } %></td>
           <td><%= p.lastUpdated ? new Date(p.lastUpdated).toLocaleDateString() : '—' %></td>
           <td><a class="btn btn-secondary" href="/succession/<%= p._id %>/edit">Edit</a></td>
+          <td><a class="btn btn-secondary" href="/admin-attachments/succession/<%= p._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (plans.length === 0) { %><tr><td colspan="8" class="empty-row">No succession plans yet.</td></tr><% } %>
+      <% if (plans.length === 0) { %><tr><td colspan="9" class="empty-row">No succession plans yet.</td></tr><% } %>
     </tbody>
   </table>
 </div>
