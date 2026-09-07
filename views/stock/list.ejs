@@ -16,7 +16,7 @@
 
 <div class="panel">
   <table class="table">
-    <thead><tr><th>Item ID</th><th>Item Name</th><th>Category</th><th>Location</th><th>Current Stock</th><th>Reorder Level</th><th></th></tr></thead>
+    <thead><tr><th>Item ID</th><th>Item Name</th><th>Category</th><th>Location</th><th>Current Stock</th><th>Reorder Level</th><th></th><th></th></tr></thead>
     <tbody>
       <% items.forEach(function(i) { %>
         <tr>
@@ -40,9 +40,10 @@
               <button type="submit" class="btn btn-secondary">Record</button>
             </form>
           </td>
+          <td><a class="btn btn-secondary" href="/admin-attachments/stock/<%= i._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (items.length === 0) { %><tr><td colspan="7" class="empty-row">No stock items yet.</td></tr><% } %>
+      <% if (items.length === 0) { %><tr><td colspan="8" class="empty-row">No stock items yet.</td></tr><% } %>
     </tbody>
   </table>
 </div>
