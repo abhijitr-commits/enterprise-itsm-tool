@@ -39,6 +39,7 @@ const ICONS = {
   calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="8.5" cy="14.5" r="1" fill="currentColor" stroke="none"/>',
   circle: '<circle cx="12" cy="12" r="9"/>',
   download: '<path d="M12 3v12"/><path d="m7 10.5 5 5 5-5"/><path d="M4.5 20h15"/>',
+  "arrow-left": '<path d="M19 12H5"/><path d="m11 18-6-6 6-6"/>',
   upload: '<path d="M12 21V9"/><path d="m7 13.5 5-5 5 5"/><path d="M4.5 20h15"/>',
   paperclip: '<path d="M8 12.5V7a4 4 0 0 1 8 0v9.5a2.5 2.5 0 0 1-5 0V8"/>',
 };
