@@ -13,15 +13,10 @@
 <body>
   <%
     // currentPath comes from src/middleware/auth.js's attachUser (set on
-    // every request, res.locals.currentPath = req.path) — used here to
-    // light up the right nav button / link for the page we're actually
-    // on, without every controller having to pass it in.
+    // every request, res.locals.currentPath = req.path) — used to light
+    // up the Dashboard link and to decide whether the Back/Home subnav
+    // shows (it's hidden on the Dashboard itself, which already IS home).
     const cp = typeof currentPath !== "undefined" ? currentPath : "";
-    const underPath = (p) => cp === p || cp.startsWith(p + "/");
-    const anyUnder = (paths) => paths.some((p) => underPath(p));
-    const topTabClass = (p) => "top-tab" + (underPath(p) ? " active" : "");
-    const topTabClassAny = (paths) => "top-tab" + (anyUnder(paths) ? " active" : "");
-    const panelLinkClass = (p) => "panel-link" + (underPath(p) ? " active" : "");
     const initials = (name) => String(name || "?").trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
   %>
   <div class="brand-watermark" aria-hidden="true">
@@ -30,211 +25,18 @@
   </div>
   <div class="page-shell">
     <% if (currentUser) { %>
-      <%
-        // Port of Navigation.gs's moduleVisibility: hides a link entirely
-        // when the signed-in user's role has zero permissions left for
-        // that module (see src/middleware/moduleVisibility.js). Undefined
-        // (e.g. no user yet) defaults every module to visible.
-        const mv = typeof moduleVisibility !== "undefined" ? moduleVisibility : {};
-        const canSee = (key) => mv[key] !== false;
-        // HR-team / IT-team / Admin-team checks, same rule as
-        // src/utils/teamAccess.js: Administrator always qualifies;
-        // otherwise Manager + the matching department. Kept inline here
-        // since header.ejs has no access to that module directly — just
-        // display logic, the real gate is still server-side on every route.
-        const isHRTeamUser = currentUser.role === 'Administrator' ||
-          (currentUser.role === 'Manager' && String(currentUser.department || '').trim().toLowerCase() === 'hr');
-        const isAdminTeamUser = currentUser.role === 'Administrator' ||
-          (currentUser.role === 'Manager' && String(currentUser.department || '').trim().toLowerCase() === 'administration');
-        const isITTeamUser = currentUser.role === 'Administrator' ||
-          (currentUser.role === 'Manager' && String(currentUser.department || '').trim().toLowerCase() === 'it');
-        const isManagerUp = currentUser.role === 'Administrator' || currentUser.role === 'Manager';
-        const ITSM_PATHS = ['/incidents','/requests','/problems','/changes','/assets','/cmdb','/knowledge','/reports'];
-        // Onboarding/Offboarding shares one route namespace (/onboarding/:slug)
-        // for both the HR-run checklists and the Admin-run ones — listed
-        // individually (not a blanket '/onboarding' prefix) so viewing an
-        // Admin Onboarding/Offboarding page lights up the Admin tab, not HR.
-        const HR_PATHS = ['/hr','/mywork','/profile','/orgchart','/employees','/leave','/attendance','/shifts','/resignations','/performance','/training','/policies','/documents','/onboarding/pre-onboarding','/onboarding/onboarding','/onboarding/offboarding','/recruitment','/referrals','/succession','/benefits','/letters','/system-policies'];
-        const IT_PATHS = ['/it','/access-requests','/vendors','/purchases','/stock','/licenses','/rooms','/complaints','/expenses','/maintenance','/helpdesk','/asset-allocation','/it-clearance','/vendor-service','/requirements'];
-        const OPS_PATHS = ['/operations','/safety','/sales','/work-orders','/engineering-changes','/shipments','/material-requests'];
-        const WELLNESS_PATHS = ['/wellness'];
-        // Single Admin dropdown for everything under /admin (+ Master Data)
-        // — operational registers and console/system-settings links used to
-        // live in two separate top-nav dropdowns ("Admin Ops" / "Admin
-        // Console"), which read as two different things even though both
-        // are just "Admin". Same underlying gates as before, just one menu:
-        // the dropdown itself shows for isAdminTeamUser (Administrator, or
-        // an Administration-department Manager); the console/system-settings
-        // links inside it (Users, Permissions, Integration Settings, Master
-        // Data) stay Administrator-only, unchanged from before. Admin
-        // Onboarding/Offboarding moved in here from HR Hub too — same
-        // isAdminTeamUser gate they always had, just grouped with the rest
-        // of Admin's own operational registers instead of living under HR.
-        const ADMIN_PATHS = ['/admin','/masterdata','/onboarding/admin-onboarding','/onboarding/admin-offboarding'];
-        const anyItsm = canSee('incidents') || canSee('requests') || canSee('problems') || canSee('changes') || canSee('assets') || canSee('cmdb') || canSee('knowledge') || canSee('reports');
-      %>
-      <!-- Every department ("head") lives under exactly one button in this
-           bar — click it to drop down that hub's full page list — instead
-           of duplicating the same links again in a separate sidebar. -->
+      <!-- Every module now has its own tile on the Dashboard (see
+           views/dashboard.ejs: HR Hub, IT Hub, Operations Hub, Wellness,
+           ITSM, Admin Console/Admin Operations) plus each hub page's own
+           tile grid one level in — so the top bar doesn't need to repeat
+           the same menu a second time. It just gets you Home, lets you
+           search, and shows who's signed in. -->
       <nav class="top-tabs">
-       <div class="top-tabs-main">
         <a class="brand-inline" href="/">
           <img class="brand-mark" src="/images/logo-mark.png" alt="Peppermint Robotics" />
           <span class="brand-inline-text">Peppermint Robotics</span>
         </a>
         <a class="<%= cp === '/' ? 'top-tab active' : 'top-tab' %>" href="/"><%- icon('home') %> Dashboard</a>
-        <a class="<%= topTabClass('/csv') %>" href="/csv"><%- icon('download', {size:15}) %> Import/Export</a>
-
-        <% if (anyItsm) { %>
-        <details class="nav-dropdown">
-          <summary class="<%= topTabClassAny(ITSM_PATHS) %>"><%- icon('layers') %> ITSM<span class="chev"><%- icon('chevron-down', {size:13}) %></span></summary>
-          <div class="nav-dropdown-panel">
-            <% if (canSee('incidents')) { %><a href="/incidents" class="<%= panelLinkClass('/incidents') %>"><%- icon('alert-circle', {size:15}) %> Incidents</a><% } %>
-            <% if (canSee('requests')) { %><a href="/requests" class="<%= panelLinkClass('/requests') %>"><%- icon('clipboard-check', {size:15}) %> Service Requests</a><% } %>
-            <% if (canSee('problems')) { %><a href="/problems" class="<%= panelLinkClass('/problems') %>"><%- icon('alert-triangle', {size:15}) %> Problems</a><% } %>
-            <% if (canSee('changes')) { %><a href="/changes" class="<%= panelLinkClass('/changes') %>"><%- icon('check-circle', {size:15}) %> Changes</a><% } %>
-            <% if (canSee('assets')) { %><a href="/assets" class="<%= panelLinkClass('/assets') %>"><%- icon('monitor', {size:15}) %> Assets</a><% } %>
-            <% if (canSee('cmdb')) { %><a href="/cmdb" class="<%= panelLinkClass('/cmdb') %>"><%- icon('grid', {size:15}) %> CMDB</a><% } %>
-            <% if (canSee('knowledge')) { %><a href="/knowledge" class="<%= panelLinkClass('/knowledge') %>"><%- icon('layers', {size:15}) %> Knowledge Base</a><% } %>
-            <% if (canSee('reports')) { %><a href="/reports" class="<%= panelLinkClass('/reports') %>"><%- icon('grid', {size:15}) %> Reports</a><% } %>
-            <% if (isManagerUp) { %><a href="/reports/executive-summary" class="<%= panelLinkClass('/reports/executive-summary') %>"><%- icon('briefcase', {size:15}) %> Executive Summary</a><% } %>
-          </div>
-        </details>
-        <% } %>
-
-        <details class="nav-dropdown">
-          <summary class="<%= topTabClassAny(HR_PATHS) %>"><%- icon('users') %> HR Hub<span class="chev"><%- icon('chevron-down', {size:13}) %></span></summary>
-          <div class="nav-dropdown-panel nav-dropdown-panel-wide">
-            <a href="/hr" class="panel-link hub-link">Hub Overview</a>
-            <a href="/mywork" class="<%= panelLinkClass('/mywork') %>">My Work</a>
-            <a href="/profile" class="<%= panelLinkClass('/profile') %>">My Profile</a>
-            <a href="/orgchart" class="<%= panelLinkClass('/orgchart') %>">Org Chart</a>
-            <a href="/employees" class="<%= panelLinkClass('/employees') %>">Employee Directory</a>
-            <a href="/leave" class="<%= panelLinkClass('/leave') %>">Leave</a>
-            <a href="/attendance" class="<%= panelLinkClass('/attendance') %>">Attendance</a>
-            <a href="/shifts" class="<%= panelLinkClass('/shifts') %>">Shifts &amp; Roster</a>
-            <a href="/resignations" class="<%= panelLinkClass('/resignations') %>">Resignations</a>
-            <a href="/performance/goals" class="<%= panelLinkClass('/performance/goals') %>">Goals</a>
-            <a href="/performance/reviews" class="<%= panelLinkClass('/performance/reviews') %>">Reviews</a>
-            <a href="/training/courses" class="<%= panelLinkClass('/training/courses') %>">Training Catalog</a>
-            <a href="/training/certificates" class="<%= panelLinkClass('/training/certificates') %>">My Certificates</a>
-            <a href="/policies" class="<%= panelLinkClass('/policies') %>">IT Policies</a>
-            <a href="/documents" class="<%= panelLinkClass('/documents') %>">My Documents</a>
-            <% if (isHRTeamUser) { %>
-              <a href="/onboarding/pre-onboarding" class="<%= panelLinkClass('/onboarding/pre-onboarding') %>">Pre-Onboarding</a>
-              <a href="/onboarding/onboarding" class="<%= panelLinkClass('/onboarding/onboarding') %>">Onboarding</a>
-              <a href="/onboarding/offboarding" class="<%= panelLinkClass('/onboarding/offboarding') %>">Offboarding</a>
-              <a href="/recruitment" class="<%= panelLinkClass('/recruitment') %>">Recruitment</a>
-            <% } %>
-            <a href="/referrals" class="<%= panelLinkClass('/referrals') %>">Referrals</a>
-            <% if (isManagerUp) { %>
-              <a href="/succession" class="<%= panelLinkClass('/succession') %>">Succession Planning</a>
-              <a href="/training/enrollments" class="<%= panelLinkClass('/training/enrollments') %>">Training Enrollments</a>
-            <% } %>
-            <% if (isHRTeamUser) { %>
-              <a href="/benefits" class="<%= panelLinkClass('/benefits') %>">Benefits Enrollment</a>
-              <a href="/letters" class="<%= panelLinkClass('/letters') %>">Letters</a>
-              <a href="/system-policies" class="<%= panelLinkClass('/system-policies') %>">System Policies</a>
-            <% } %>
-          </div>
-        </details>
-
-        <details class="nav-dropdown">
-          <summary class="<%= topTabClassAny(IT_PATHS) %>"><%- icon('monitor') %> IT Hub<span class="chev"><%- icon('chevron-down', {size:13}) %></span></summary>
-          <div class="nav-dropdown-panel nav-dropdown-panel-wide">
-            <a href="/it" class="panel-link hub-link">Hub Overview</a>
-            <a href="/access-requests/mine" class="<%= panelLinkClass('/access-requests/mine') %>">My Access Requests</a>
-            <a href="/vendors" class="<%= panelLinkClass('/vendors') %>">Vendors</a>
-            <a href="/purchases" class="<%= panelLinkClass('/purchases') %>">Purchase Register</a>
-            <a href="/stock" class="<%= panelLinkClass('/stock') %>">Stock / Inventory</a>
-            <a href="/licenses" class="<%= panelLinkClass('/licenses') %>">Software Licenses</a>
-            <a href="/rooms/bookings" class="<%= panelLinkClass('/rooms/bookings') %>">Room / Equipment Booking</a>
-            <a href="/complaints/mine" class="<%= panelLinkClass('/complaints/mine') %>">My Complaints</a>
-            <a href="/expenses/mine" class="<%= panelLinkClass('/expenses/mine') %>">My Expense Claims</a>
-            <a href="/maintenance" class="<%= panelLinkClass('/maintenance') %>">Maintenance Announcements</a>
-            <% if (isManagerUp) { %>
-              <a href="/complaints" class="<%= panelLinkClass('/complaints') %>">All Complaints</a>
-              <a href="/expenses" class="<%= panelLinkClass('/expenses') %>">All Expense Claims</a>
-            <% } %>
-            <% if (isITTeamUser) { %>
-              <a href="/helpdesk" class="<%= panelLinkClass('/helpdesk') %>">IT Helpdesk</a>
-              <a href="/asset-allocation" class="<%= panelLinkClass('/asset-allocation') %>">Asset Allocation</a>
-              <a href="/it-clearance" class="<%= panelLinkClass('/it-clearance') %>">IT Clearance</a>
-              <a href="/access-requests" class="<%= panelLinkClass('/access-requests') %>">Access Requests (All)</a>
-              <a href="/vendor-service" class="<%= panelLinkClass('/vendor-service') %>">Vendor Service Tracking</a>
-            <% } %>
-            <% if (isITTeamUser || isAdminTeamUser) { %>
-              <a href="/requirements" class="<%= panelLinkClass('/requirements') %>">Requirement Requests</a>
-            <% } %>
-          </div>
-        </details>
-
-        <details class="nav-dropdown">
-          <summary class="<%= topTabClassAny(OPS_PATHS) %>"><%- icon('factory') %> Operations Hub<span class="chev"><%- icon('chevron-down', {size:13}) %></span></summary>
-          <div class="nav-dropdown-panel nav-dropdown-panel-wide">
-            <a href="/operations" class="panel-link hub-link">Hub Overview</a>
-            <div class="panel-group">
-              <div class="nav-dropdown-subsection-label">Safety</div>
-              <a href="/safety/mine" class="<%= panelLinkClass('/safety/mine') %>">My Safety Reports</a>
-              <% if (isManagerUp) { %><a href="/safety" class="<%= panelLinkClass('/safety') %>">All Safety Incidents</a><% } %>
-            </div>
-            <div class="panel-group">
-              <div class="nav-dropdown-subsection-label">Sales, Production &amp; Logistics</div>
-              <a href="/sales" class="<%= panelLinkClass('/sales') %>">Sales Orders</a>
-              <a href="/work-orders" class="<%= panelLinkClass('/work-orders') %>">Work Orders</a>
-              <a href="/engineering-changes" class="<%= panelLinkClass('/engineering-changes') %>">Engineering Change Requests</a>
-              <a href="/shipments" class="<%= panelLinkClass('/shipments') %>">Shipments</a>
-              <a href="/material-requests" class="<%= panelLinkClass('/material-requests') %>">Material Requests</a>
-            </div>
-          </div>
-        </details>
-
-        <details class="nav-dropdown">
-          <summary class="<%= topTabClassAny(WELLNESS_PATHS) %>"><%- icon('heart') %> Wellness<span class="chev"><%- icon('chevron-down', {size:13}) %></span></summary>
-          <div class="nav-dropdown-panel">
-            <a href="/wellness/programs" class="<%= panelLinkClass('/wellness/programs') %>">Wellness Programs</a>
-            <a href="/wellness/pulse" class="<%= panelLinkClass('/wellness/pulse') %>">Pulse Survey</a>
-            <a href="/wellness/kudos" class="<%= panelLinkClass('/wellness/kudos') %>">Kudos Wall</a>
-            <% if (isManagerUp) { %><a href="/wellness/pulse/results" class="<%= panelLinkClass('/wellness/pulse/results') %>">Pulse Results</a><% } %>
-          </div>
-        </details>
-
-        <% if (isAdminTeamUser) { %>
-        <details class="nav-dropdown nav-dropdown-right">
-          <summary class="<%= topTabClassAny(ADMIN_PATHS) %>"><%- icon('settings') %> Admin<span class="chev"><%- icon('chevron-down', {size:13}) %></span></summary>
-          <div class="nav-dropdown-panel">
-            <% if (currentUser.role === 'Administrator') { %>
-              <a href="/admin" class="panel-link hub-link">Hub Overview</a>
-            <% } %>
-            <a href="/admin/vendors" class="<%= panelLinkClass('/admin/vendors') %>"><%- icon('truck', {size:15}) %> Vendor Management</a>
-            <a href="/admin/stock" class="<%= panelLinkClass('/admin/stock') %>"><%- icon('grid', {size:15}) %> Stock Management</a>
-            <a href="/admin/stock/orders" class="<%= panelLinkClass('/admin/stock/orders') %>"><%- icon('clipboard-check', {size:15}) %> Stock Orders</a>
-            <a href="/admin/scrap" class="<%= panelLinkClass('/admin/scrap') %>"><%- icon('alert-triangle', {size:15}) %> Scrap Management</a>
-            <a href="/admin/assets" class="<%= panelLinkClass('/admin/assets') %>"><%- icon('monitor', {size:15}) %> Asset Register</a>
-            <a href="/admin/purchases" class="<%= panelLinkClass('/admin/purchases') %>"><%- icon('layers', {size:15}) %> Purchase / Procurement</a>
-            <a href="/admin/helpdesk" class="<%= panelLinkClass('/admin/helpdesk') %>"><%- icon('alert-circle', {size:15}) %> Facility Helpdesk</a>
-            <a href="/admin/facility-tasks" class="<%= panelLinkClass('/admin/facility-tasks') %>"><%- icon('calendar', {size:15}) %> Facility Ops Tasks</a>
-            <a href="/onboarding/admin-onboarding" class="<%= panelLinkClass('/onboarding/admin-onboarding') %>"><%- icon('users', {size:15}) %> Admin Onboarding</a>
-            <a href="/onboarding/admin-offboarding" class="<%= panelLinkClass('/onboarding/admin-offboarding') %>"><%- icon('users', {size:15}) %> Admin Offboarding</a>
-            <% if (currentUser.role === 'Administrator') { %>
-              <a href="/admin/users" class="<%= panelLinkClass('/admin/users') %>">Users</a>
-              <a href="/admin/permissions" class="<%= panelLinkClass('/admin/permissions') %>">Permissions</a>
-              <a href="/admin/integrations" class="<%= panelLinkClass('/admin/integrations') %>">Integration Settings</a>
-              <a href="/masterdata/departments" class="<%= panelLinkClass('/masterdata') %>">Master Data</a>
-              <a href="/rooms/bookings" class="<%= panelLinkClass('/rooms/bookings') %>"><%- icon('calendar', {size:15}) %> Room Bookings</a>
-            <% } %>
-          </div>
-        </details>
-        <% } %>
-       </div>
-
-        <!-- A second, deliberate row — not a wrap artifact of the first —
-             so search/account always has its own clean line instead of
-             randomly landing wherever the main nav happens to break. The
-             main nav (above) wraps freely across two or three lines on a
-             narrow window; this row stays exactly one line, right-aligned,
-             with a thin divider so it still reads as "part of the same
-             bar" rather than a stray leftover strip. -->
         <div class="top-tabs-utility">
           <form method="get" action="/search" class="top-tabs-search">
             <input type="text" name="q" placeholder="Search everything…" />
