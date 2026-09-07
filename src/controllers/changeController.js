@@ -19,7 +19,16 @@ async function listChanges(req, res) {
   if (implementationStatus) filter.implementationStatus = implementationStatus;
   if (q) {
     const rx = new RegExp(q, "i");
-    filter.$or = ["changeId", "title", "requestedBy", "department", "riskLevel"].map((f) => ({ [f]: rx }));
+    filter.$or = [
+      "changeId",
+      "title",
+      "requestedBy",
+      "department",
+      "riskLevel",
+      "rootCause",
+      "correctiveAction",
+      "lessonsLearned",
+    ].map((f) => ({ [f]: rx }));
   }
 
   const { rows: changes, pageInfo } = await paginate(Change, filter, { createdDate: -1 }, req.query);
@@ -188,12 +197,38 @@ async function bulkDecideChanges(req, res) {
 
 async function updateImplementationStatus(req, res) {
   try {
-    const { implementationStatus } = req.body;
+    const { implementationStatus, rootCause, correctiveAction, lessonsLearned } = req.body;
     const change = await Change.findById(req.params.id);
     if (!change) return res.status(404).render("errors/404");
 
     if (change.cabStatus !== APPROVAL.APPROVED) {
       throw new Error("This change has not been approved by CAB yet.");
+    }
+
+    // A change that reaches "Rolled Back" here means an approved
+    // implementation was actually attempted and had to be backed out —
+    // a real failure, not just a paperwork rejection (CAB rejecting a
+    // change outright, before implementation ever starts, is handled
+    // separately in decideChange() and doesn't go through this path).
+    // Don't let that get closed out with nothing on record: require the
+    // root cause, the corrective action taken, and the lesson learned
+    // before the rollback is allowed to save, so the next team to hit
+    // something similar has something to go on instead of just a
+    // status badge.
+    if (implementationStatus === IMPL.ROLLED_BACK) {
+      for (const [field, label] of [
+        ["rootCause", "Root cause"],
+        ["correctiveAction", "Corrective action"],
+        ["lessonsLearned", "Lessons learned"],
+      ]) {
+        if (!req.body[field] || !req.body[field].trim()) {
+          throw new Error(`${label} is required when rolling back an implementation.`);
+        }
+      }
+      change.rootCause = rootCause.trim();
+      change.correctiveAction = correctiveAction.trim();
+      change.lessonsLearned = lessonsLearned.trim();
+      change.closedDate = new Date();
     }
 
     change.implementationStatus = implementationStatus;
@@ -204,7 +239,10 @@ async function updateImplementationStatus(req, res) {
       action: "Implementation Status",
       entityType: "Change",
       entityId: change._id,
-      details: implementationStatus,
+      details:
+        implementationStatus === IMPL.ROLLED_BACK
+          ? `${implementationStatus} — root cause: ${change.rootCause}`
+          : implementationStatus,
     });
 
     res.redirect(`/changes/${change._id}`);
