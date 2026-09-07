@@ -17,6 +17,11 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: MAX
 
 router.use(requireLogin);
 
+// The central "Data Import/Export" hub page — GET /csv. Placed ahead of
+// the :moduleKey routes for readability; there's no actual overlap since
+// this is a zero-segment path and those need a moduleKey segment.
+router.get("/", csvController.showHub);
+
 router.get("/:moduleKey/export.csv", csvController.exportModule);
 
 router.post("/:moduleKey/import", (req, res, next) => {
