@@ -95,6 +95,11 @@ async function attachUser(req, res, next) {
     // (e.g. "/operations/..." keeps the Operations tab lit) without
     // every single controller having to pass it in explicitly.
     res.locals.currentPath = req.path || req.originalUrl.split("?")[0];
+    // The raw query object for the current request, so
+    // partials/pagination.ejs can build Prev/Next links that keep
+    // every other active filter/search param intact — no controller
+    // has to pass this in separately, same trick as currentPath above.
+    res.locals.currentQuery = req.query || {};
     // Same "don't make every controller pass this in" trick, for the
     // Department datalist every "Department" field in the app now uses.
     res.locals.departmentList = req.user ? await getDepartmentNames() : [];
