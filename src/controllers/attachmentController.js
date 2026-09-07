@@ -13,7 +13,7 @@ const Attachment = require("../models/Attachment");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
-const { isAdminTeam } = require("../utils/teamAccess");
+const { isAdminTeam, isHRTeam, isITTeam } = require("../utils/teamAccess");
 
 const MAX_FILE_BYTES = 3 * 1024 * 1024; // 3MB — same shared-Atlas-tier reason as EmployeeDocument
 
@@ -44,6 +44,61 @@ const MODULE_CONFIG = {
   "admin-vendors": { label: "Admin Vendor", teamCheck: isAdminTeam, base: "/admin-attachments/admin-vendors" },
   "admin-helpdesk": { label: "Facility Helpdesk Request", teamCheck: isAdminTeam, base: "/admin-attachments/admin-helpdesk" },
   "admin-facility": { label: "Facility Task", teamCheck: isAdminTeam, base: "/admin-attachments/admin-facility" },
+
+  // Attachment-coverage expansion pass — every other real content
+  // module across HR Hub, IT Hub and Operations Hub, none of which had
+  // file-attachment support before. None of these have their own
+  // individual detail page with room for the attachments partial
+  // embedded inline (same situation as the 7 Admin modules above), so
+  // they all reuse the same generic "record attachments" page —
+  // adminAttachmentsController.js's RECORD_CONFIG has the matching
+  // entry for each key below. Where a module already has a specific
+  // Permission Matrix action (see config/permissions.js), that's used
+  // via editAction; where it doesn't, this follows the exact same
+  // precedent the 7 Admin modules already set — team-check by
+  // whichever hub the module belongs to, rather than inventing a new
+  // Permission Matrix action just for attachments. Deliberately NOT
+  // covered: EmployeeDocument (it IS a file store already — attaching
+  // a file to a file record is redundant), Kudos/PulseSurvey (informal
+  // wellness content, not the kind of record anyone attaches
+  // supporting documents to), and ExitInterview/ITClearanceRecord
+  // (sub-records of Resignation with no independent list page of their
+  // own — reachable, and attachable, via the parent Resignation
+  // record above).
+  leave: { label: "Leave Request", editAction: "leave_approve", base: "/admin-attachments/leave" },
+  resignations: { label: "Resignation", teamCheck: isHRTeam, base: "/admin-attachments/resignations" },
+  candidates: { label: "Candidate", editAction: "recruitment_manage", base: "/admin-attachments/candidates" },
+  "job-postings": { label: "Job Posting", editAction: "recruitment_manage", base: "/admin-attachments/job-postings" },
+  referrals: { label: "Referral", editAction: "referrals_manage", base: "/admin-attachments/referrals" },
+  goals: { label: "Goal", teamCheck: isHRTeam, base: "/admin-attachments/goals" },
+  reviews: { label: "Performance Review", teamCheck: isHRTeam, base: "/admin-attachments/reviews" },
+  succession: { label: "Succession Plan", editAction: "succession_manage", base: "/admin-attachments/succession" },
+  courses: { label: "Course", editAction: "training_manage", base: "/admin-attachments/courses" },
+  enrollments: { label: "Enrollment", editAction: "training_manage", base: "/admin-attachments/enrollments" },
+  benefits: { label: "Benefit Enrollment", teamCheck: isHRTeam, base: "/admin-attachments/benefits" },
+  "wellness-programs": { label: "Wellness Program", editAction: "wellness_manage", base: "/admin-attachments/wellness-programs" },
+  policies: { label: "Policy", teamCheck: isHRTeam, base: "/admin-attachments/policies" },
+  letters: { label: "Letter", teamCheck: isHRTeam, base: "/admin-attachments/letters" },
+
+  "it-allocations": { label: "IT Allocation", teamCheck: isITTeam, base: "/admin-attachments/it-allocations" },
+  "access-requests": { label: "Access Request", teamCheck: isITTeam, base: "/admin-attachments/access-requests" },
+  vendors: { label: "Vendor", editAction: "vendors_edit", base: "/admin-attachments/vendors" },
+  "vendor-service": { label: "Vendor Service Log", teamCheck: isITTeam, base: "/admin-attachments/vendor-service" },
+  requirements: { label: "Requirement", teamCheck: isITTeam, base: "/admin-attachments/requirements" },
+  stock: { label: "Stock Item", teamCheck: isITTeam, base: "/admin-attachments/stock" },
+  licenses: { label: "Software License", teamCheck: isITTeam, base: "/admin-attachments/licenses" },
+
+  "room-bookings": { label: "Room Booking", editAction: "rooms_manage", base: "/admin-attachments/room-bookings" },
+  complaints: { label: "Complaint", editAction: "complaints_manage", base: "/admin-attachments/complaints" },
+  maintenance: { label: "Maintenance Announcement", teamCheck: isAdminTeam, base: "/admin-attachments/maintenance" },
+  expenses: { label: "Expense Claim", editAction: "expenses_approve", base: "/admin-attachments/expenses" },
+  safety: { label: "Safety Incident", editAction: "safety_manage", base: "/admin-attachments/safety" },
+  sales: { label: "Sales Order", editAction: "sales_edit", base: "/admin-attachments/sales" },
+  "work-orders": { label: "Work Order", editAction: "workorders_edit", base: "/admin-attachments/work-orders" },
+  ecr: { label: "Engineering Change Request", editAction: "ecr_decide", base: "/admin-attachments/ecr" },
+  shipments: { label: "Shipment", editAction: "shipments_edit", base: "/admin-attachments/shipments" },
+  "material-requests": { label: "Material Request", teamCheck: isAdminTeam, base: "/admin-attachments/material-requests" },
+  "stock-orders": { label: "Stock Order", teamCheck: isAdminTeam, base: "/admin-attachments/stock-orders" },
 };
 
 async function canUploadToModule(user, moduleKey) {
