@@ -1,0 +1,103 @@
+<%- include('../partials/header', { title: 'Admin Operations' }) %>
+
+<div class="page-header">
+  <h1>Admin Operations</h1>
+  <% if (isAdministrator) { %><a class="btn btn-secondary" href="/admin">Full Admin Console</a><% } %>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Vendors &amp; Procurement</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/admin/vendors">
+      <span class="admin-tile-icon"><%- icon('truck') %></span>
+      <div class="admin-tile-body">
+        <div class="admin-tile-title">Vendor Management</div>
+        <div class="admin-tile-sub">Vendor directory, ratings, and service records.</div>
+      </div>
+    </a>
+    <a class="admin-tile" href="/admin/purchases">
+      <span class="admin-tile-icon admin-tile-icon-blue"><%- icon('layers') %></span>
+      <div class="admin-tile-body">
+        <div class="admin-tile-title">Purchases</div>
+        <div class="admin-tile-sub">Purchase requests, approvals, and receiving.</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Stock &amp; Assets</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/admin/stock">
+      <span class="admin-tile-icon admin-tile-icon-teal"><%- icon('grid') %></span>
+      <div class="admin-tile-body">
+        <div class="admin-tile-title">Stock Management</div>
+        <div class="admin-tile-sub">Inventory items, opening stock, and transactions.</div>
+      </div>
+    </a>
+    <a class="admin-tile" href="/admin/stock/orders">
+      <span class="admin-tile-icon admin-tile-icon-amber"><%- icon('clipboard-check') %></span>
+      <div class="admin-tile-body">
+        <div class="admin-tile-title">Stock Orders</div>
+        <div class="admin-tile-sub">Reorder requests and receiving against them.</div>
+      </div>
+    </a>
+    <a class="admin-tile" href="/admin/assets">
+      <span class="admin-tile-icon"><%- icon('monitor') %></span>
+      <div class="admin-tile-body">
+        <div class="admin-tile-title">Asset Register</div>
+        <div class="admin-tile-sub">Company assets outside the IT fleet — furniture, tools, fixtures.</div>
+      </div>
+    </a>
+    <a class="admin-tile" href="/admin/scrap">
+      <span class="admin-tile-icon admin-tile-icon-blue"><%- icon('alert-triangle') %></span>
+      <div class="admin-tile-body">
+        <div class="admin-tile-title">Scrap Management</div>
+        <div class="admin-tile-sub">Scrap/disposal requests, approvals, and recovery value.</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Facilities &amp; Lifecycle</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/admin/helpdesk">
+      <span class="admin-tile-icon admin-tile-icon-teal"><%- icon('alert-circle') %></span>
+      <div class="admin-tile-body">
+        <div class="admin-tile-title">Facility Helpdesk</div>
+        <div class="admin-tile-sub">Facility complaints and requests raised by employees.</div>
+      </div>
+    </a>
+    <a class="admin-tile" href="/admin/facility-tasks">
+      <span class="admin-tile-icon admin-tile-icon-amber"><%- icon('calendar') %></span>
+      <div class="admin-tile-body">
+        <div class="admin-tile-title">Facility Ops Tasks</div>
+        <div class="admin-tile-sub">Recurring facility/housekeeping task tracking.</div>
+      </div>
+    </a>
+    <a class="admin-tile" href="/onboarding/admin-onboarding">
+      <span class="admin-tile-icon"><%- icon('users') %></span>
+      <div class="admin-tile-body">
+        <div class="admin-tile-title">Admin Onboarding</div>
+        <div class="admin-tile-sub">Facilities checklist — ID card, desk, locker.</div>
+      </div>
+    </a>
+    <a class="admin-tile" href="/onboarding/admin-offboarding">
+      <span class="admin-tile-icon admin-tile-icon-blue"><%- icon('users') %></span>
+      <div class="admin-tile-body">
+        <div class="admin-tile-title">Admin Offboarding</div>
+        <div class="admin-tile-sub">Physical return checklist on exit.</div>
+      </div>
+    </a>
+    <a class="admin-tile" href="/rooms">
+      <span class="admin-tile-icon admin-tile-icon-teal"><%- icon('calendar') %></span>
+      <div class="admin-tile-body">
+        <div class="admin-tile-title">Room Bookings</div>
+        <div class="admin-tile-sub">Meeting room booking calendar for the whole company.</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
