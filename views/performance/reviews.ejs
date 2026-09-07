@@ -5,6 +5,8 @@
   <% if (isHR) { %><a class="btn btn-primary" href="/performance/reviews/new">+ New Review</a><% } %>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'review' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <div class="panel">

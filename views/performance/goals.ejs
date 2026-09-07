@@ -5,6 +5,8 @@
   <% if (isHR) { %><a class="btn btn-primary" href="/performance/goals/new">+ Set a Goal</a><% } %>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'goal' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <div class="panel">
