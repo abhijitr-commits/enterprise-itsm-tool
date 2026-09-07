@@ -11,7 +11,7 @@
 
 <div class="panel">
   <table class="table">
-    <thead><tr><th>ID</th><th>Employee</th><th>Goal</th><th>Target Date</th><th>Status</th><th>Progress</th><th></th></tr></thead>
+    <thead><tr><th>ID</th><th>Employee</th><th>Goal</th><th>Target Date</th><th>Status</th><th>Progress</th><th></th><th></th></tr></thead>
     <tbody>
       <% goals.forEach(function(g) { %>
         <% const isOwner = g.employee.trim().toLowerCase() === currentUserName.trim().toLowerCase(); %>
@@ -30,9 +30,10 @@
               </form>
             <% } %>
           </td>
+          <td><a class="btn btn-secondary" href="/admin-attachments/goals/<%= g._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (goals.length === 0) { %><tr><td colspan="7" class="empty-row">No goals set yet.</td></tr><% } %>
+      <% if (goals.length === 0) { %><tr><td colspan="8" class="empty-row">No goals set yet.</td></tr><% } %>
     </tbody>
   </table>
 </div>

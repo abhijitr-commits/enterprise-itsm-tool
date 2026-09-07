@@ -11,7 +11,7 @@
 
 <div class="panel">
   <table class="table">
-    <thead><tr><th>ID</th><th>Employee</th><th>Period</th><th>Reviewer</th><th>Rating</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>ID</th><th>Employee</th><th>Period</th><th>Reviewer</th><th>Rating</th><th>Status</th><th></th><th></th></tr></thead>
     <tbody>
       <% reviews.forEach(function(r) { %>
         <% const isOwner = r.employee.trim().toLowerCase() === currentUserName.trim().toLowerCase(); %>
@@ -29,6 +29,7 @@
               </form>
             <% } %>
           </td>
+          <td><a class="btn btn-secondary" href="/admin-attachments/reviews/<%= r._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
         <% if (r.strengths || r.areasForImprovement) { %>
           <tr>
@@ -40,7 +41,7 @@
           </tr>
         <% } %>
       <% }) %>
-      <% if (reviews.length === 0) { %><tr><td colspan="7" class="empty-row">No reviews submitted yet.</td></tr><% } %>
+      <% if (reviews.length === 0) { %><tr><td colspan="8" class="empty-row">No reviews submitted yet.</td></tr><% } %>
     </tbody>
   </table>
 </div>
