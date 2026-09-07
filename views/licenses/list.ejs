@@ -5,6 +5,8 @@
   <a class="btn btn-primary" href="/licenses/new">+ Add License</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'softwareLicense' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <div class="panel">
