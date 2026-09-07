@@ -47,11 +47,18 @@
             <% } else if (p.status === 'Approved') { %>
               <details>
                 <summary class="btn btn-secondary" style="display:inline-block; cursor:pointer;">Mark Received</summary>
-                <form method="post" action="/admin/purchases/<%= p.poId %>/receive" class="filter-bar" style="margin-top:8px; flex-wrap:wrap;">
+                <form method="post" action="/admin/purchases/<%= p.poId %>/receive" class="filter-bar" style="margin-top:8px; flex-wrap:wrap; align-items:center;">
                   <input type="text" name="referenceBillNo" placeholder="Reference Bill No" style="width:140px;" />
                   <input type="number" name="actualAmount" min="0" step="0.01" placeholder="Actual Amount" style="width:130px;" />
+                  <label class="checkbox-label" style="white-space:nowrap;">
+                    <input type="checkbox" name="addToAssetRegister" onchange="this.form.querySelectorAll('.asset-register-field').forEach(function(el){ el.style.display = this.checked ? '' : 'none'; }.bind(this))" />
+                    Add to Asset Register
+                  </label>
+                  <input class="asset-register-field" type="text" name="assetLocation" placeholder="Asset Location" style="width:140px; display:none;" />
+                  <input class="asset-register-field" type="date" name="assetWarrantyExpiry" title="Warranty Expiry (optional)" style="width:150px; display:none;" />
                   <button type="submit" class="btn btn-primary">Confirm</button>
                 </form>
+                <p class="hint" style="margin-top:4px;">Checking "Add to Asset Register" also creates a linked entry in the Asset Register — only tick it for a real asset (equipment, furniture, hardware), not stationery or a service.</p>
               </details>
               <form method="post" action="/admin/purchases/<%= p.poId %>/cancel" style="display:inline-block;">
                 <button type="submit" class="btn btn-secondary">Cancel</button>
