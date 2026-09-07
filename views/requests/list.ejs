@@ -5,6 +5,8 @@
   <a class="btn btn-primary" href="/requests/new">+ New Request</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'serviceRequest' }) %>
+
 <form class="filter-bar" method="get" action="/requests">
   <input type="text" name="q" placeholder="Search requests…" value="<%= query.q %>" />
   <select name="approvalStatus">
