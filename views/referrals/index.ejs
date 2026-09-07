@@ -12,7 +12,7 @@
 <div class="panel">
   <div class="panel-header"><h2>My Referrals</h2></div>
   <table class="table">
-    <thead><tr><th>ID</th><th>Candidate</th><th>Job</th><th>Status</th><th>Reward</th><th>Submitted</th></tr></thead>
+    <thead><tr><th>ID</th><th>Candidate</th><th>Job</th><th>Status</th><th>Reward</th><th>Submitted</th><th></th></tr></thead>
     <tbody>
       <% myReferrals.forEach(function(r) { %>
         <tr>
@@ -22,9 +22,10 @@
           <td><span class="badge badge-status-open"><%= r.status %></span></td>
           <td><span class="badge <%= r.rewardStatus === 'Paid' ? 'badge-status-resolved' : 'badge-status-open' %>"><%= r.rewardStatus %></span></td>
           <td><%= new Date(r.submittedDate).toLocaleDateString() %></td>
+          <td><a class="btn btn-secondary" href="/admin-attachments/referrals/<%= r._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (myReferrals.length === 0) { %><tr><td colspan="6" class="empty-row">You haven't referred anyone yet.</td></tr><% } %>
+      <% if (myReferrals.length === 0) { %><tr><td colspan="7" class="empty-row">You haven't referred anyone yet.</td></tr><% } %>
     </tbody>
   </table>
 </div>
@@ -33,7 +34,7 @@
 <div class="panel">
   <div class="panel-header"><h2>All Referrals</h2></div>
   <table class="table">
-    <thead><tr><th>ID</th><th>Referrer</th><th>Candidate</th><th>Job</th><th>Status</th><th>Reward</th><th></th></tr></thead>
+    <thead><tr><th>ID</th><th>Referrer</th><th>Candidate</th><th>Job</th><th>Status</th><th>Reward</th><th></th><th></th></tr></thead>
     <tbody>
       <% allReferrals.forEach(function(r) { %>
         <tr>
@@ -57,9 +58,10 @@
             </form>
           </td>
           <td></td>
+          <td><a class="btn btn-secondary" href="/admin-attachments/referrals/<%= r._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (allReferrals.length === 0) { %><tr><td colspan="7" class="empty-row">No referrals yet.</td></tr><% } %>
+      <% if (allReferrals.length === 0) { %><tr><td colspan="8" class="empty-row">No referrals yet.</td></tr><% } %>
     </tbody>
   </table>
 </div>
