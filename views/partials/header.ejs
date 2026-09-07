@@ -226,19 +226,32 @@
         </details>
         <% } %>
 
-        <div class="top-tabs-spacer"></div>
-        <form method="get" action="/search" class="top-tabs-search">
-          <input type="text" name="q" placeholder="Search everything…" />
-        </form>
-        <div class="top-tabs-user">
-          <span class="user-chip">
-            <span class="avatar"><%= initials(currentUser.name) %></span>
-            <span class="user-chip-text">
-              <span class="user-chip-name"><%= currentUser.name %></span>
-              <span class="role-badge"><%= currentUser.role %></span>
+        <!-- Search + account stay grouped and pushed to the far right as one
+             unit (margin-left: auto on the wrapper, not a separate spacer
+             div) — with this many hub dropdowns, the nav bar wraps onto a
+             second line on anything but a wide screen, and a bare spacer
+             div only pushes things right on whichever line IT lands on,
+             which let the account chip and Sign out button drift to the
+             far left under the logo on line 2 instead of staying at the
+             right where every other page on the bar expects to find them. -->
+        <div class="top-tabs-right">
+          <form method="get" action="/search" class="top-tabs-search">
+            <input type="text" name="q" placeholder="Search everything…" />
+          </form>
+          <div class="top-tabs-user">
+            <span class="user-chip">
+              <span class="avatar"><%= initials(currentUser.name) %></span>
+              <span class="user-chip-text">
+                <span class="user-chip-name"><%= currentUser.name %></span>
+                <span class="role-badge"><%= currentUser.role %></span>
+              </span>
             </span>
-          </span>
-          <form method="post" action="/logout"><button class="link-button" title="Sign out"><%- icon('log-out', {size:15}) %></button></form>
+            <form method="post" action="/logout">
+              <button class="link-button" title="Sign out">
+                <%- icon('log-out', {size:15}) %><span class="logout-label">Sign out</span>
+              </button>
+            </form>
+          </div>
         </div>
       </nav>
       <% if (cp !== '/') { %>
