@@ -62,11 +62,18 @@
         <div class="dept-tile-title">Wellness <%- icon('chevron-right', {size:16}) %></div>
         <div class="dept-tile-sub">Wellness Programs, Pulse Surveys, and the Kudos Wall.</div>
       </a>
-      <a class="dept-tile dept-tile-teal" href="/incidents">
+      <a class="dept-tile dept-tile-teal" href="/itsm">
         <span class="dept-tile-icon"><%- icon('alert-circle', {size:22}) %></span>
         <div class="dept-tile-title">ITSM <%- icon('chevron-right', {size:16}) %></div>
-        <div class="dept-tile-sub">Incidents, plus Requests, Problems, Changes, and Knowledge Base under the ITSM menu.</div>
+        <div class="dept-tile-sub">Incidents, Requests, Problems, Changes, Assets, CMDB, Knowledge Base, and Reports.</div>
       </a>
+      <% if (isAdminTeamUser) { %>
+        <a class="dept-tile dept-tile-slate" href="/admin/ops">
+          <span class="dept-tile-icon"><%- icon('grid', {size:22}) %></span>
+          <div class="dept-tile-title">Admin Operations <%- icon('chevron-right', {size:16}) %></div>
+          <div class="dept-tile-sub">Vendors, Stock, Scrap, Assets, Purchases, and Facilities.</div>
+        </a>
+      <% } %>
       <% if (currentUser && currentUser.role === 'Administrator') { %>
         <a class="dept-tile dept-tile-purple" href="/admin">
           <span class="dept-tile-icon"><%- icon('settings', {size:22}) %></span>
