@@ -7,6 +7,7 @@ const { icon, initials } = require("../utils/icons");
 const { isAdminTeam } = require("../utils/teamAccess");
 const { csvUiMeta } = require("../utils/csvMeta");
 const { resolveCsvImportAccess } = require("../utils/csvAccess");
+const { unreadCount } = require("../utils/notifications");
 
 // Short in-memory cache for the Department master list (Admin Console ->
 // Master Data -> Departments), so every "Department" field across the
@@ -102,6 +103,9 @@ async function attachUser(req, res, next) {
     res.locals.employeeList = req.user ? await getEmployeeNames() : [];
     res.locals.locationList = req.user ? await getLocationNames() : [];
     res.locals.assetNameList = req.user ? await getAssetNames() : [];
+    // Unread in-app notification count for the bell icon (partials/header.ejs)
+    // — cheap (one indexed count query) and only run for signed-in users.
+    res.locals.unreadNotifications = req.user ? await unreadCount(req.user._id) : 0;
     next();
   } catch (err) {
     next(err);
