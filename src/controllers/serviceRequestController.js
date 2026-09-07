@@ -1,10 +1,12 @@
 /*************************************************************
  * serviceRequestController.js — port of ServiceRequestEngine.gs.
  * Approval workflow (decide/bulkDecide) mirrors the original;
- * email notifications (notifyUser) are not yet wired up — see
- * MIGRATION.md's EmailEngine note — so approval/decision events
- * are recorded in history + the audit log instead, same pattern
- * incidentController.js used for engineer reassignment.
+ * decisions are recorded in history + the audit log, plus (as of the
+ * in-app notification bell) an in-app notifyUser() to the requester,
+ * resolved reliably via createdBy (the filer's real email address —
+ * see utils/notifications.js). EMAIL notifications are still not
+ * wired up — see MIGRATION.md's EmailEngine note, blocked pending an
+ * SMTP app password.
  *************************************************************/
 const ServiceRequest = require("../models/ServiceRequest");
 const RequestCatalog = require("../models/RequestCatalog");
@@ -13,6 +15,7 @@ const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
+const { notifyUser } = require("../utils/notifications");
 
 const { APPROVAL } = ServiceRequest;
 
@@ -200,6 +203,15 @@ async function decideRequest(req, res) {
     details: decision,
   });
 
+  // In-app bell notification to the requester. createdBy is a reliable
+  // real email address (unlike the free-text `requester` field), so this
+  // resolves cleanly — fire-and-forget, never blocks the redirect.
+  notifyUser({
+    email: request.createdBy,
+    message: `Your request ${request.requestId} (${request.catalogItem}) was ${decision.toLowerCase()}.`,
+    link: `/requests/${request._id}`,
+  });
+
   res.redirect(`/requests/${request._id}`);
 }
 
@@ -216,6 +228,13 @@ async function bulkDecideRequests(req, res) {
     update.closedDate = new Date();
   }
 
+  // Fetched before the update so the bulk-decision notifications below know
+  // which requests were actually still PENDING (the same filter the update
+  // itself uses) and have their requestId/catalogItem/createdBy to hand.
+  const affected = await ServiceRequest.find({ _id: { $in: ids }, approvalStatus: APPROVAL.PENDING })
+    .select("_id requestId catalogItem createdBy")
+    .lean();
+
   const result = await ServiceRequest.updateMany(
     { _id: { $in: ids }, approvalStatus: APPROVAL.PENDING },
     { $set: update }
@@ -226,6 +245,16 @@ async function bulkDecideRequests(req, res) {
     action: "Bulk Decision",
     entityType: "Service Request",
     details: `${result.modifiedCount} of ${ids.length} request(s) ${decision.toLowerCase()}.`,
+  });
+
+  // Same in-app notification as the single-request decision path, once
+  // per affected request — fire-and-forget, never blocks the redirect.
+  affected.forEach((r) => {
+    notifyUser({
+      email: r.createdBy,
+      message: `Your request ${r.requestId} (${r.catalogItem}) was ${decision.toLowerCase()}.`,
+      link: `/requests/${r._id}`,
+    });
   });
 
   res.redirect("/requests");

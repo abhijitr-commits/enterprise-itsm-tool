@@ -14,6 +14,7 @@ const { calculateSLADue } = require("../utils/sla");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
+const { notifyUser } = require("../utils/notifications");
 
 /**
  * Phase 9 helper — a light "Asset Name (Asset ID)" list for the
@@ -171,10 +172,6 @@ async function updateIncident(req, res) {
 
     await incident.save();
 
-    // Original notified the newly assigned engineer by email here
-    // (notifyUser via lookupUserEmailByName). Wire this up once the
-    // notification/email module is ported in a later phase — for now
-    // the reassignment itself is recorded in history + audit log below.
     if (data.engineer && data.engineer !== previousEngineer) {
       incident.history.push({
         field: "engineer",
@@ -183,6 +180,18 @@ async function updateIncident(req, res) {
         changedBy: req.user._id,
       });
       await incident.save();
+
+      // In-app bell notification for the newly assigned engineer. engineer
+      // is a free-text display name (a spreadsheet-migration leftover, not
+      // a User reference — see utils/notifications.js's resolveRecipient),
+      // so this is a best-effort exact-name match: it silently finds no
+      // one if the name doesn't match a User exactly or matches more than
+      // one. Fire-and-forget — never let this delay or fail the redirect.
+      notifyUser({
+        name: data.engineer,
+        message: `You were assigned to incident ${incident.incidentId} — ${incident.subject}`,
+        link: `/incidents/${incident._id}`,
+      });
     }
 
     await logAudit({
