@@ -60,7 +60,14 @@
         <span class="admin-tile-icon admin-tile-icon-teal"><%- icon('factory') %></span>
         <div class="admin-tile-body">
           <div class="admin-tile-title">Operations Hub</div>
-          <div class="admin-tile-sub">Sales, Production, Logistics, Safety, Facilities, Wellness.</div>
+          <div class="admin-tile-sub">Sales, Production, Logistics, Safety, and Facilities.</div>
+        </div>
+      </a>
+      <a class="admin-tile" href="/wellness/programs">
+        <span class="admin-tile-icon"><%- icon('heart') %></span>
+        <div class="admin-tile-body">
+          <div class="admin-tile-title">Wellness</div>
+          <div class="admin-tile-sub">Wellness Programs, Pulse Surveys, and the Kudos Wall.</div>
         </div>
       </a>
       <% if (currentUser && currentUser.role === 'Administrator') { %>
