@@ -5,6 +5,8 @@
   <a class="btn btn-primary" href="/admin/helpdesk/new">+ Raise Request</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'adminComplaint' }) %>
+
 <p class="hint">Facility &amp; office-services requests — housekeeping, pantry, seating, AC, courier — separate from the general Complaints module. Anyone can raise one; the Admin team triages and resolves.</p>
 
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
@@ -12,7 +14,7 @@
 <div class="panel">
   <div class="table-scroll">
   <table class="table">
-    <thead><tr><th>Complaint ID</th><th>Complainant</th><th>Department</th><th>Category</th><th>Subject</th><th>Status</th><th>Assigned To</th><% if (canManage) { %><th></th><% } %></tr></thead>
+    <thead><tr><th>Complaint ID</th><th>Complainant</th><th>Department</th><th>Category</th><th>Subject</th><th>Status</th><th>Assigned To</th><% if (canManage) { %><th></th><% } %><th></th></tr></thead>
     <tbody>
       <% complaints.forEach(function(c) { %>
         <tr>
@@ -36,9 +38,10 @@
               </form>
             </td>
           <% } %>
+          <td><a class="btn btn-secondary" href="/admin-attachments/admin-helpdesk/<%= c._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (complaints.length === 0) { %><tr><td colspan="<%= canManage ? 8 : 7 %>" class="empty-row">No facility requests yet.</td></tr><% } %>
+      <% if (complaints.length === 0) { %><tr><td colspan="<%= canManage ? 9 : 8 %>" class="empty-row">No facility requests yet.</td></tr><% } %>
     </tbody>
   </table>
   </div>
