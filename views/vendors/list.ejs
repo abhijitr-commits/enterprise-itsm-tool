@@ -5,6 +5,8 @@
   <a class="btn btn-primary" href="/vendors/new">+ Add Vendor</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'vendor' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <div class="panel">
