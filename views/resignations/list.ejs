@@ -12,7 +12,7 @@
 <div class="panel">
   <table class="table">
     <thead>
-      <tr><th>ID</th><th>Employee</th><th>Department</th><th>Last Working Day</th><th>Notice (Days)</th><th>Status</th></tr>
+      <tr><th>ID</th><th>Employee</th><th>Department</th><th>Last Working Day</th><th>Notice (Days)</th><th>Status</th><th></th></tr>
     </thead>
     <tbody>
       <% resignations.forEach(function(r) { %>
@@ -23,10 +23,11 @@
           <td><%= new Date(r.lastWorkingDay).toLocaleDateString() %></td>
           <td><%= r.noticePeriodDays %></td>
           <td><span class="badge <%= r.status === 'Completed' ? 'badge-status-closed' : 'badge-status-open' %>"><%= r.status %></span></td>
+          <td><a class="btn btn-secondary" href="/admin-attachments/resignations/<%= r._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
       <% if (resignations.length === 0) { %>
-        <tr><td colspan="6" class="empty-row">No resignations on file.</td></tr>
+        <tr><td colspan="7" class="empty-row">No resignations on file.</td></tr>
       <% } %>
     </tbody>
   </table>
