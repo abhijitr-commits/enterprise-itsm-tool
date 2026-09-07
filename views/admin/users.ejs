@@ -21,7 +21,12 @@
           <td><%= u.email %></td>
           <td><%= u.department || '—' %></td>
           <td><span class="badge badge-role"><%= u.role %></span></td>
-          <td><span class="badge <%= u.active ? 'badge-status-open' : 'badge-status-closed' %>"><%= u.active ? 'Active' : 'Inactive' %></span></td>
+          <td>
+            <span class="badge <%= u.active ? 'badge-status-open' : 'badge-status-closed' %>"><%= u.active ? 'Active' : 'Inactive' %></span>
+            <% if (u.lockedUntil && new Date(u.lockedUntil).getTime() > Date.now()) { %>
+              <span class="badge badge-priority-high">Locked</span>
+            <% } %>
+          </td>
           <td><%= u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString() : 'Never' %></td>
         </tr>
       <% }) %>

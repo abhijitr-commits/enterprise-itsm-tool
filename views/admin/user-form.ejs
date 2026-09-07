@@ -33,6 +33,15 @@
     <input type="checkbox" name="active" <%= (editing ? form.active : true) ? 'checked' : '' %> />
     Active — inactive users can't sign in
   </label>
+  <% if (editing && form.lockedUntil && new Date(form.lockedUntil).getTime() > Date.now()) { %>
+    <div class="alert alert-error">
+      This account is locked until <%= new Date(form.lockedUntil).toLocaleString() %> after too many failed sign-in attempts.
+    </div>
+    <label class="checkbox-label">
+      <input type="checkbox" name="unlockAccount" />
+      Unlock this account now
+    </label>
+  <% } %>
   <div class="form-actions">
     <a class="btn btn-secondary" href="/admin/users">Cancel</a>
     <button type="submit" class="btn btn-primary"><%= editing ? 'Save Changes' : 'Create User' %></button>
