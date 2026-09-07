@@ -5,6 +5,8 @@
   <a href="/engineering-changes/new" class="btn btn-primary">New ECR</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'engineeringChangeRequest' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <div class="panel">
