@@ -52,15 +52,32 @@
     <% if (change.cabStatus === APPROVAL.APPROVED) { %>
       <div class="panel form-panel">
         <div class="panel-header"><h2>Implementation</h2></div>
-        <form method="post" action="/changes/<%= change._id %>/implementation-status" class="form-grid">
-          <label>Implementation Status
-            <select name="implementationStatus">
-              <% Object.values(IMPL).forEach(function(i){ %>
-                <option value="<%= i %>" <%= change.implementationStatus === i ? 'selected' : '' %>><%= i %></option>
-              <% }) %>
-            </select>
-          </label>
-          <div class="form-actions" style="align-self:end">
+        <form method="post" action="/changes/<%= change._id %>/implementation-status">
+          <div class="form-grid">
+            <label>Implementation Status
+              <select name="implementationStatus" id="implStatusSelect" onchange="document.getElementById('rollbackPirFields').style.display = this.value === 'Rolled Back' ? '' : 'none'">
+                <% Object.values(IMPL).forEach(function(i){ %>
+                  <option value="<%= i %>" <%= change.implementationStatus === i ? 'selected' : '' %>><%= i %></option>
+                <% }) %>
+              </select>
+            </label>
+          </div>
+          <div id="rollbackPirFields" style="display:<%= change.implementationStatus === 'Rolled Back' ? '' : 'none' %>">
+            <div class="alert alert-warning">
+              This implementation was rolled back. Record what went wrong and what to do about it — the next
+              team to run into something similar will only have this to go on.
+            </div>
+            <label>Root Cause <span class="hint">(required to roll back)</span>
+              <textarea name="rootCause" rows="2"><%= change.rootCause || '' %></textarea>
+            </label>
+            <label>Corrective Action <span class="hint">(required to roll back)</span>
+              <textarea name="correctiveAction" rows="2"><%= change.correctiveAction || '' %></textarea>
+            </label>
+            <label>Lessons Learned <span class="hint">(required to roll back)</span>
+              <textarea name="lessonsLearned" rows="2"><%= change.lessonsLearned || '' %></textarea>
+            </label>
+          </div>
+          <div class="form-actions">
             <button type="submit" class="btn btn-secondary">Update Status</button>
           </div>
         </form>
@@ -74,6 +91,17 @@
             </div>
           </form>
         <% } %>
+      </div>
+    <% } %>
+
+    <% if (change.implementationStatus === 'Rolled Back' && (change.rootCause || change.correctiveAction || change.lessonsLearned)) { %>
+      <div class="panel form-panel">
+        <div class="panel-header"><h2>Post-Implementation Review — Rollback</h2></div>
+        <dl class="meta-list">
+          <dt>Root Cause</dt><dd><%= change.rootCause || '—' %></dd>
+          <dt>Corrective Action</dt><dd><%= change.correctiveAction || '—' %></dd>
+          <dt>Lessons Learned</dt><dd><%= change.lessonsLearned || '—' %></dd>
+        </dl>
       </div>
     <% } %>
   </div>
