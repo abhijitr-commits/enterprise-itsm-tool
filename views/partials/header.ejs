@@ -77,6 +77,7 @@
            bar — click it to drop down that hub's full page list — instead
            of duplicating the same links again in a separate sidebar. -->
       <nav class="top-tabs">
+       <div class="top-tabs-main">
         <a class="brand-inline" href="/">
           <img class="brand-mark" src="/images/logo-mark.png" alt="Peppermint Robotics" />
           <span class="brand-inline-text">Peppermint Robotics</span>
@@ -225,16 +226,16 @@
           </div>
         </details>
         <% } %>
+       </div>
 
-        <!-- Search + account stay grouped and pushed to the far right as one
-             unit (margin-left: auto on the wrapper, not a separate spacer
-             div) — with this many hub dropdowns, the nav bar wraps onto a
-             second line on anything but a wide screen, and a bare spacer
-             div only pushes things right on whichever line IT lands on,
-             which let the account chip and Sign out button drift to the
-             far left under the logo on line 2 instead of staying at the
-             right where every other page on the bar expects to find them. -->
-        <div class="top-tabs-right">
+        <!-- A second, deliberate row — not a wrap artifact of the first —
+             so search/account always has its own clean line instead of
+             randomly landing wherever the main nav happens to break. The
+             main nav (above) wraps freely across two or three lines on a
+             narrow window; this row stays exactly one line, right-aligned,
+             with a thin divider so it still reads as "part of the same
+             bar" rather than a stray leftover strip. -->
+        <div class="top-tabs-utility">
           <form method="get" action="/search" class="top-tabs-search">
             <input type="text" name="q" placeholder="Search everything…" />
           </form>
