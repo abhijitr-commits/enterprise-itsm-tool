@@ -5,6 +5,8 @@
   <a href="/sales/new" class="btn btn-primary">New Sales Order</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'salesOrder' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <div class="panel">
