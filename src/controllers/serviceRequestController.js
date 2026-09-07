@@ -7,6 +7,7 @@
  * incidentController.js used for engineer reassignment.
  *************************************************************/
 const ServiceRequest = require("../models/ServiceRequest");
+const RequestCatalog = require("../models/RequestCatalog");
 const { STATUS } = require("../config/constants");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
@@ -14,6 +15,40 @@ const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 
 const { APPROVAL } = ServiceRequest;
+
+// Records that `name` got used on a request just now: bumps requestCount
+// on a matching (case-insensitive) entry, or auto-creates one if nothing
+// matched yet — see RequestCatalog.js for why both paths stay open.
+// Deliberately swallow-and-log any failure here: the catalog is a
+// convenience on top of Service Requests, not a dependency of them, so a
+// duplicate-key race or a transient DB hiccup on THIS write must never
+// turn into a failed request submission.
+async function recordCatalogUsage(name, userEmail) {
+  const trimmed = String(name || "").trim();
+  if (!trimmed) return;
+  const nameKey = trimmed.toLowerCase();
+  try {
+    const updated = await RequestCatalog.findOneAndUpdate(
+      { nameKey },
+      { $inc: { requestCount: 1 } },
+      { new: true }
+    );
+    if (!updated) {
+      await RequestCatalog.create({
+        name: trimmed,
+        nameKey,
+        source: "auto",
+        requestCount: 1,
+        createdBy: userEmail,
+      });
+    }
+  } catch (err) {
+    // Most likely a duplicate-key race (two people submitting the same
+    // brand-new catalog item at the same instant) — harmless, the other
+    // request's write already created the entry.
+    console.error("[requestCatalog] recordCatalogUsage failed (non-fatal):", err.message);
+  }
+}
 
 async function listRequests(req, res) {
   const { q, approvalStatus, fulfillmentStatus } = req.query;
@@ -26,18 +61,23 @@ async function listRequests(req, res) {
     filter.$or = ["requestId", "requester", "department", "catalogItem", "details"].map((f) => ({ [f]: rx }));
   }
 
-  const requests = await ServiceRequest.find(filter).sort({ createdDate: -1 }).lean();
+  const [requests, canManageCatalog] = await Promise.all([
+    ServiceRequest.find(filter).sort({ createdDate: -1 }).lean(),
+    hasPermission(req.user.role, "requests_catalog_manage"),
+  ]);
 
   res.render("requests/list", {
     requests,
     query: { q: q || "", approvalStatus: approvalStatus || "", fulfillmentStatus: fulfillmentStatus || "" },
     STATUS,
     APPROVAL,
+    canManageCatalog,
   });
 }
 
-function showNewForm(req, res) {
-  res.render("requests/new", { error: null, form: {} });
+async function showNewForm(req, res) {
+  const catalogItems = await RequestCatalog.find({ active: true }).sort({ name: 1 }).select("name").lean();
+  res.render("requests/new", { error: null, form: {}, catalogItems: catalogItems.map((c) => c.name) });
 }
 
 async function createRequest(req, res) {
@@ -67,6 +107,10 @@ async function createRequest(req, res) {
       entityId: request._id,
       details: data.catalogItem,
     });
+
+    // Non-blocking: grow/track the catalog, but never let this delay or
+    // fail the redirect the person filing the request is waiting on.
+    recordCatalogUsage(data.catalogItem, req.user.email);
 
     res.redirect(`/requests/${request._id}?created=1`);
   } catch (err) {
@@ -219,6 +263,80 @@ async function addComment(req, res) {
   res.redirect(`/requests/${request._id}`);
 }
 
+/************************************************
+ * REQUEST CATALOG MANAGEMENT — /requests/catalog. Gated by
+ * requests_catalog_manage (see permissions.js) rather than
+ * requests_edit, since curating the picklist is a level above
+ * editing an individual request. See RequestCatalog.js for how
+ * entries get here in the first place (manual add here, or
+ * auto-add from serviceRequestController.js's createRequest).
+ ************************************************/
+async function listCatalog(req, res) {
+  const entries = await RequestCatalog.find().sort({ name: 1 }).lean();
+  res.render("requests/catalog", {
+    entries,
+    message: req.query.message || null,
+    error: null,
+    form: {},
+  });
+}
+
+async function createCatalogEntry(req, res) {
+  try {
+    const data = req.body;
+    const name = String(data.name || "").trim();
+    if (!name) throw new Error("Name is required.");
+    const nameKey = name.toLowerCase();
+
+    const existing = await RequestCatalog.findOne({ nameKey });
+    if (existing) throw new Error(`"${existing.name}" is already in the catalog.`);
+
+    await RequestCatalog.create({
+      name,
+      nameKey,
+      category: (data.category || "").trim(),
+      description: (data.description || "").trim(),
+      source: "manual",
+      createdBy: req.user.email,
+    });
+
+    res.redirect(`/requests/catalog?message=${encodeURIComponent(`"${name}" added to the catalog.`)}`);
+  } catch (err) {
+    const entries = await RequestCatalog.find().sort({ name: 1 }).lean();
+    res.status(400).render("requests/catalog", { entries, message: null, error: err.message, form: req.body });
+  }
+}
+
+async function updateCatalogEntry(req, res) {
+  try {
+    const entry = await RequestCatalog.findById(req.params.id);
+    if (!entry) return res.status(404).render("errors/404");
+
+    const data = req.body;
+    if (data.name !== undefined) {
+      const name = String(data.name || "").trim();
+      if (!name) throw new Error("Name cannot be empty.");
+      const nameKey = name.toLowerCase();
+      if (nameKey !== entry.nameKey) {
+        const clash = await RequestCatalog.findOne({ nameKey, _id: { $ne: entry._id } });
+        if (clash) throw new Error(`"${clash.name}" is already in the catalog.`);
+      }
+      entry.name = name;
+      entry.nameKey = nameKey;
+    }
+    if (data.category !== undefined) entry.category = String(data.category).trim();
+    if (data.description !== undefined) entry.description = String(data.description).trim();
+    entry.active = data.active === "on" || data.active === "true";
+
+    await entry.save();
+
+    res.redirect(`/requests/catalog?message=${encodeURIComponent(`"${entry.name}" updated.`)}`);
+  } catch (err) {
+    const entries = await RequestCatalog.find().sort({ name: 1 }).lean();
+    res.status(400).render("requests/catalog", { entries, message: null, error: err.message, form: {} });
+  }
+}
+
 module.exports = {
   listRequests,
   showNewForm,
@@ -229,4 +347,7 @@ module.exports = {
   bulkDecideRequests,
   closeRequest,
   addComment,
+  listCatalog,
+  createCatalogEntry,
+  updateCatalogEntry,
 };
