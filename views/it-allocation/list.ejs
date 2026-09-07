@@ -4,6 +4,8 @@
   <h1>IT Asset Allocation</h1>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'itAllocation' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <p class="hint">Allocate real assets from the Asset Register to new joiners awaiting IT provisioning.</p>
