@@ -74,6 +74,7 @@
           <span class="brand-inline-text">Peppermint Robotics</span>
         </a>
         <a class="<%= cp === '/' ? 'top-tab active' : 'top-tab' %>" href="/"><%- icon('home') %> Dashboard</a>
+        <a class="<%= topTabClass('/csv') %>" href="/csv"><%- icon('download', {size:15}) %> Import/Export</a>
 
         <% if (anyItsm) { %>
         <details class="nav-dropdown">
