@@ -30,6 +30,12 @@ router.get("/", requestController.listRequests);
 router.get("/new", guard("requests_create"), requestController.showNewForm);
 router.post("/", guard("requests_create"), requestController.createRequest);
 router.post("/bulk-decide", guardOrDelegate("requests_approve"), requestController.bulkDecideRequests);
+// Registered ahead of "/:id" so the literal "catalog" segment is never
+// mistaken for a request's Mongo _id — same reasoning as adminStockRoutes.js's
+// "/orders" routes.
+router.get("/catalog", guard("requests_catalog_manage"), requestController.listCatalog);
+router.post("/catalog", guard("requests_catalog_manage"), requestController.createCatalogEntry);
+router.post("/catalog/:id", guard("requests_catalog_manage"), requestController.updateCatalogEntry);
 router.get("/:id", requestController.showRequest);
 router.post("/:id", guard("requests_edit"), requestController.updateRequest);
 router.post("/:id/decide", guardOrDelegate("requests_approve"), requestController.decideRequest);
