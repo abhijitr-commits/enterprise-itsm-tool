@@ -13,7 +13,7 @@
 
 <div class="panel">
   <table class="table">
-    <thead><tr><th>Title</th><th>Type</th><th>Date</th><th>Description</th><th>Status</th></tr></thead>
+    <thead><tr><th>Title</th><th>Type</th><th>Date</th><th>Description</th><th>Status</th><th></th></tr></thead>
     <tbody>
       <% programs.forEach(function(p) { %>
         <tr>
@@ -22,9 +22,10 @@
           <td><%= p.date ? new Date(p.date).toLocaleDateString() : '—' %></td>
           <td><%= p.description || '—' %></td>
           <td><span class="badge <%= p.status === 'Completed' ? 'badge-status-resolved' : p.status === 'Cancelled' ? 'badge-status-cancelled' : 'badge-status-open' %>"><%= p.status %></span></td>
+          <td><a class="btn btn-secondary" href="/admin-attachments/wellness-programs/<%= p._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (programs.length === 0) { %><tr><td colspan="5" class="empty-row">No wellness programs scheduled yet.</td></tr><% } %>
+      <% if (programs.length === 0) { %><tr><td colspan="6" class="empty-row">No wellness programs scheduled yet.</td></tr><% } %>
     </tbody>
   </table>
 </div>
