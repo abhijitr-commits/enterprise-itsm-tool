@@ -5,6 +5,8 @@
   <a href="/shipments/new" class="btn btn-primary">New Shipment</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'shipment' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <form class="panel filter-bar" method="get" action="/shipments">
