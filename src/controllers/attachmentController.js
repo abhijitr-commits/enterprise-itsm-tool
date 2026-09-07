@@ -13,14 +13,23 @@ const Attachment = require("../models/Attachment");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
+const { isAdminTeam } = require("../utils/teamAccess");
 
 const MAX_FILE_BYTES = 3 * 1024 * 1024; // 3MB — same shared-Atlas-tier reason as EmployeeDocument
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: MAX_FILE_BYTES } }).single("file");
 
 // Route-prefix module key -> { label matching the entityType strings
-// already used across every controller's logAudit() calls, the
-// permission action that gates uploading, and where "back" points. }
+// already used across every controller's logAudit() calls, who's
+// allowed to upload (editAction checked via the Permission Matrix, OR
+// teamCheck for the 7 Admin-team modules below, which were never
+// wired into the fine-grained Permission Matrix and already gate every
+// other write with isAdminTeam — attachments follow the same rule
+// rather than inventing new Permission Matrix actions for them), and
+// where "back" points. The 7 Admin modules have no individual detail
+// page (list + inline-action only, like Purchase Orders) — "base"
+// points at the shared generic attachments page
+// (adminAttachmentsController.js) instead of a per-record detail URL.
 const MODULE_CONFIG = {
   incidents: { label: "Incident", editAction: "incidents_edit", base: "/incidents" },
   requests: { label: "Service Request", editAction: "requests_edit", base: "/requests" },
@@ -28,11 +37,19 @@ const MODULE_CONFIG = {
   changes: { label: "Change", editAction: "changes_edit", base: "/changes" },
   assets: { label: "Asset", editAction: "assets_edit", base: "/assets" },
   cmdb: { label: "CMDB", editAction: "cmdb_edit", base: "/cmdb" },
+  "admin-assets": { label: "Admin Asset", teamCheck: isAdminTeam, base: "/admin-attachments/admin-assets" },
+  "admin-purchases": { label: "Admin Purchase", teamCheck: isAdminTeam, base: "/admin-attachments/admin-purchases" },
+  "admin-scrap": { label: "Scrap Item", teamCheck: isAdminTeam, base: "/admin-attachments/admin-scrap" },
+  "admin-stock": { label: "Admin Stock Item", teamCheck: isAdminTeam, base: "/admin-attachments/admin-stock" },
+  "admin-vendors": { label: "Admin Vendor", teamCheck: isAdminTeam, base: "/admin-attachments/admin-vendors" },
+  "admin-helpdesk": { label: "Facility Helpdesk Request", teamCheck: isAdminTeam, base: "/admin-attachments/admin-helpdesk" },
+  "admin-facility": { label: "Facility Task", teamCheck: isAdminTeam, base: "/admin-attachments/admin-facility" },
 };
 
 async function canUploadToModule(user, moduleKey) {
   const config = MODULE_CONFIG[moduleKey];
   if (!config) return false;
+  if (config.teamCheck) return config.teamCheck(user);
   return hasPermission(user.role, config.editAction);
 }
 
