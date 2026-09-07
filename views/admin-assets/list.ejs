@@ -5,6 +5,8 @@
   <a class="btn btn-primary" href="/admin/assets/new">+ Add Asset</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'adminAsset' }) %>
+
 <p class="hint">Office &amp; facility assets — furniture, office equipment, pantry appliances — separate from the IT Asset Register.</p>
 
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
@@ -33,7 +35,7 @@
           <td><%= a.purchaseDate ? new Date(a.purchaseDate).toLocaleDateString() : '—' %></td>
           <td><%= a.warrantyExpiry ? new Date(a.warrantyExpiry).toLocaleDateString() : '—' %></td>
           <td><%= a.vendor || '—' %></td>
-          <td><a class="btn btn-secondary" href="/admin/assets/<%= a.assetId %>/edit">Edit</a></td>
+          <td><a class="btn btn-secondary" href="/admin/assets/<%= a.assetId %>/edit">Edit</a> <a class="btn btn-secondary" href="/admin-attachments/admin-assets/<%= a._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
       <% if (assets.length === 0) { %><tr><td colspan="11" class="empty-row">No admin assets yet.</td></tr><% } %>
