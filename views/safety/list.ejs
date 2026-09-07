@@ -10,7 +10,7 @@
 
 <div class="panel">
   <table class="table">
-    <thead><tr><th>ID</th><th>Reporter</th><th>Department</th><th>Severity</th><th>Injury?</th><th>Related Asset</th><th>Status</th><th>Assigned To</th><% if (canManage) { %><th></th><% } %></tr></thead>
+    <thead><tr><th>ID</th><th>Reporter</th><th>Department</th><th>Severity</th><th>Injury?</th><th>Related Asset</th><th>Status</th><th>Assigned To</th><% if (canManage) { %><th></th><% } %><th></th></tr></thead>
     <tbody>
       <% incidents.forEach(function(i) { %>
         <tr>
@@ -35,9 +35,10 @@
               </form>
             </td>
           <% } %>
+          <td><a class="btn btn-secondary" href="/admin-attachments/safety/<%= i._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (incidents.length === 0) { %><tr><td colspan="<%= canManage ? 9 : 8 %>" class="empty-row">No safety incidents reported.</td></tr><% } %>
+      <% if (incidents.length === 0) { %><tr><td colspan="<%= canManage ? 10 : 9 %>" class="empty-row">No safety incidents reported.</td></tr><% } %>
     </tbody>
   </table>
 </div>
