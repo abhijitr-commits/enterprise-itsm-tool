@@ -11,7 +11,7 @@
 
 <div class="panel">
   <table class="table">
-    <thead><tr><th>Request ID</th><th>Requested By</th><th>Department</th><th>Item</th><th>Qty</th><th>Purpose</th><th>Status</th><% if (canIssue) { %><th></th><% } %></tr></thead>
+    <thead><tr><th>Request ID</th><th>Requested By</th><th>Department</th><th>Item</th><th>Qty</th><th>Purpose</th><th>Status</th><% if (canIssue) { %><th></th><% } %><th></th></tr></thead>
     <tbody>
       <% requests.forEach(function(r) { %>
         <tr>
@@ -35,9 +35,10 @@
               <% } %>
             </td>
           <% } %>
+          <td><a class="btn btn-secondary" href="/admin-attachments/material-requests/<%= r._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (requests.length === 0) { %><tr><td colspan="<%= canIssue ? 8 : 7 %>" class="empty-row">No material requests yet.</td></tr><% } %>
+      <% if (requests.length === 0) { %><tr><td colspan="<%= canIssue ? 9 : 8 %>" class="empty-row">No material requests yet.</td></tr><% } %>
     </tbody>
   </table>
 </div>
