@@ -51,6 +51,7 @@
         <% } %>
       </tbody>
     </table>
+    <%- include('../partials/pagination', { pageInfo }) %>
   </div>
   <% if (changes.length > 0) { %>
     <div class="form-actions">
