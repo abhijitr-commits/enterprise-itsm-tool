@@ -41,42 +41,37 @@
 <div class="dashboard-grid">
   <div class="panel">
     <div class="panel-header"><h2>Departments</h2></div>
-    <div class="admin-tile-grid">
-      <a class="admin-tile" href="/hr">
-        <span class="admin-tile-icon"><%- icon('users') %></span>
-        <div class="admin-tile-body">
-          <div class="admin-tile-title">HR Hub</div>
-          <div class="admin-tile-sub">People, Time Off, Onboarding/Offboarding, Letters, Training, and more.</div>
-        </div>
+    <div class="dept-tile-grid">
+      <a class="dept-tile dept-tile-blue" href="/hr">
+        <span class="dept-tile-icon"><%- icon('users', {size:22}) %></span>
+        <div class="dept-tile-title">HR Hub <%- icon('chevron-right', {size:16}) %></div>
+        <div class="dept-tile-sub">People, Time Off, Onboarding/Offboarding, Letters, Training, and more.</div>
       </a>
-      <a class="admin-tile" href="/it">
-        <span class="admin-tile-icon admin-tile-icon-blue"><%- icon('monitor') %></span>
-        <div class="admin-tile-body">
-          <div class="admin-tile-title">IT Management Hub</div>
-          <div class="admin-tile-sub">Helpdesk, Assets, Licensing, Vendors, and IT operations.</div>
-        </div>
+      <a class="dept-tile dept-tile-indigo" href="/it">
+        <span class="dept-tile-icon"><%- icon('monitor', {size:22}) %></span>
+        <div class="dept-tile-title">IT Management Hub <%- icon('chevron-right', {size:16}) %></div>
+        <div class="dept-tile-sub">Helpdesk, Assets, Licensing, Vendors, and IT operations.</div>
       </a>
-      <a class="admin-tile" href="/operations">
-        <span class="admin-tile-icon admin-tile-icon-teal"><%- icon('factory') %></span>
-        <div class="admin-tile-body">
-          <div class="admin-tile-title">Operations Hub</div>
-          <div class="admin-tile-sub">Sales, Production, Logistics, Safety, and Facilities.</div>
-        </div>
+      <a class="dept-tile dept-tile-amber" href="/operations">
+        <span class="dept-tile-icon"><%- icon('factory', {size:22}) %></span>
+        <div class="dept-tile-title">Operations Hub <%- icon('chevron-right', {size:16}) %></div>
+        <div class="dept-tile-sub">Sales, Production, Logistics, Safety, and Facilities.</div>
       </a>
-      <a class="admin-tile" href="/wellness/programs">
-        <span class="admin-tile-icon"><%- icon('heart') %></span>
-        <div class="admin-tile-body">
-          <div class="admin-tile-title">Wellness</div>
-          <div class="admin-tile-sub">Wellness Programs, Pulse Surveys, and the Kudos Wall.</div>
-        </div>
+      <a class="dept-tile dept-tile-rose" href="/wellness/programs">
+        <span class="dept-tile-icon"><%- icon('heart', {size:22}) %></span>
+        <div class="dept-tile-title">Wellness <%- icon('chevron-right', {size:16}) %></div>
+        <div class="dept-tile-sub">Wellness Programs, Pulse Surveys, and the Kudos Wall.</div>
+      </a>
+      <a class="dept-tile dept-tile-teal" href="/incidents">
+        <span class="dept-tile-icon"><%- icon('alert-circle', {size:22}) %></span>
+        <div class="dept-tile-title">ITSM <%- icon('chevron-right', {size:16}) %></div>
+        <div class="dept-tile-sub">Incidents, plus Requests, Problems, Changes, and Knowledge Base under the ITSM menu.</div>
       </a>
       <% if (currentUser && currentUser.role === 'Administrator') { %>
-        <a class="admin-tile" href="/admin">
-          <span class="admin-tile-icon admin-tile-icon-amber"><%- icon('settings') %></span>
-          <div class="admin-tile-body">
-            <div class="admin-tile-title">Admin Console</div>
-            <div class="admin-tile-sub">Users, Permissions, Integrations, and Master Data.</div>
-          </div>
+        <a class="dept-tile dept-tile-purple" href="/admin">
+          <span class="dept-tile-icon"><%- icon('settings', {size:22}) %></span>
+          <div class="dept-tile-title">Admin Console <%- icon('chevron-right', {size:16}) %></div>
+          <div class="dept-tile-sub">Users, Permissions, Integrations, and Master Data.</div>
         </a>
       <% } %>
     </div>
