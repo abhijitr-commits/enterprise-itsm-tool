@@ -15,6 +15,7 @@ const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 const { notifyUser } = require("../utils/notifications");
+const { parsePagination, buildPageInfo } = require("../utils/pagination");
 
 /**
  * Phase 9 helper — a light "Asset Name (Asset ID)" list for the
@@ -61,13 +62,18 @@ async function listIncidents(req, res) {
     ].map((field) => ({ [field]: rx }));
   }
 
-  const incidents = await Incident.find(filter).sort({ createdDate: -1 }).lean();
+  const { page, limit, skip } = parsePagination(req.query);
+  const [incidents, totalCount] = await Promise.all([
+    Incident.find(filter).sort({ createdDate: -1 }).skip(skip).limit(limit).lean(),
+    Incident.countDocuments(filter),
+  ]);
 
   res.render("incidents/list", {
     incidents,
     query: { q: q || "", status: status || "", priority: priority || "" },
     STATUS,
     PRIORITY,
+    pageInfo: buildPageInfo(totalCount, page, limit),
   });
 }
 

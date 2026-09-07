@@ -16,6 +16,7 @@ const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 const { notifyUser } = require("../utils/notifications");
+const { parsePagination, buildPageInfo } = require("../utils/pagination");
 
 const { APPROVAL } = ServiceRequest;
 
@@ -64,8 +65,10 @@ async function listRequests(req, res) {
     filter.$or = ["requestId", "requester", "department", "catalogItem", "details"].map((f) => ({ [f]: rx }));
   }
 
-  const [requests, canManageCatalog] = await Promise.all([
-    ServiceRequest.find(filter).sort({ createdDate: -1 }).lean(),
+  const { page, limit, skip } = parsePagination(req.query);
+  const [requests, totalCount, canManageCatalog] = await Promise.all([
+    ServiceRequest.find(filter).sort({ createdDate: -1 }).skip(skip).limit(limit).lean(),
+    ServiceRequest.countDocuments(filter),
     hasPermission(req.user.role, "requests_catalog_manage"),
   ]);
 
@@ -75,6 +78,7 @@ async function listRequests(req, res) {
     STATUS,
     APPROVAL,
     canManageCatalog,
+    pageInfo: buildPageInfo(totalCount, page, limit),
   });
 }
 

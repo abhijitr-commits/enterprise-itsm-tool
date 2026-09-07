@@ -7,6 +7,7 @@ const { logAudit } = require("../utils/auditLog");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
+const { parsePagination, buildPageInfo } = require("../utils/pagination");
 
 const { IMPL } = Change;
 
@@ -21,13 +22,18 @@ async function listChanges(req, res) {
     filter.$or = ["changeId", "title", "requestedBy", "department", "riskLevel"].map((f) => ({ [f]: rx }));
   }
 
-  const changes = await Change.find(filter).sort({ createdDate: -1 }).lean();
+  const { page, limit, skip } = parsePagination(req.query);
+  const [changes, totalCount] = await Promise.all([
+    Change.find(filter).sort({ createdDate: -1 }).skip(skip).limit(limit).lean(),
+    Change.countDocuments(filter),
+  ]);
 
   res.render("changes/list", {
     changes,
     query: { q: q || "", cabStatus: cabStatus || "", implementationStatus: implementationStatus || "" },
     APPROVAL,
     IMPL,
+    pageInfo: buildPageInfo(totalCount, page, limit),
   });
 }
 

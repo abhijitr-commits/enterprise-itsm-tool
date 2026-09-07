@@ -6,6 +6,7 @@ const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
+const { parsePagination, buildPageInfo } = require("../utils/pagination");
 
 async function listCIs(req, res) {
   const { q, status, type } = req.query;
@@ -18,11 +19,16 @@ async function listCIs(req, res) {
     filter.$or = ["ciId", "ciName", "type", "ipAddress", "owner", "vlan", "subnet"].map((f) => ({ [f]: rx }));
   }
 
-  const cis = await ConfigurationItem.find(filter).sort({ createdDate: -1 }).lean();
+  const { page, limit, skip } = parsePagination(req.query);
+  const [cis, totalCount] = await Promise.all([
+    ConfigurationItem.find(filter).sort({ createdDate: -1 }).skip(skip).limit(limit).lean(),
+    ConfigurationItem.countDocuments(filter),
+  ]);
 
   res.render("cmdb/list", {
     cis,
     query: { q: q || "", status: status || "", type: type || "" },
+    pageInfo: buildPageInfo(totalCount, page, limit),
   });
 }
 
