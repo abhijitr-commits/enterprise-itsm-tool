@@ -8,6 +8,8 @@
   </div>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'adminStockOrder' }) %>
+
 <p class="hint">Same fields as the Order Register sheet — raise an order against an item, then mark it received once goods arrive to update stock and record the bill/payment. Raising an order sets that item's Order flag to ORDER; marking it received sets it to DONE.</p>
 
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>

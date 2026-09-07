@@ -9,6 +9,8 @@
   </div>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'adminStockItem' }) %>
+
 <p class="hint">Same fields and calculations as the Inventory sheet: Closing Stock (PC) = Opening Stock + Received − Issued/Used, never stored as an editable number. Status is CRITICAL once Closing Stock falls to or below Minimum Buffer Stock.</p>
 
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
@@ -22,7 +24,7 @@
         <th>PC per Box</th><th>Minimum Buffer Stock</th>
         <th>Issued / Used (PC)</th><th>Closing Stock (PC)</th><th>Display Stock</th>
         <th>Status</th><th>Order</th><th>Qty to Order</th>
-        <th></th>
+        <th></th><th></th>
       </tr>
     </thead>
     <tbody>
@@ -51,9 +53,10 @@
               <button type="submit" class="btn btn-secondary">Record</button>
             </form>
           </td>
+          <td><a class="btn btn-secondary" href="/admin-attachments/admin-stock/<%= i._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (items.length === 0) { %><tr><td colspan="13" class="empty-row">No stock items yet.</td></tr><% } %>
+      <% if (items.length === 0) { %><tr><td colspan="14" class="empty-row">No stock items yet.</td></tr><% } %>
     </tbody>
   </table>
   </div>
