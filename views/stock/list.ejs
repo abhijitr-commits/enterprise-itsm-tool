@@ -8,6 +8,8 @@
   </div>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'stockItem' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <p class="hint">Current stock is always calculated as Opening Stock + all IN − all OUT transactions, never stored as an editable number.</p>
