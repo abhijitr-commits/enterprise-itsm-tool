@@ -8,6 +8,8 @@
   </div>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'configurationItem' }) %>
+
 <form class="filter-bar" method="get" action="/cmdb">
   <input type="text" name="q" placeholder="Search CIs…" value="<%= query.q %>" />
   <select name="status">
