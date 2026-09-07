@@ -5,6 +5,17 @@
   <a class="btn btn-primary" href="/masterdata/<%= tableKey %>/new">+ Add <%= table.label.replace(/s$/, '') %></a>
 </div>
 
+<%
+  // masterdata's own tableKey strings (plural: "departments", "slamatrix"...)
+  // don't match utils/csvRegistry.js's model-derived moduleKeys — this is
+  // the one place that needs a small alias, since this single view serves
+  // 5 different models off one tableKey param.
+  const CSV_MASTERDATA_KEY = { departments: 'department', locations: 'location', categories: 'category', slamatrix: 'slaMatrix', holidays: 'holiday' }[tableKey];
+%>
+<% if (CSV_MASTERDATA_KEY) { %>
+<%- include('../partials/csvActions', { moduleKey: CSV_MASTERDATA_KEY }) %>
+<% } %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 <% if (typeof error !== "undefined" && error) { %><div class="alert alert-error"><%= error %></div><% } %>
 
