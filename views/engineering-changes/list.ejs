@@ -11,7 +11,7 @@
 
 <div class="panel">
   <table class="table">
-    <thead><tr><th>ECR ID</th><th>Title</th><th>Department</th><th>Requested By</th><th>Status</th><th>Reviewed By</th><% if (canDecide) { %><th></th><% } %></tr></thead>
+    <thead><tr><th>ECR ID</th><th>Title</th><th>Department</th><th>Requested By</th><th>Status</th><th>Reviewed By</th><% if (canDecide) { %><th></th><% } %><th></th></tr></thead>
     <tbody>
       <% ecrs.forEach(function(e) { %>
         <tr>
@@ -34,9 +34,10 @@
               </form>
             </td>
           <% } %>
+          <td><a class="btn btn-secondary" href="/admin-attachments/ecr/<%= e._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (ecrs.length === 0) { %><tr><td colspan="<%= canDecide ? 7 : 6 %>" class="empty-row">No engineering change requests yet.</td></tr><% } %>
+      <% if (ecrs.length === 0) { %><tr><td colspan="<%= canDecide ? 8 : 7 %>" class="empty-row">No engineering change requests yet.</td></tr><% } %>
     </tbody>
   </table>
 </div>
