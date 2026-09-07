@@ -1,0 +1,13 @@
+<%- include('../partials/header', { title: recordLabel + ' · Attachments' }) %>
+
+<div class="page-header">
+  <h1><%= recordLabel %> <span class="hint">Attachments</span></h1>
+  <a class="btn btn-secondary" href="<%= listPath %>">Back to <%= listLabel %></a>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<%- include('../partials/attachments', { attachments, moduleKey, recordId, canUpload }) %>
+
+<%- include('../partials/footer') %>
