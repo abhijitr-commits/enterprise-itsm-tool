@@ -346,6 +346,30 @@ a:hover { color: var(--primary-dark); }
 
 .content { padding: 32px 40px; max-width: 1320px; margin: 0 auto; width: 100%; }
 
+/* ---------- Back / Home sub-bar ----------
+ * A slim strip directly under the top nav on every page except the
+ * dashboard (which already IS "home") — the nav dropdowns jump straight
+ * to a module's list page with no breadcrumb trail, so this is the one
+ * consistent way to step back to wherever you came from, or bail out to
+ * the dashboard, from inside any module. */
+.subnav-bar { display: flex; align-items: center; gap: 8px; padding: 12px 40px 0; max-width: 1320px; margin: 0 auto; width: 100%; }
+.subnav-back, .subnav-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-muted);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.subnav-back:hover, .subnav-home:hover { color: var(--primary-dark); border-color: var(--primary-light); background: var(--primary-50); }
+
 .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
 .page-header h1 { font-size: 25px; font-weight: 800; letter-spacing: -.02em; margin: 0; }
 .header-actions { display: flex; gap: 8px; }
@@ -798,6 +822,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
 
 @media (max-width: 600px) {
   .content { padding: 22px 18px; }
+  .subnav-bar { padding: 12px 18px 0; }
   .top-tabs-user .user-chip-text { display: none; }
   .stat-grid, .admin-tile-grid { grid-template-columns: 1fr; }
 }
