@@ -1,0 +1,40 @@
+<%- include('../partials/header', { title: 'Notifications' }) %>
+
+<div class="page-header">
+  <h1>Notifications</h1>
+  <% if (notifications.some(function(n){ return !n.read; })) { %>
+    <form method="post" action="/notifications/mark-all-read">
+      <button type="submit" class="btn btn-secondary">Mark all as read</button>
+    </form>
+  <% } %>
+</div>
+
+<div class="panel">
+  <% if (notifications.length === 0) { %>
+    <div class="empty-row">You're all caught up — no notifications yet.</div>
+  <% } else { %>
+    <div class="notif-list">
+      <% notifications.forEach(function(n) { %>
+        <div class="notif-item <%= n.read ? 'is-read' : 'is-unread' %>">
+          <span class="notif-dot"></span>
+          <div class="notif-body">
+            <div class="notif-message"><%= n.message %></div>
+            <div class="notif-time"><%= new Date(n.createdAt).toLocaleString() %></div>
+            <% if (n.link) { %>
+              <form method="post" action="/notifications/<%= n._id %>/read">
+                <input type="hidden" name="link" value="<%= n.link %>" />
+                <button type="submit" class="notif-link" style="background:none;border:none;padding:0;cursor:pointer;">View <%- icon('chevron-right', {size:12}) %></button>
+              </form>
+            <% } else if (!n.read) { %>
+              <form method="post" action="/notifications/<%= n._id %>/read">
+                <button type="submit" class="notif-link" style="background:none;border:none;padding:0;cursor:pointer;">Mark read</button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>
