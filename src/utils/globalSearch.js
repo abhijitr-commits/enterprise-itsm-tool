@@ -108,7 +108,7 @@ async function globalSearch(keyword) {
     Incident.find({ $or: ["incidentId", "employeeName", "department", "location", "category", "priority", "subject", "status", "engineer"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
     ServiceRequest.find({ $or: ["requestId", "requester", "department", "catalogItem", "details"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
     Problem.find({ $or: ["problemId", "title", "description", "owner", "linkedIncidents"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
-    Change.find({ $or: ["changeId", "title", "requestedBy", "department", "riskLevel"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
+    Change.find({ $or: ["changeId", "title", "requestedBy", "department", "riskLevel", "rootCause", "correctiveAction", "lessonsLearned"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
     Asset.find({ $or: ["assetId", "assetName", "type", "serialNumber", "assignedTo", "department", "location", "vendor"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
     ConfigurationItem.find({ $or: ["ciId", "ciName", "type", "ipAddress", "owner", "vlan", "subnet"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
     KnowledgeArticle.find({ $or: ["articleId", "title", "content", "category"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
