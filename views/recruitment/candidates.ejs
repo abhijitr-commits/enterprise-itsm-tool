@@ -5,6 +5,8 @@
   <a class="btn btn-secondary" href="/recruitment">All Job Postings</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'candidate' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <div class="panel">
