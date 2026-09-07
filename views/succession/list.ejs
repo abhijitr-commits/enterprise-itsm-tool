@@ -5,6 +5,8 @@
   <a class="btn btn-primary" href="/succession/new">+ New Succession Plan</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'successionPlan' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <div class="alert alert-info">
