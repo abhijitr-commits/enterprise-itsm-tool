@@ -14,7 +14,7 @@
 
 <div class="panel">
   <table class="table">
-    <thead><tr><th>Booking ID</th><th>Type</th><th>Room / Equipment</th><th>Date</th><th>Time</th><th>Booked By</th><th>Purpose</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>Booking ID</th><th>Type</th><th>Room / Equipment</th><th>Date</th><th>Time</th><th>Booked By</th><th>Purpose</th><th>Status</th><th></th><th></th></tr></thead>
     <tbody>
       <% bookings.forEach(function(b) { %>
         <tr>
@@ -33,9 +33,10 @@
               </form>
             <% } %>
           </td>
+          <td><a class="btn btn-secondary" href="/admin-attachments/room-bookings/<%= b._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (bookings.length === 0) { %><tr><td colspan="9" class="empty-row">No bookings yet.</td></tr><% } %>
+      <% if (bookings.length === 0) { %><tr><td colspan="10" class="empty-row">No bookings yet.</td></tr><% } %>
     </tbody>
   </table>
 </div>
