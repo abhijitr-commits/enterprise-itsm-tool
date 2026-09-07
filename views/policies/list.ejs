@@ -7,6 +7,8 @@
   <% } %>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'policy' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <% policies.forEach(function(p) { %>
