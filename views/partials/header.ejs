@@ -41,6 +41,12 @@
           <form method="get" action="/search" class="top-tabs-search">
             <input type="text" name="q" placeholder="Search everything…" />
           </form>
+          <a class="bell-link" href="/notifications" title="Notifications">
+            <%- icon('bell', {size:18}) %>
+            <% if (typeof unreadNotifications !== 'undefined' && unreadNotifications > 0) { %>
+              <span class="bell-badge"><%= unreadNotifications > 9 ? '9+' : unreadNotifications %></span>
+            <% } %>
+          </a>
           <div class="top-tabs-user">
             <span class="user-chip">
               <span class="avatar"><%= initials(currentUser.name) %></span>
