@@ -1,0 +1,25 @@
+<%
+  // Shared partial — include with locals: { moduleKey }. Renders an
+  // "Export CSV" link (always, for any signed-in user — export access
+  // itself is enforced server-side in csvController.js, same as every
+  // other read in this app) and, when this user is allowed to import
+  // into this module, a compact "Import CSV" upload form right next to
+  // it. See utils/csvRegistry.js for the full per-module rules;
+  // utils/csvMeta.js / utils/csvAccess.js for the lightweight versions
+  // this partial actually reads — both attached on every request in
+  // middleware/auth.js, since EJS can't await the underlying (async,
+  // Permission-Matrix-backed) access check mid-render.
+  const csvMeta = (typeof csvModuleMeta !== 'undefined' && csvModuleMeta[moduleKey]) || null;
+  const canImport = csvMeta && typeof csvCanImport !== 'undefined' && !!csvCanImport[moduleKey];
+%>
+<% if (csvMeta) { %>
+<div class="csv-actions" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+  <a href="/csv/<%= moduleKey %>/export.csv" class="btn btn-secondary"><%- typeof icon === 'function' ? icon('download', {size:15}) : '' %> Export CSV</a>
+  <% if (canImport) { %>
+    <form method="post" action="/csv/<%= moduleKey %>/import" enctype="multipart/form-data" style="display:flex;align-items:center;gap:6px;">
+      <input type="file" name="file" accept=".csv" required style="max-width:200px;">
+      <button type="submit" class="btn btn-secondary"><%- typeof icon === 'function' ? icon('upload', {size:15}) : '' %> Import CSV</button>
+    </form>
+  <% } %>
+</div>
+<% } %>
