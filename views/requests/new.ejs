@@ -15,9 +15,15 @@
       <input type="text" name="department" list="departmentList" value="<%= form.department || '' %>" required />
     </label>
     <label>Catalog Item
-      <input type="text" name="catalogItem" value="<%= form.catalogItem || '' %>" required placeholder="e.g. New Laptop, VPN Access, Software License" />
+      <input type="text" name="catalogItem" list="catalogItemList" value="<%= form.catalogItem || '' %>" required placeholder="e.g. New Laptop, VPN Access, Software License" />
+      <span class="hint">Pick an existing item or type a new one — it's added to the catalog automatically.</span>
     </label>
   </div>
+  <% if (typeof catalogItems !== "undefined" && catalogItems.length) { %>
+    <datalist id="catalogItemList">
+      <% catalogItems.forEach(function(c) { %><option value="<%= c %>"><% }) %>
+    </datalist>
+  <% } %>
   <label>Details
     <textarea name="details" rows="5" required><%= form.details || '' %></textarea>
   </label>

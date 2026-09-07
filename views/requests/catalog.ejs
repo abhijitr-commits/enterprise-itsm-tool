@@ -1,0 +1,80 @@
+<%- include('../partials/header', { title: 'Request Catalog' }) %>
+
+<div class="page-header">
+  <h1>Request Catalog</h1>
+  <a class="btn btn-secondary" href="/requests">Back to Service Requests</a>
+</div>
+
+<p class="hint" style="margin-bottom: 18px;">
+  This is the picklist behind "Catalog Item" on the New Service Request form. Anyone filing a request can still type
+  anything they need — a brand-new item they type gets added here automatically (tagged <strong>Auto</strong>) so the
+  catalog grows on its own. Add curated items below, or edit/deactivate anything that's showed up.
+</p>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<div class="panel form-panel">
+  <div class="panel-header"><h2>Add a Catalog Item</h2></div>
+  <form method="post" action="/requests/catalog">
+    <div class="form-grid">
+      <label>Name
+        <input type="text" name="name" value="<%= form.name || '' %>" required placeholder="e.g. New Laptop" />
+      </label>
+      <label>Category
+        <input type="text" name="category" value="<%= form.category || '' %>" placeholder="e.g. Hardware" />
+      </label>
+    </div>
+    <label>Description
+      <textarea name="description" rows="2" placeholder="Shown to whoever's picking a catalog item (optional)."><%= form.description || '' %></textarea>
+    </label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Add to Catalog</button>
+    </div>
+  </form>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Catalog Items (<%= entries.length %>)</h2></div>
+  <div class="table-scroll">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Description</th>
+          <th>Source</th>
+          <th>Times Used</th>
+          <th>Active</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% entries.forEach(function(e) { %>
+          <% var fid = 'catalog-form-' + e._id; %>
+          <tr>
+            <td><input type="text" name="name" form="<%= fid %>" value="<%= e.name %>" required style="width: 160px;" /></td>
+            <td><input type="text" name="category" form="<%= fid %>" value="<%= e.category || '' %>" style="width: 120px;" /></td>
+            <td><input type="text" name="description" form="<%= fid %>" value="<%= e.description || '' %>" style="width: 220px;" /></td>
+            <td><span class="badge <%= e.source === 'auto' ? 'badge-status-in-progress' : 'badge-status-resolved' %>"><%= e.source === 'auto' ? 'Auto' : 'Manual' %></span></td>
+            <td><%= e.requestCount || 0 %></td>
+            <td><label class="checkbox-label"><input type="checkbox" name="active" form="<%= fid %>" <%= e.active !== false ? 'checked' : '' %> /></label></td>
+            <td><button type="submit" form="<%= fid %>" class="btn btn-secondary">Save</button></td>
+          </tr>
+        <% }) %>
+        <% if (entries.length === 0) { %>
+          <tr><td colspan="7" class="empty-row">No catalog items yet — add one above, or one will appear the first time someone types a new Catalog Item on a request.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+  <!-- One real <form> per row, referenced by every field's form="..."
+       attribute above (HTML5 lets an input/button target a form
+       anywhere in the document, not just an ancestor) — a <form> can't
+       validly wrap a handful of <td>s inside a <tr> the way a per-row
+       Save action would otherwise need. -->
+  <% entries.forEach(function(e) { %>
+    <form id="catalog-form-<%= e._id %>" method="post" action="/requests/catalog/<%= e._id %>"></form>
+  <% }) %>
+</div>
+
+<%- include('../partials/footer') %>
