@@ -1,0 +1,66 @@
+<%- include('../partials/header', { title: 'Data Import/Export' }) %>
+
+<div class="page-header">
+  <h1><%- icon('layers', {size:22}) %> Data Import / Export</h1>
+</div>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<p class="hint">Pick a module to export its data as a CSV, or pick a module and upload a CSV to add new rows to it. Every module's own list page has the same Export/Import buttons too — this page just puts all of them in one spot so you can choose the source and destination directly.</p>
+
+<div class="panel">
+  <div class="panel-header"><h2><%- icon('download', {size:16}) %> Export data</h2></div>
+  <% if (exportable.length > 0) { %>
+    <form method="get" id="csvExportForm" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:6px 0;">
+      <label for="csvExportModule">Export from</label>
+      <select id="csvExportModule" required style="min-width:220px;">
+        <option value="" disabled selected>Choose a module…</option>
+        <% exportable.forEach(function(m) { %><option value="<%= m.key %>"><%= m.label %></option><% }) %>
+      </select>
+      <button type="submit" class="btn btn-primary"><%- icon('download', {size:15}) %> Export CSV</button>
+    </form>
+  <% } else { %>
+    <p class="empty-row">No modules are available for you to export right now.</p>
+  <% } %>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2><%- icon('upload', {size:16}) %> Import data</h2></div>
+  <% if (importable.length > 0) { %>
+    <form method="post" id="csvImportForm" enctype="multipart/form-data" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:6px 0;">
+      <label for="csvImportModule">Import into</label>
+      <select id="csvImportModule" required style="min-width:220px;">
+        <option value="" disabled selected>Choose a module…</option>
+        <% importable.forEach(function(m) { %><option value="<%= m.key %>"><%= m.label %></option><% }) %>
+      </select>
+      <input type="file" name="file" accept=".csv" required style="max-width:220px;">
+      <button type="submit" class="btn btn-primary"><%- icon('upload', {size:15}) %> Import CSV</button>
+    </form>
+    <p class="hint">A row is only ever added, never overwritten — if its ID already exists in that module, the row is skipped. Export a module first to see the exact column headings its import expects.</p>
+  <% } else { %>
+    <p class="empty-row">No modules are available for you to import into right now — bulk-create is Administrator-only unless a module says otherwise.</p>
+  <% } %>
+</div>
+
+<script>
+  (function () {
+    var exportForm = document.getElementById('csvExportForm');
+    if (exportForm) {
+      exportForm.addEventListener('submit', function (e) {
+        var key = document.getElementById('csvExportModule').value;
+        if (!key) { e.preventDefault(); return; }
+        exportForm.action = '/csv/' + encodeURIComponent(key) + '/export.csv';
+      });
+    }
+    var importForm = document.getElementById('csvImportForm');
+    if (importForm) {
+      importForm.addEventListener('submit', function (e) {
+        var key = document.getElementById('csvImportModule').value;
+        if (!key) { e.preventDefault(); return; }
+        importForm.action = '/csv/' + encodeURIComponent(key) + '/import';
+      });
+    }
+  })();
+</script>
+
+<%- include('../partials/footer') %>
