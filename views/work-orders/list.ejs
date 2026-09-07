@@ -5,6 +5,8 @@
   <a href="/work-orders/new" class="btn btn-primary">New Work Order</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'workOrder' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <form class="panel filter-bar" method="get" action="/work-orders">
