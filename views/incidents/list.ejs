@@ -5,6 +5,8 @@
   <a class="btn btn-primary" href="/incidents/new">+ New Incident</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'incident' }) %>
+
 <form class="filter-bar" method="get" action="/incidents">
   <input type="text" name="q" placeholder="Search incidents…" value="<%= query.q %>" />
   <select name="status">
