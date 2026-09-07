@@ -17,6 +17,7 @@ const AdminStockTransaction = require("../models/AdminStockTransaction");
 const AdminStockOrder = require("../models/AdminStockOrder");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { positiveNumber } = require("../utils/validation");
 
 /** Box + loose-piece display, e.g. "3 Box + 4 Pc" — same format as the sheet's "Display Stock" column. */
 function boxDisplay(pieces, piecesPerBox) {
@@ -94,9 +95,9 @@ async function createItem(req, res) {
     const data = req.body;
     if (!data.itemName) throw new Error("Item Name is required.");
 
-    const piecesPerBox = Math.max(1, Number(data.piecesPerBox) || 1);
-    const openingBoxes = Number(data.openingBoxes) || 0;
-    const openingLoosePieces = Number(data.openingLoosePieces) || 0;
+    const piecesPerBox = positiveNumber(data.piecesPerBox, 1, { min: 1 });
+    const openingBoxes = positiveNumber(data.openingBoxes, 0, { min: 0 });
+    const openingLoosePieces = positiveNumber(data.openingLoosePieces, 0, { min: 0 });
     const openingStock = openingBoxes * piecesPerBox + openingLoosePieces;
 
     const itemId = await generateSequentialId("ASTK");
@@ -110,7 +111,7 @@ async function createItem(req, res) {
       openingBoxes,
       openingLoosePieces,
       openingStock,
-      minBufferStock: Number(data.minBufferStock) || 0,
+      minBufferStock: positiveNumber(data.minBufferStock, 0, { min: 0 }),
       orderFlag: ["Hold", "Order", "Done"].includes(data.orderFlag) ? data.orderFlag : "Hold",
       location: data.location || "",
       remarks: data.remarks || "",
@@ -237,8 +238,8 @@ async function markReceived(req, res) {
     const item = await AdminStockItem.findOne({ itemId: order.itemId }).lean();
     if (!item) throw new Error(`Stock item ${order.itemId} not found.`);
 
-    const receivedBoxes = Number(data.receivedBoxes) || 0;
-    const receivedLoosePieces = Number(data.receivedLoosePieces) || 0;
+    const receivedBoxes = positiveNumber(data.receivedBoxes, 0, { min: 0 });
+    const receivedLoosePieces = positiveNumber(data.receivedLoosePieces, 0, { min: 0 });
     const receivedStockPieces = receivedBoxes * item.piecesPerBox + receivedLoosePieces;
     if (receivedStockPieces <= 0) throw new Error("Received quantity must be greater than 0.");
 

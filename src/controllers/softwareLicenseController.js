@@ -4,6 +4,7 @@
 const SoftwareLicense = require("../models/SoftwareLicense");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { positiveNumber } = require("../utils/validation");
 
 async function listLicenses(req, res) {
   const licenses = await SoftwareLicense.find().sort({ softwareName: 1 }).lean();
@@ -25,8 +26,8 @@ async function createLicense(req, res) {
       softwareName: data.softwareName,
       vendor: data.vendor || "",
       licenseType: data.licenseType || "",
-      seatsTotal: Number(data.seatsTotal) || 0,
-      seatsUsed: Number(data.seatsUsed) || 0,
+      seatsTotal: positiveNumber(data.seatsTotal, 0, { min: 0 }),
+      seatsUsed: positiveNumber(data.seatsUsed, 0, { min: 0 }),
       cost: data.cost || undefined,
       purchaseDate: data.purchaseDate ? new Date(data.purchaseDate) : undefined,
       expiryDate: data.expiryDate ? new Date(data.expiryDate) : undefined,
@@ -55,8 +56,8 @@ async function updateLicense(req, res) {
     license.softwareName = data.softwareName;
     license.vendor = data.vendor || "";
     license.licenseType = data.licenseType || "";
-    license.seatsTotal = Number(data.seatsTotal) || 0;
-    license.seatsUsed = Number(data.seatsUsed) || 0;
+    license.seatsTotal = positiveNumber(data.seatsTotal, 0, { min: 0 });
+    license.seatsUsed = positiveNumber(data.seatsUsed, 0, { min: 0 });
     license.cost = data.cost || undefined;
     license.purchaseDate = data.purchaseDate ? new Date(data.purchaseDate) : undefined;
     license.expiryDate = data.expiryDate ? new Date(data.expiryDate) : undefined;

@@ -8,8 +8,10 @@
  *************************************************************/
 const AdminPurchase = require("../models/AdminPurchase");
 const { ADMIN_PURCHASE_STATUS, PAYMENT_STATUS } = AdminPurchase;
+const AdminAsset = require("../models/AdminAsset");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { positiveNumber } = require("../utils/validation");
 
 async function listPurchases(req, res) {
   const purchases = await AdminPurchase.find().sort({ createdAt: -1 }).lean();
@@ -30,8 +32,8 @@ async function createPurchase(req, res) {
       poId,
       itemDescription: data.itemDescription,
       category: data.category || "General",
-      quantity: Number(data.quantity) || 1,
-      estimatedAmount: Number(data.estimatedAmount) || 0,
+      quantity: positiveNumber(data.quantity, 1, { min: 1 }),
+      estimatedAmount: positiveNumber(data.estimatedAmount, 0, { min: 0 }),
       vendor: data.vendor || "",
       remarks: data.remarks || "",
       raisedBy: req.user.email,
@@ -64,6 +66,16 @@ async function approve(req, res) {
   }
 }
 
+/**
+ * Marks an Approved purchase Received. Optionally — only when the
+ * person checks "Add to Asset Register" on the Mark Received form,
+ * since not every purchase is an asset (stationery, services, a
+ * one-off consumable) — it also writes a real linked AdminAsset entry,
+ * the same "record a real transaction, don't just flag a status" rule
+ * adminScrapController.js's dispose() uses to write a real stock OUT.
+ * Without this, a received laptop or printer would otherwise need a
+ * second, fully separate manual "Add Asset" entry to show up anywhere.
+ */
 async function markReceived(req, res) {
   try {
     const purchase = await AdminPurchase.findOne({ poId: req.params.poId });
@@ -71,15 +83,39 @@ async function markReceived(req, res) {
     if (purchase.status !== ADMIN_PURCHASE_STATUS.APPROVED) throw new Error("Only an Approved request can be marked received.");
 
     const data = req.body;
+    const wantsAsset = data.addToAssetRegister === "on" || data.addToAssetRegister === "true";
+    if (wantsAsset && !data.assetLocation) throw new Error("Location is required to add this purchase to the Asset Register.");
+
     purchase.status = ADMIN_PURCHASE_STATUS.RECEIVED;
     purchase.receivedDate = new Date();
     purchase.referenceBillNo = data.referenceBillNo || "";
-    purchase.actualAmount = data.actualAmount !== undefined && data.actualAmount !== "" ? Number(data.actualAmount) : purchase.estimatedAmount;
+    purchase.actualAmount =
+      data.actualAmount !== undefined && data.actualAmount !== ""
+        ? positiveNumber(data.actualAmount, purchase.estimatedAmount, { min: 0 })
+        : purchase.estimatedAmount;
     await purchase.save();
+
+    let assetNote = "";
+    if (wantsAsset) {
+      const assetId = await generateSequentialId("ADAST");
+      const asset = await AdminAsset.create({
+        assetId,
+        assetName: purchase.itemDescription,
+        type: purchase.category || "General",
+        location: data.assetLocation,
+        vendor: purchase.vendor || "",
+        purchaseDate: purchase.receivedDate,
+        warrantyExpiry: data.assetWarrantyExpiry ? new Date(data.assetWarrantyExpiry) : undefined,
+        remarks: `Auto-created on receipt of Purchase ${purchase.poId}.`,
+        createdBy: req.user.email,
+      });
+      await logAudit({ user: req.user._id, action: "Create", entityType: "AdminAsset", entityId: asset._id, details: `${asset.assetName} (from ${purchase.poId})` });
+      assetNote = ` Added to Asset Register as ${assetId}.`;
+    }
 
     await logAudit({ user: req.user._id, action: "Receive", entityType: "AdminPurchase", entityId: purchase._id, details: purchase.itemDescription });
 
-    res.redirect(`/admin/purchases?message=${encodeURIComponent(`${purchase.poId} marked received.`)}`);
+    res.redirect(`/admin/purchases?message=${encodeURIComponent(`${purchase.poId} marked received.${assetNote}`)}`);
   } catch (err) {
     res.redirect(`/admin/purchases?message=${encodeURIComponent(err.message)}`);
   }

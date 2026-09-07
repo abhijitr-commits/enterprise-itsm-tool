@@ -17,6 +17,7 @@ const AdminStockItem = require("../models/AdminStockItem");
 const AdminStockTransaction = require("../models/AdminStockTransaction");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { positiveNumber } = require("../utils/validation");
 
 async function listScrap(req, res) {
   const items = await AdminScrapItem.find().sort({ createdAt: -1 }).lean();
@@ -39,7 +40,7 @@ async function createScrap(req, res) {
       itemCode: data.itemCode || "",
       itemName: data.itemName,
       category: data.category || "General",
-      quantity: Number(data.quantity) || 1,
+      quantity: positiveNumber(data.quantity, 1, { min: 1 }),
       unit: data.unit || "pcs",
       reason: data.reason,
       scrapDate: data.scrapDate ? new Date(data.scrapDate) : new Date(),
@@ -91,7 +92,7 @@ async function dispose(req, res) {
 
     item.status = SCRAP_STATUS.DISPOSED;
     item.disposalMethod = data.disposalMethod;
-    item.valueRecovered = Number(data.valueRecovered) || 0;
+    item.valueRecovered = positiveNumber(data.valueRecovered, 0, { min: 0 });
     item.disposedDate = new Date();
     await item.save();
 
@@ -121,4 +122,30 @@ async function dispose(req, res) {
   }
 }
 
-module.exports = { listScrap, showNewForm, createScrap, approve, dispose };
+/**
+ * Cancels a scrap request that's still Pending Approval or Approved —
+ * the same escape hatch adminPurchaseController.js's cancel() already
+ * gives Purchase requests. Once Disposed, an entry is done (it may
+ * already have written a real stock OUT transaction) and can no
+ * longer be cancelled.
+ */
+async function cancel(req, res) {
+  try {
+    const item = await AdminScrapItem.findOne({ scrapId: req.params.scrapId });
+    if (!item) return res.status(404).render("errors/404");
+    if (![SCRAP_STATUS.PENDING_APPROVAL, SCRAP_STATUS.APPROVED].includes(item.status)) {
+      throw new Error("Only a Pending Approval or Approved entry can be cancelled.");
+    }
+
+    item.status = SCRAP_STATUS.CANCELLED;
+    await item.save();
+
+    await logAudit({ user: req.user._id, action: "Cancel", entityType: "AdminScrap", entityId: item._id, details: item.itemName });
+
+    res.redirect(`/admin/scrap?message=${encodeURIComponent(`${item.scrapId} cancelled.`)}`);
+  } catch (err) {
+    res.redirect(`/admin/scrap?message=${encodeURIComponent(err.message)}`);
+  }
+}
+
+module.exports = { listScrap, showNewForm, createScrap, approve, dispose, cancel };

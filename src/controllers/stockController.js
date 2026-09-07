@@ -10,6 +10,7 @@ const StockItem = require("../models/StockItem");
 const StockTransaction = require("../models/StockTransaction");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { positiveNumber } = require("../utils/validation");
 
 /** Port of getAllStockItemsSafe()'s derivation step — pulls all transactions once, then sums per item, far faster than querying per item. */
 async function withCurrentStock(items) {
@@ -57,8 +58,8 @@ async function createItem(req, res) {
       itemName: data.itemName,
       category: data.category || "General",
       unit: data.unit || "pcs",
-      openingStock: Number(data.openingStock) || 0,
-      reorderLevel: Number(data.reorderLevel) || 0,
+      openingStock: positiveNumber(data.openingStock, 0, { min: 0 }),
+      reorderLevel: positiveNumber(data.reorderLevel, 0, { min: 0 }),
       location: data.location || "",
     });
 
