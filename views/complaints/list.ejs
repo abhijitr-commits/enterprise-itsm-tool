@@ -10,7 +10,7 @@
 
 <div class="panel">
   <table class="table">
-    <thead><tr><th>Complaint ID</th><th>Complainant</th><th>Department</th><th>Category</th><th>Subject</th><th>Status</th><th>Assigned To</th><% if (canManage) { %><th></th><% } %></tr></thead>
+    <thead><tr><th>Complaint ID</th><th>Complainant</th><th>Department</th><th>Category</th><th>Subject</th><th>Status</th><th>Assigned To</th><% if (canManage) { %><th></th><% } %><th></th></tr></thead>
     <tbody>
       <% complaints.forEach(function(c) { %>
         <tr>
@@ -34,9 +34,10 @@
               </form>
             </td>
           <% } %>
+          <td><a class="btn btn-secondary" href="/admin-attachments/complaints/<%= c._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (complaints.length === 0) { %><tr><td colspan="<%= canManage ? 8 : 7 %>" class="empty-row">No complaints yet.</td></tr><% } %>
+      <% if (complaints.length === 0) { %><tr><td colspan="<%= canManage ? 9 : 8 %>" class="empty-row">No complaints yet.</td></tr><% } %>
     </tbody>
   </table>
 </div>
