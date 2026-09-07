@@ -5,6 +5,8 @@
   <a href="/material-requests/new" class="btn btn-primary">New Material Request</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'materialRequest' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <div class="panel">
