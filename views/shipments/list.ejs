@@ -27,7 +27,7 @@
 
 <div class="panel">
   <table class="table">
-    <thead><tr><th>Shipment ID</th><th>Direction</th><th>Carrier</th><th>Tracking #</th><th>Origin</th><th>Destination</th><th>Expected Delivery</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>Shipment ID</th><th>Direction</th><th>Carrier</th><th>Tracking #</th><th>Origin</th><th>Destination</th><th>Expected Delivery</th><th>Status</th><th></th><th></th></tr></thead>
     <tbody>
       <% shipments.forEach(function(s) { %>
         <tr>
@@ -49,9 +49,10 @@
               <button type="submit" class="btn btn-secondary">Update</button>
             </form>
           </td>
+          <td><a class="btn btn-secondary" href="/admin-attachments/shipments/<%= s._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (shipments.length === 0) { %><tr><td colspan="9" class="empty-row">No shipments yet.</td></tr><% } %>
+      <% if (shipments.length === 0) { %><tr><td colspan="10" class="empty-row">No shipments yet.</td></tr><% } %>
     </tbody>
   </table>
 </div>
