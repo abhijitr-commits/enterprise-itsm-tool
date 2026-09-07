@@ -28,10 +28,11 @@
  *    always requires sign-in (routes/csvRoutes.js applies requireLogin).
  *************************************************************/
 const { registry, AUTO_MANAGED_FIELDS } = require("../utils/csvRegistry");
+const { csvUiMeta } = require("../utils/csvMeta");
 const { rowsToCSV, csvTextToRecords, coerceCell, setNested } = require("../utils/csvHelper");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
-const { canExportModule, canImportModule } = require("../utils/csvAccess");
+const { canExportModule, canImportModule, resolveCsvExportAccess, resolveCsvImportAccess } = require("../utils/csvAccess");
 
 function withMessage(url, message, extra) {
   const sep = url.includes("?") ? "&" : "?";
@@ -45,6 +46,32 @@ function safeRedirectTarget(req) {
   // Referer at all (e.g. a bookmarked POST, which browsers don't do, but
   // better than crashing).
   return req.get("Referer") || "/";
+}
+
+/**
+ * showHub — the central "Data Import/Export" page: one screen where the
+ * user picks a source module to export FROM and a destination module to
+ * import INTO, instead of having to hunt down each module's own list page
+ * for its Export/Import buttons. Pure UI convenience over the exact same
+ * engine/permissions every per-module button already uses — no new
+ * capability, just one more (and more discoverable) way to reach it.
+ */
+async function showHub(req, res) {
+  const [exportAccess, importAccess] = await Promise.all([
+    resolveCsvExportAccess(req.user),
+    resolveCsvImportAccess(req.user),
+  ]);
+
+  const exportable = [];
+  const importable = [];
+  for (const [key, meta] of Object.entries(csvUiMeta)) {
+    if (exportAccess[key]) exportable.push({ key, label: meta.label });
+    if (meta.importable && importAccess[key]) importable.push({ key, label: meta.label });
+  }
+  exportable.sort((a, b) => a.label.localeCompare(b.label));
+  importable.sort((a, b) => a.label.localeCompare(b.label));
+
+  res.render("csv/hub", { exportable, importable, message: req.query.message || null });
 }
 
 async function exportModule(req, res) {
@@ -143,4 +170,4 @@ async function importModule(req, res) {
   res.redirect(withMessage(redirectTarget, summary));
 }
 
-module.exports = { exportModule, importModule };
+module.exports = { showHub, exportModule, importModule };
