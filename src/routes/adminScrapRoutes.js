@@ -14,5 +14,6 @@ router.get("/new", requireAdminTeam, adminScrapController.showNewForm);
 router.post("/", requireAdminTeam, adminScrapController.createScrap);
 router.post("/:scrapId/approve", requireAdminTeam, adminScrapController.approve);
 router.post("/:scrapId/dispose", requireAdminTeam, adminScrapController.dispose);
+router.post("/:scrapId/cancel", requireAdminTeam, adminScrapController.cancel);
 
 module.exports = router;
