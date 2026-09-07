@@ -5,6 +5,8 @@
   <a class="btn btn-secondary" href="/attendance">My Attendance</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'attendance' }) %>
+
 <div class="panel">
   <table class="table">
     <thead><tr><th>Date</th><th>Employee</th><th>Check In</th><th>Check Out</th><th>Hours</th></tr></thead>
