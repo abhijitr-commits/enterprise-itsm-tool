@@ -5,6 +5,8 @@
   <a class="btn btn-secondary" href="/rooms/bookings">Go to Bookings</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'room' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <div class="panel">
