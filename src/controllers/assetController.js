@@ -8,7 +8,7 @@ const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
-const { parsePagination, buildPageInfo } = require("../utils/pagination");
+const { paginate } = require("../utils/pagination");
 
 const { ASSET_STATUS, HARDWARE_TYPE } = Asset;
 
@@ -31,17 +31,13 @@ async function listAssets(req, res) {
     filter.$or = ["assetId", "assetName", "type", "serialNumber", "assignedTo", "department", "location", "vendor"].map((f) => ({ [f]: rx }));
   }
 
-  const { page, limit, skip } = parsePagination(req.query);
-  const [assets, totalCount] = await Promise.all([
-    Asset.find(filter).sort({ createdDate: -1 }).skip(skip).limit(limit).lean(),
-    Asset.countDocuments(filter),
-  ]);
+  const { rows: assets, pageInfo } = await paginate(Asset, filter, { createdDate: -1 }, req.query);
 
   res.render("assets/list", {
     assets,
     query: { q: q || "", status: status || "", department: department || "" },
     ASSET_STATUS,
-    pageInfo: buildPageInfo(totalCount, page, limit),
+    pageInfo,
   });
 }
 

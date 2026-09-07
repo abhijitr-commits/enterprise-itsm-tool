@@ -7,7 +7,7 @@ const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
-const { parsePagination, buildPageInfo } = require("../utils/pagination");
+const { paginate } = require("../utils/pagination");
 
 async function listProblems(req, res) {
   const { q, status } = req.query;
@@ -19,17 +19,13 @@ async function listProblems(req, res) {
     filter.$or = ["problemId", "title", "description", "owner", "linkedIncidents"].map((f) => ({ [f]: rx }));
   }
 
-  const { page, limit, skip } = parsePagination(req.query);
-  const [problems, totalCount] = await Promise.all([
-    Problem.find(filter).sort({ createdDate: -1 }).skip(skip).limit(limit).lean(),
-    Problem.countDocuments(filter),
-  ]);
+  const { rows: problems, pageInfo } = await paginate(Problem, filter, { createdDate: -1 }, req.query);
 
   res.render("problems/list", {
     problems,
     query: { q: q || "", status: status || "" },
     STATUS,
-    pageInfo: buildPageInfo(totalCount, page, limit),
+    pageInfo,
   });
 }
 

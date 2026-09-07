@@ -7,7 +7,7 @@
 const KnowledgeArticle = require("../models/KnowledgeArticle");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
-const { parsePagination, buildPageInfo } = require("../utils/pagination");
+const { paginate } = require("../utils/pagination");
 
 async function listArticles(req, res) {
   const { q, category, status } = req.query;
@@ -20,16 +20,12 @@ async function listArticles(req, res) {
     filter.$or = ["articleId", "title", "content", "category"].map((f) => ({ [f]: rx }));
   }
 
-  const { page, limit, skip } = parsePagination(req.query);
-  const [articles, totalCount] = await Promise.all([
-    KnowledgeArticle.find(filter).sort({ lastUpdated: -1 }).skip(skip).limit(limit).lean(),
-    KnowledgeArticle.countDocuments(filter),
-  ]);
+  const { rows: articles, pageInfo } = await paginate(KnowledgeArticle, filter, { lastUpdated: -1 }, req.query);
 
   res.render("knowledge/list", {
     articles,
     query: { q: q || "", category: category || "", status: status || "" },
-    pageInfo: buildPageInfo(totalCount, page, limit),
+    pageInfo,
   });
 }
 
