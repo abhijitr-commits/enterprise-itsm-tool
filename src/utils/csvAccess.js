@@ -52,4 +52,20 @@ async function resolveCsvImportAccess(user) {
   return access;
 }
 
-module.exports = { teamCheck, canExportModule, canImportModule, resolveCsvImportAccess };
+/** Same idea as resolveCsvImportAccess, but for export — used by the
+ * "Data Import/Export" hub page (csvController.js's showHub) to build
+ * the "export from" dropdown out of only the modules this user can
+ * actually read, rather than listing all 73 and letting most of them
+ * 403 on click. */
+async function resolveCsvExportAccess(user) {
+  const access = {};
+  if (!user) return access;
+  await Promise.all(
+    Object.entries(csvUiMeta).map(async ([key, meta]) => {
+      access[key] = await canExportModule(meta, user);
+    })
+  );
+  return access;
+}
+
+module.exports = { teamCheck, canExportModule, canImportModule, resolveCsvImportAccess, resolveCsvExportAccess };
