@@ -92,28 +92,4 @@
   </div>
 </div>
 
-<div class="panel">
-  <div class="panel-header"><h2>Wellness &amp; Engagement</h2></div>
-  <div class="admin-tile-grid">
-    <a class="admin-tile" href="/wellness/programs">
-      <div class="admin-tile-title">Wellness Programs</div>
-      <div class="admin-tile-sub">Browse and join company wellness programs.</div>
-    </a>
-    <a class="admin-tile" href="/wellness/pulse">
-      <div class="admin-tile-title">Pulse Survey</div>
-      <div class="admin-tile-sub">The active pulse survey — quick, anonymous feedback.</div>
-    </a>
-    <a class="admin-tile" href="/wellness/kudos">
-      <div class="admin-tile-title">Kudos Wall</div>
-      <div class="admin-tile-sub">Give and view public shout-outs to teammates.</div>
-    </a>
-    <% if (isManagerUp) { %>
-      <a class="admin-tile" href="/wellness/pulse/results">
-        <div class="admin-tile-title">Pulse Results</div>
-        <div class="admin-tile-sub">Aggregated results from every pulse survey.</div>
-      </a>
-    <% } %>
-  </div>
-</div>
-
 <%- include('../partials/footer') %>
