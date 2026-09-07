@@ -50,9 +50,14 @@
           (currentUser.role === 'Manager' && String(currentUser.department || '').trim().toLowerCase() === 'it');
         const isManagerUp = currentUser.role === 'Administrator' || currentUser.role === 'Manager';
         const ITSM_PATHS = ['/incidents','/requests','/problems','/changes','/assets','/cmdb','/knowledge','/reports'];
-        const HR_PATHS = ['/hr','/mywork','/profile','/orgchart','/employees','/leave','/attendance','/shifts','/resignations','/performance','/training','/policies','/documents','/onboarding','/recruitment','/referrals','/succession','/benefits','/letters','/system-policies'];
+        // Onboarding/Offboarding shares one route namespace (/onboarding/:slug)
+        // for both the HR-run checklists and the Admin-run ones — listed
+        // individually (not a blanket '/onboarding' prefix) so viewing an
+        // Admin Onboarding/Offboarding page lights up the Admin tab, not HR.
+        const HR_PATHS = ['/hr','/mywork','/profile','/orgchart','/employees','/leave','/attendance','/shifts','/resignations','/performance','/training','/policies','/documents','/onboarding/pre-onboarding','/onboarding/onboarding','/onboarding/offboarding','/recruitment','/referrals','/succession','/benefits','/letters','/system-policies'];
         const IT_PATHS = ['/it','/access-requests','/vendors','/purchases','/stock','/licenses','/rooms','/complaints','/expenses','/maintenance','/helpdesk','/asset-allocation','/it-clearance','/vendor-service','/requirements'];
-        const OPS_PATHS = ['/operations','/safety','/sales','/work-orders','/engineering-changes','/shipments','/material-requests','/wellness'];
+        const OPS_PATHS = ['/operations','/safety','/sales','/work-orders','/engineering-changes','/shipments','/material-requests'];
+        const WELLNESS_PATHS = ['/wellness'];
         // Single Admin dropdown for everything under /admin (+ Master Data)
         // — operational registers and console/system-settings links used to
         // live in two separate top-nav dropdowns ("Admin Ops" / "Admin
@@ -61,8 +66,11 @@
         // the dropdown itself shows for isAdminTeamUser (Administrator, or
         // an Administration-department Manager); the console/system-settings
         // links inside it (Users, Permissions, Integration Settings, Master
-        // Data) stay Administrator-only, unchanged from before.
-        const ADMIN_PATHS = ['/admin','/masterdata'];
+        // Data) stay Administrator-only, unchanged from before. Admin
+        // Onboarding/Offboarding moved in here from HR Hub too — same
+        // isAdminTeamUser gate they always had, just grouped with the rest
+        // of Admin's own operational registers instead of living under HR.
+        const ADMIN_PATHS = ['/admin','/masterdata','/onboarding/admin-onboarding','/onboarding/admin-offboarding'];
         const anyItsm = canSee('incidents') || canSee('requests') || canSee('problems') || canSee('changes') || canSee('assets') || canSee('cmdb') || canSee('knowledge') || canSee('reports');
       %>
       <!-- Every department ("head") lives under exactly one button in this
@@ -127,10 +135,6 @@
               <a href="/letters" class="<%= panelLinkClass('/letters') %>">Letters</a>
               <a href="/system-policies" class="<%= panelLinkClass('/system-policies') %>">System Policies</a>
             <% } %>
-            <% if (isAdminTeamUser) { %>
-              <a href="/onboarding/admin-onboarding" class="<%= panelLinkClass('/onboarding/admin-onboarding') %>">Admin Onboarding</a>
-              <a href="/onboarding/admin-offboarding" class="<%= panelLinkClass('/onboarding/admin-offboarding') %>">Admin Offboarding</a>
-            <% } %>
           </div>
         </details>
 
@@ -181,13 +185,16 @@
               <a href="/shipments" class="<%= panelLinkClass('/shipments') %>">Shipments</a>
               <a href="/material-requests" class="<%= panelLinkClass('/material-requests') %>">Material Requests</a>
             </div>
-            <div class="panel-group">
-              <div class="nav-dropdown-subsection-label">Wellness &amp; Engagement</div>
-              <a href="/wellness/programs" class="<%= panelLinkClass('/wellness/programs') %>">Wellness Programs</a>
-              <a href="/wellness/pulse" class="<%= panelLinkClass('/wellness/pulse') %>">Pulse Survey</a>
-              <a href="/wellness/kudos" class="<%= panelLinkClass('/wellness/kudos') %>">Kudos Wall</a>
-              <% if (isManagerUp) { %><a href="/wellness/pulse/results" class="<%= panelLinkClass('/wellness/pulse/results') %>">Pulse Results</a><% } %>
-            </div>
+          </div>
+        </details>
+
+        <details class="nav-dropdown">
+          <summary class="<%= topTabClassAny(WELLNESS_PATHS) %>"><%- icon('heart') %> Wellness<span class="chev"><%- icon('chevron-down', {size:13}) %></span></summary>
+          <div class="nav-dropdown-panel">
+            <a href="/wellness/programs" class="<%= panelLinkClass('/wellness/programs') %>">Wellness Programs</a>
+            <a href="/wellness/pulse" class="<%= panelLinkClass('/wellness/pulse') %>">Pulse Survey</a>
+            <a href="/wellness/kudos" class="<%= panelLinkClass('/wellness/kudos') %>">Kudos Wall</a>
+            <% if (isManagerUp) { %><a href="/wellness/pulse/results" class="<%= panelLinkClass('/wellness/pulse/results') %>">Pulse Results</a><% } %>
           </div>
         </details>
 
@@ -206,6 +213,8 @@
             <a href="/admin/purchases" class="<%= panelLinkClass('/admin/purchases') %>"><%- icon('layers', {size:15}) %> Purchase / Procurement</a>
             <a href="/admin/helpdesk" class="<%= panelLinkClass('/admin/helpdesk') %>"><%- icon('alert-circle', {size:15}) %> Facility Helpdesk</a>
             <a href="/admin/facility-tasks" class="<%= panelLinkClass('/admin/facility-tasks') %>"><%- icon('calendar', {size:15}) %> Facility Ops Tasks</a>
+            <a href="/onboarding/admin-onboarding" class="<%= panelLinkClass('/onboarding/admin-onboarding') %>"><%- icon('users', {size:15}) %> Admin Onboarding</a>
+            <a href="/onboarding/admin-offboarding" class="<%= panelLinkClass('/onboarding/admin-offboarding') %>"><%- icon('users', {size:15}) %> Admin Offboarding</a>
             <% if (currentUser.role === 'Administrator') { %>
               <a href="/admin/users" class="<%= panelLinkClass('/admin/users') %>">Users</a>
               <a href="/admin/permissions" class="<%= panelLinkClass('/admin/permissions') %>">Permissions</a>
