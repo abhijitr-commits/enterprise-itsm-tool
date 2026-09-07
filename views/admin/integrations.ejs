@@ -4,6 +4,8 @@
   <h1>Integration Settings</h1>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'setting' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
 

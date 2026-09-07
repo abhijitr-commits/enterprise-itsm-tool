@@ -4,6 +4,8 @@
   <h1>Permission Matrix</h1>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'permission' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 <div class="alert alert-info">
   Tick which roles can perform each action. Administrator always keeps

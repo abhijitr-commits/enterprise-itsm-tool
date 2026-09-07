@@ -5,6 +5,8 @@
   <a class="btn btn-primary" href="/admin/users/new">+ New User</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'user' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <div class="panel">
