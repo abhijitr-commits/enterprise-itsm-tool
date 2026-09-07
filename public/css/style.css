@@ -271,6 +271,63 @@ a:hover { color: var(--primary-dark); }
 }
 .top-tabs-search input::placeholder { color: var(--sidebar-text-dim); }
 .top-tabs-search input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.28); width: 240px; background: rgba(255, 255, 255, 0.14); color: #fff; }
+/* Notification bell (partials/header.ejs, .top-tabs-utility) — sits
+   between search and the user chip; badge only renders when there's an
+   unread count (see src/middleware/auth.js's res.locals.unreadNotifications). */
+.bell-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  color: var(--sidebar-text);
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.bell-link:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+.bell-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 15px;
+  text-align: center;
+  box-shadow: 0 0 0 2px var(--sidebar-bg);
+}
+/* /notifications list page (views/notifications/index.ejs) */
+.notif-list { display: flex; flex-direction: column; }
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 6px;
+  border-bottom: 1px solid var(--border);
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-item.is-unread { background: var(--primary-50); }
+.notif-dot {
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  margin-top: 6px;
+  background: var(--primary);
+}
+.notif-item.is-read .notif-dot { background: transparent; }
+.notif-body { flex: 1; min-width: 0; }
+.notif-message { font-size: 13.5px; color: var(--text); line-height: 1.5; }
+.notif-item.is-unread .notif-message { font-weight: 600; }
+.notif-time { font-size: 11.5px; color: var(--text-faint); margin-top: 2px; }
+.notif-link { font-size: 12.5px; font-weight: 600; color: var(--primary); margin-top: 4px; display: inline-block; }
 .top-tabs-user {
   display: flex;
   align-items: center;
