@@ -11,7 +11,7 @@
 
 <div class="panel">
   <table class="table">
-    <thead><tr><th>Software</th><th>Vendor</th><th>Type</th><th>Seats</th><th>Cost</th><th>Expiry</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>Software</th><th>Vendor</th><th>Type</th><th>Seats</th><th>Cost</th><th>Expiry</th><th>Status</th><th></th><th></th></tr></thead>
     <tbody>
       <% licenses.forEach(function(l) { %>
         <tr>
@@ -23,9 +23,10 @@
           <td><%= l.expiryDate ? new Date(l.expiryDate).toLocaleDateString() : '—' %></td>
           <td><span class="badge <%= l.status === 'Active' ? 'badge-status-open' : 'badge-status-closed' %>"><%= l.status %></span></td>
           <td><a class="btn btn-secondary" href="/licenses/<%= l._id %>/edit">Edit</a></td>
+          <td><a class="btn btn-secondary" href="/admin-attachments/licenses/<%= l._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (licenses.length === 0) { %><tr><td colspan="8" class="empty-row">No software licenses yet.</td></tr><% } %>
+      <% if (licenses.length === 0) { %><tr><td colspan="9" class="empty-row">No software licenses yet.</td></tr><% } %>
     </tbody>
   </table>
 </div>
