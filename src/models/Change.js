@@ -27,6 +27,19 @@ const changeSchema = new mongoose.Schema(
     plannedDate: { type: Date, required: true },
     implementationStatus: { type: String, enum: Object.values(IMPL), default: IMPL.NOT_STARTED },
     pirNotes: { type: String, trim: true },
+
+    // Captured when an approved change's implementation is rolled back
+    // (see changeController.updateImplementationStatus) — a failed
+    // change isn't just marked "Rolled Back" and forgotten: the person
+    // closing it out has to record why it failed, what was done about
+    // it right away, and what the team should remember next time. All
+    // three are shown together on the change record and are searchable
+    // (module search + global search) so a future CAB reviewing a
+    // similar change can find this one.
+    rootCause: { type: String, trim: true },
+    correctiveAction: { type: String, trim: true },
+    lessonsLearned: { type: String, trim: true },
+
     closedDate: { type: Date },
     requestedBy: { type: String, required: true, trim: true },
     department: { type: String, required: true, trim: true },
