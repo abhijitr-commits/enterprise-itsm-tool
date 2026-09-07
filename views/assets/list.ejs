@@ -8,6 +8,8 @@
   </div>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'asset' }) %>
+
 <form class="filter-bar" method="get" action="/assets">
   <input type="text" name="q" placeholder="Search assets…" value="<%= query.q %>" />
   <select name="status">
