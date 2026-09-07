@@ -30,7 +30,7 @@
 <div class="panel">
   <div class="panel-header"><h2>Allocation History</h2></div>
   <table class="table">
-    <thead><tr><th>Allocation ID</th><th>Employee</th><th>Assets</th><th>Date</th><th>Allocated By</th></tr></thead>
+    <thead><tr><th>Allocation ID</th><th>Employee</th><th>Assets</th><th>Date</th><th>Allocated By</th><th></th></tr></thead>
     <tbody>
       <% history.forEach(function(a) { %>
         <tr>
@@ -39,9 +39,10 @@
           <td><%= a.assetIds.join(', ') %></td>
           <td><%= new Date(a.allocationDate).toLocaleDateString() %></td>
           <td><%= a.allocatedBy %></td>
+          <td><a class="btn btn-secondary" href="/admin-attachments/it-allocations/<%= a._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (history.length === 0) { %><tr><td colspan="5" class="empty-row">No allocations recorded yet.</td></tr><% } %>
+      <% if (history.length === 0) { %><tr><td colspan="6" class="empty-row">No allocations recorded yet.</td></tr><% } %>
     </tbody>
   </table>
 </div>
