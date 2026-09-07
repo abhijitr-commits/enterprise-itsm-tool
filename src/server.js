@@ -70,6 +70,7 @@ const materialRequestRoutes = require("./routes/materialRequestRoutes");
 const operationsHubRoutes = require("./routes/operationsHubRoutes");
 const itsmHubRoutes = require("./routes/itsmHubRoutes");
 const adminOpsHubRoutes = require("./routes/adminOpsHubRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 const adminVendorRoutes = require("./routes/adminVendorRoutes");
 const adminStockRoutes = require("./routes/adminStockRoutes");
 const adminScrapRoutes = require("./routes/adminScrapRoutes");
@@ -380,6 +381,7 @@ async function start() {
   // routes they could already reach directly, mirroring hrHubRoutes.js /
   // itHubRoutes.js / operationsHubRoutes.js for every other department.
   app.use("/admin/ops", adminOpsHubRoutes);
+  app.use("/notifications", notificationRoutes);
   app.use("/csv", csvRoutes);
   app.use("/admin-attachments", adminAttachmentsRoutes);
 
