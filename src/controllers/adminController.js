@@ -141,6 +141,15 @@ async function updateUser(req, res) {
       await user.setPassword(data.password);
     }
 
+    // Manual override for account lockout (see User.js's
+    // registerFailedLogin/isLocked) — otherwise a locked-out user has no
+    // way back in except waiting out the fixed cooldown, which is a real
+    // problem if it happens during something urgent.
+    if (data.unlockAccount === "on") {
+      user.failedLoginAttempts = 0;
+      user.lockedUntil = null;
+    }
+
     await user.save();
 
     await logAudit({

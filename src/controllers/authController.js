@@ -11,13 +11,25 @@ async function login(req, res) {
 
   const user = await User.findOne({ email: String(email).toLowerCase().trim() });
 
+  // Locked accounts are rejected before even checking the password, so a
+  // legitimate owner who mistypes once more while locked doesn't also
+  // reset/extend anything — the lock has its own fixed expiry.
+  if (user && user.isLocked()) {
+    const minutesLeft = Math.max(1, Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000));
+    return res.render("login", {
+      error: `Too many failed sign-in attempts. This account is locked for ${minutesLeft} more minute${minutesLeft === 1 ? "" : "s"} — contact your Administrator if you need in sooner.`,
+    });
+  }
+
   if (!user || !user.active || !(await user.checkPassword(password))) {
+    // Only a real, active user's own failed attempts count toward their
+    // lockout — an unknown email or a deactivated account never trips it.
+    if (user && user.active) await user.registerFailedLogin();
     return res.render("login", { error: "Invalid email or password." });
   }
 
+  await user.registerSuccessfulLogin();
   req.session.userId = user._id.toString();
-  user.lastLoginAt = new Date();
-  await user.save();
 
   await logAudit({
     user: user._id,
