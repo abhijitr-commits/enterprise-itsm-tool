@@ -68,6 +68,8 @@ const ecrRoutes = require("./routes/ecrRoutes");
 const shipmentRoutes = require("./routes/shipmentRoutes");
 const materialRequestRoutes = require("./routes/materialRequestRoutes");
 const operationsHubRoutes = require("./routes/operationsHubRoutes");
+const itsmHubRoutes = require("./routes/itsmHubRoutes");
+const adminOpsHubRoutes = require("./routes/adminOpsHubRoutes");
 const adminVendorRoutes = require("./routes/adminVendorRoutes");
 const adminStockRoutes = require("./routes/adminStockRoutes");
 const adminScrapRoutes = require("./routes/adminScrapRoutes");
@@ -356,6 +358,7 @@ async function start() {
   app.use("/shipments", shipmentRoutes);
   app.use("/material-requests", materialRequestRoutes);
   app.use("/operations", operationsHubRoutes);
+  app.use("/itsm", itsmHubRoutes);
   app.use("/admin/vendors", adminVendorRoutes);
   app.use("/admin/stock", adminStockRoutes);
   app.use("/admin/scrap", adminScrapRoutes);
@@ -363,6 +366,20 @@ async function start() {
   app.use("/admin/purchases", adminPurchaseRoutes);
   app.use("/admin/helpdesk", adminHelpdeskRoutes);
   app.use("/admin/facility-tasks", adminFacilityTaskRoutes);
+  // Admin Operations hub — a tile-grid landing page for the Admin team's
+  // day-to-day operational registers (Vendors, Stock, Scrap, Assets,
+  // Purchases, Facility Helpdesk/Tasks, Admin Onboarding/Offboarding,
+  // Room Bookings). Deliberately a SEPARATE route from "/admin" itself:
+  // admin_view_database (the "/admin" summary gate) is grouped with
+  // admin_manage_users/admin_manage_settings as Administrator-only,
+  // never-delegable actions (see src/utils/delegation.js's comment) —
+  // that's an intentional, sensitive gate this page must not loosen.
+  // requireAdminTeam here matches the gate every one of these operational
+  // routes already enforces on its own, so this hub grants no new access,
+  // it just gives Administration-department Managers a landing page for
+  // routes they could already reach directly, mirroring hrHubRoutes.js /
+  // itHubRoutes.js / operationsHubRoutes.js for every other department.
+  app.use("/admin/ops", adminOpsHubRoutes);
   app.use("/csv", csvRoutes);
   app.use("/admin-attachments", adminAttachmentsRoutes);
 
