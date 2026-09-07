@@ -5,6 +5,8 @@
   <a class="btn btn-primary" href="/admin/scrap/new">+ Raise Scrap Entry</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'adminScrapItem' }) %>
+
 <p class="hint">Damaged, expired, or obsolete items taken out of use — request, approve, then mark disposed. Disposing an entry linked to a Stock Management Item Code also records a real stock OUT for the scrapped quantity.</p>
 
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
@@ -16,7 +18,7 @@
       <tr>
         <th>Scrap ID</th><th>Item Code</th><th>Item Name</th><th>Category</th><th>Quantity</th>
         <th>Reason</th><th>Scrap Date</th><th>Status</th><th>Disposal Method</th><th>Value Recovered</th>
-        <th></th>
+        <th></th><th></th>
       </tr>
     </thead>
     <tbody>
@@ -52,9 +54,10 @@
               </details>
             <% } %>
           </td>
+          <td><a class="btn btn-secondary" href="/admin-attachments/admin-scrap/<%= s._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (items.length === 0) { %><tr><td colspan="11" class="empty-row">No scrap entries yet.</td></tr><% } %>
+      <% if (items.length === 0) { %><tr><td colspan="12" class="empty-row">No scrap entries yet.</td></tr><% } %>
     </tbody>
   </table>
   </div>
