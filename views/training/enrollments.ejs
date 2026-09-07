@@ -4,6 +4,8 @@
   <h1>Training Enrollments</h1>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'enrollment' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
 
