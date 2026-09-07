@@ -1,0 +1,42 @@
+<%
+  // Shared partial — include with locals: { pageInfo } right after the
+  // closing </table> (see utils/pagination.js for how pageInfo is
+  // built). Silently renders nothing when there's nothing to page
+  // through, so it's safe to include unconditionally on every list
+  // view. Prev/Next links reuse res.locals.currentPath/currentQuery
+  // (set globally in middleware/auth.js) so an active search or filter
+  // survives paging instead of resetting to "show everything".
+  function paginationLink(targetPage) {
+    const params = new URLSearchParams();
+    Object.keys(currentQuery || {}).forEach(function (key) {
+      if (key === "page") return;
+      const val = currentQuery[key];
+      if (val === undefined || val === null || val === "") return;
+      params.set(key, val);
+    });
+    params.set("page", targetPage);
+    return currentPath + "?" + params.toString();
+  }
+%>
+<% if (pageInfo && pageInfo.totalPages > 1) { %>
+  <div class="pagination-bar">
+    <span class="pagination-info">Showing <%= pageInfo.from %>–<%= pageInfo.to %> of <%= pageInfo.totalCount %></span>
+    <div class="pagination-controls">
+      <% if (pageInfo.hasPrev) { %>
+        <a class="btn btn-secondary btn-sm" href="<%= paginationLink(pageInfo.page - 1) %>">&larr; Prev</a>
+      <% } else { %>
+        <span class="btn btn-secondary btn-sm btn-disabled">&larr; Prev</span>
+      <% } %>
+      <span class="pagination-page">Page <%= pageInfo.page %> of <%= pageInfo.totalPages %></span>
+      <% if (pageInfo.hasNext) { %>
+        <a class="btn btn-secondary btn-sm" href="<%= paginationLink(pageInfo.page + 1) %>">Next &rarr;</a>
+      <% } else { %>
+        <span class="btn btn-secondary btn-sm btn-disabled">Next &rarr;</span>
+      <% } %>
+    </div>
+  </div>
+<% } else if (pageInfo && pageInfo.totalCount > 0) { %>
+  <div class="pagination-bar pagination-bar-single">
+    <span class="pagination-info">Showing all <%= pageInfo.totalCount %></span>
+  </div>
+<% } %>
