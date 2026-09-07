@@ -4,6 +4,9 @@ const Employee = require("../models/Employee");
 const Location = require("../models/Location");
 const Asset = require("../models/Asset");
 const { icon, initials } = require("../utils/icons");
+const { isAdminTeam } = require("../utils/teamAccess");
+const { csvUiMeta } = require("../utils/csvMeta");
+const { resolveCsvImportAccess } = require("../utils/csvAccess");
 
 // Short in-memory cache for the Department master list (Admin Console ->
 // Master Data -> Departments), so every "Department" field across the
@@ -62,6 +65,23 @@ async function attachUser(req, res, next) {
       }
     }
     res.locals.currentUser = req.user || null;
+    // Shared "is this an Admin-team member" flag — header.ejs computes
+    // its own copy of this same check inline (for the nav dropdown), but
+    // partials/csvActions.ejs needs it too and, unlike header.ejs, isn't
+    // always the thing that's included first on a page, so it gets a
+    // real global instead of relying on include-order.
+    res.locals.isAdminTeamUser = req.user ? isAdminTeam(req.user) : false;
+    // Lightweight (no model refs) per-module CSV export/import metadata —
+    // see utils/csvMeta.js / utils/csvRegistry.js — so partials/csvActions.ejs
+    // can render the Export link for a given moduleKey without every
+    // controller having to pass it in.
+    res.locals.csvModuleMeta = csvUiMeta;
+    // Whether the current user may IMPORT into each CSV-registered
+    // module — resolved once here (permission checks are async; EJS
+    // can't await mid-render) via utils/csvAccess.js, the exact same
+    // logic csvController.js itself enforces at request time. Cheap:
+    // hasPermission() caches the whole Permission map in-process.
+    res.locals.csvCanImport = await resolveCsvImportAccess(req.user);
     // Shared inline-SVG icon helper (src/utils/icons.js) — available on
     // every page, signed in or not, so header.ejs/login.ejs/etc. can call
     // `<%- icon('home') %>` instead of hardcoding emoji or markup per view.
