@@ -10,7 +10,7 @@
 
 <div class="panel">
   <table class="table">
-    <thead><tr><th>Claim ID</th><th>Employee</th><th>Category</th><th>Amount</th><th>Description</th><th>Status</th><% if (canApprove) { %><th></th><% } %></tr></thead>
+    <thead><tr><th>Claim ID</th><th>Employee</th><th>Category</th><th>Amount</th><th>Description</th><th>Status</th><% if (canApprove) { %><th></th><% } %><th></th></tr></thead>
     <tbody>
       <% claims.forEach(function(c) { %>
         <tr>
@@ -38,9 +38,10 @@
               <% } %>
             </td>
           <% } %>
+          <td><a class="btn btn-secondary" href="/admin-attachments/expenses/<%= c._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (claims.length === 0) { %><tr><td colspan="<%= canApprove ? 7 : 6 %>" class="empty-row">No expense claims yet.</td></tr><% } %>
+      <% if (claims.length === 0) { %><tr><td colspan="<%= canApprove ? 8 : 7 %>" class="empty-row">No expense claims yet.</td></tr><% } %>
     </tbody>
   </table>
 </div>
