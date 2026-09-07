@@ -4,6 +4,8 @@
   <h1>IT Clearance</h1>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'itClearanceRecord' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <p class="hint">Employees awaiting IT clearance as part of their resignation offboarding.</p>
