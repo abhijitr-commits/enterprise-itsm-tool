@@ -7,6 +7,8 @@
   <% } %>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'pulseSurvey' }) %>
+
 <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
 <% if (submitted) { %><div class="alert alert-success">Thanks for your feedback!</div><% } %>
 
