@@ -1,0 +1,97 @@
+<%- include('../partials/header', { title: 'ITSM' }) %>
+
+<%
+  const mv = typeof moduleVisibility !== "undefined" ? moduleVisibility : {};
+  const canSee = (key) => mv[key] !== false;
+%>
+
+<div class="page-header">
+  <h1>ITSM</h1>
+  <% if (isManagerUp) { %><a class="btn btn-secondary" href="/reports/executive-summary">Executive Summary</a><% } %>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Tickets</h2></div>
+  <div class="admin-tile-grid">
+    <% if (canSee('incidents')) { %>
+      <a class="admin-tile" href="/incidents">
+        <span class="admin-tile-icon"><%- icon('alert-circle') %></span>
+        <div class="admin-tile-body">
+          <div class="admin-tile-title">Incidents</div>
+          <div class="admin-tile-sub">Log and track incidents, priority, SLA, and full audit trail.</div>
+        </div>
+      </a>
+    <% } %>
+    <% if (canSee('requests')) { %>
+      <a class="admin-tile" href="/requests">
+        <span class="admin-tile-icon admin-tile-icon-blue"><%- icon('clipboard-check') %></span>
+        <div class="admin-tile-body">
+          <div class="admin-tile-title">Service Requests</div>
+          <div class="admin-tile-sub">Requests, approvals, and fulfillment.</div>
+        </div>
+      </a>
+    <% } %>
+    <% if (canSee('problems')) { %>
+      <a class="admin-tile" href="/problems">
+        <span class="admin-tile-icon admin-tile-icon-amber"><%- icon('alert-triangle') %></span>
+        <div class="admin-tile-body">
+          <div class="admin-tile-title">Problems</div>
+          <div class="admin-tile-sub">Root-cause tracking, linked to the incidents that raised them.</div>
+        </div>
+      </a>
+    <% } %>
+    <% if (canSee('changes')) { %>
+      <a class="admin-tile" href="/changes">
+        <span class="admin-tile-icon admin-tile-icon-teal"><%- icon('check-circle') %></span>
+        <div class="admin-tile-body">
+          <div class="admin-tile-title">Changes</div>
+          <div class="admin-tile-sub">Change requests, approvals, and scheduled rollout.</div>
+        </div>
+      </a>
+    <% } %>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Reference &amp; Reporting</h2></div>
+  <div class="admin-tile-grid">
+    <% if (canSee('assets')) { %>
+      <a class="admin-tile" href="/assets">
+        <span class="admin-tile-icon"><%- icon('monitor') %></span>
+        <div class="admin-tile-body">
+          <div class="admin-tile-title">Assets</div>
+          <div class="admin-tile-sub">The IT asset register — issue, track, and retire equipment.</div>
+        </div>
+      </a>
+    <% } %>
+    <% if (canSee('cmdb')) { %>
+      <a class="admin-tile" href="/cmdb">
+        <span class="admin-tile-icon admin-tile-icon-blue"><%- icon('grid') %></span>
+        <div class="admin-tile-body">
+          <div class="admin-tile-title">CMDB</div>
+          <div class="admin-tile-sub">Configuration items and how they relate to one another.</div>
+        </div>
+      </a>
+    <% } %>
+    <% if (canSee('knowledge')) { %>
+      <a class="admin-tile" href="/knowledge">
+        <span class="admin-tile-icon admin-tile-icon-amber"><%- icon('layers') %></span>
+        <div class="admin-tile-body">
+          <div class="admin-tile-title">Knowledge Base</div>
+          <div class="admin-tile-sub">Articles for self-service and for the service desk to reuse.</div>
+        </div>
+      </a>
+    <% } %>
+    <% if (canSee('reports')) { %>
+      <a class="admin-tile" href="/reports">
+        <span class="admin-tile-icon admin-tile-icon-teal"><%- icon('grid') %></span>
+        <div class="admin-tile-body">
+          <div class="admin-tile-title">Reports</div>
+          <div class="admin-tile-sub">Volume, SLA, and backlog reporting across every ticket type.</div>
+        </div>
+      </a>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
