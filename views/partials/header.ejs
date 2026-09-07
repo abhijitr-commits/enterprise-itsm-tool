@@ -241,6 +241,22 @@
           <form method="post" action="/logout"><button class="link-button" title="Sign out"><%- icon('log-out', {size:15}) %></button></form>
         </div>
       </nav>
+      <% if (cp !== '/') { %>
+        <!-- Slim Back/Home bar on every page except the dashboard itself
+             (which already IS home) — module pages have no other way to
+             get back to the previous screen besides a browser back button
+             the nav dropdowns don't set up history for. history.back() is
+             the best signal we have of "where the user actually came
+             from" without tracking a server-side page stack; falling back
+             to Home covers a page opened fresh (e.g. a bookmark or a new
+             tab) where there's no in-app history to go back to. -->
+        <div class="subnav-bar">
+          <button type="button" class="subnav-back" onclick="window.history.length > 1 ? window.history.back() : (window.location.href = '/')">
+            <%- icon('arrow-left', {size:14}) %> Back
+          </button>
+          <a href="/" class="subnav-home"><%- icon('home', {size:14}) %> Home</a>
+        </div>
+      <% } %>
     <% } %>
     <main class="content">
       <% if (typeof departmentList !== "undefined" && departmentList.length) { %>
