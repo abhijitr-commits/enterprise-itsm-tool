@@ -30,6 +30,7 @@ const SCRAP_STATUS = {
   PENDING_APPROVAL: "Pending Approval",
   APPROVED: "Approved",
   DISPOSED: "Disposed",
+  CANCELLED: "Cancelled",
 };
 
 const adminScrapItemSchema = new mongoose.Schema(
