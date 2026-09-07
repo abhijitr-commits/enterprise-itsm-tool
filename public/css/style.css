@@ -157,7 +157,10 @@ a:hover { color: var(--primary-dark); }
 .top-tab:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
 .top-tab.active { background: linear-gradient(120deg, var(--primary) 0%, #7c6df0 100%); color: #fff; box-shadow: 0 4px 14px -2px rgba(124, 109, 240, 0.55); }
 .top-tab.active .icon, .top-tab.active .chev { opacity: 1; }
-.top-tabs-spacer { flex: 1; }
+/* Search + the account chip/Sign out button, kept together and pushed to
+   the end of whichever nav line they end up on — see header.ejs's
+   .top-tabs-right comment for why this replaced a bare spacer div. */
+.top-tabs-right { display: flex; align-items: center; gap: 2px; margin-left: auto; flex-wrap: nowrap; }
 
 /* ---------- Hub dropdown menus ----------
  * Native <details>/<summary> gives us click-to-open for free; footer.ejs
@@ -278,8 +281,9 @@ a:hover { color: var(--primary-dark); }
 }
 .top-tabs-user .avatar { background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.16); }
 .top-tabs-user .role-badge { background: var(--accent); color: #fff; }
-.top-tabs-user .link-button { color: var(--sidebar-text-dim); font-weight: 600; padding: 7px 9px; width: auto; }
+.top-tabs-user .link-button { color: var(--sidebar-text-dim); font-weight: 600; padding: 7px 11px; width: auto; white-space: nowrap; }
 .top-tabs-user .link-button:hover { color: #fff; background: rgba(220, 38, 38, 0.35); }
+.top-tabs-user .logout-label { font-size: 12.5px; }
 
 .avatar {
   display: inline-flex;
@@ -824,5 +828,6 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--p
   .content { padding: 22px 18px; }
   .subnav-bar { padding: 12px 18px 0; }
   .top-tabs-user .user-chip-text { display: none; }
+  .top-tabs-user .logout-label { display: none; }
   .stat-grid, .admin-tile-grid { grid-template-columns: 1fr; }
 }
