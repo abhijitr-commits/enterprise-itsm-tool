@@ -11,7 +11,7 @@
 
 <div class="panel">
   <table class="table">
-    <thead><tr><th>Title</th><th>Description</th><th>Site/Location</th><th>Scheduled</th><th>Created By</th><th>Posted</th></tr></thead>
+    <thead><tr><th>Title</th><th>Description</th><th>Site/Location</th><th>Scheduled</th><th>Created By</th><th>Posted</th><th></th></tr></thead>
     <tbody>
       <% announcements.forEach(function(a) { %>
         <tr>
@@ -25,9 +25,10 @@
           </td>
           <td><%= a.createdBy %></td>
           <td><%= new Date(a.createdDate).toLocaleDateString() %></td>
+          <td><a class="btn btn-secondary" href="/admin-attachments/maintenance/<%= a._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (announcements.length === 0) { %><tr><td colspan="6" class="empty-row">No maintenance announcements yet.</td></tr><% } %>
+      <% if (announcements.length === 0) { %><tr><td colspan="7" class="empty-row">No maintenance announcements yet.</td></tr><% } %>
     </tbody>
   </table>
 </div>
