@@ -5,6 +5,8 @@
   <a class="btn btn-primary" href="/leave/new">+ Apply for Leave</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'leaveRequest' }) %>
+
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
 
 <div class="panel">
