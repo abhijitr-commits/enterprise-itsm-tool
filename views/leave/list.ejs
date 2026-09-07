@@ -17,6 +17,7 @@
           <% if (canApprove) { %><th></th><% } %>
           <th>ID</th><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th><th>Approver</th>
           <% if (canApprove) { %><th></th><% } %>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -47,10 +48,11 @@
                 <% } %>
               </td>
             <% } %>
+            <td><a class="btn btn-secondary" href="/admin-attachments/leave/<%= l._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
           </tr>
         <% }) %>
         <% if (leaveRequests.length === 0) { %>
-          <tr><td colspan="9" class="empty-row">No leave requests yet.</td></tr>
+          <tr><td colspan="10" class="empty-row">No leave requests yet.</td></tr>
         <% } %>
       </tbody>
     </table>
