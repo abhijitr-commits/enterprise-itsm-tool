@@ -5,6 +5,8 @@
   <a class="btn btn-primary" href="/admin/facility-tasks/new">+ Add Task</a>
 </div>
 
+<%- include('../partials/csvActions', { moduleKey: 'adminFacilityTask' }) %>
+
 <p class="hint">Daily/weekly/monthly housekeeping and facility-upkeep rounds — cleaning, pantry restocking, servicing checks.</p>
 
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
@@ -15,7 +17,7 @@
     <thead>
       <tr>
         <th>Task ID</th><th>Task Name</th><th>Area</th><th>Assigned Staff</th><th>Frequency</th>
-        <th>Scheduled Date</th><th>Status</th><th>Completed Date</th><th>Remarks</th><th></th>
+        <th>Scheduled Date</th><th>Status</th><th>Completed Date</th><th>Remarks</th><th></th><th></th>
       </tr>
     </thead>
     <tbody>
@@ -42,9 +44,10 @@
               </form>
             <% } %>
           </td>
+          <td><a class="btn btn-secondary" href="/admin-attachments/admin-facility/<%= t._id %>" title="Attachments"><%- icon('paperclip', {size:14}) %></a></td>
         </tr>
       <% }) %>
-      <% if (tasks.length === 0) { %><tr><td colspan="10" class="empty-row">No facility tasks yet.</td></tr><% } %>
+      <% if (tasks.length === 0) { %><tr><td colspan="11" class="empty-row">No facility tasks yet.</td></tr><% } %>
     </tbody>
   </table>
   </div>
