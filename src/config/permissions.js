@@ -21,6 +21,12 @@ const DEFAULT_PERMISSIONS_MAP = {
   requests_edit: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER],
   requests_approve: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER],
   requests_close: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER],
+  // Request Catalog — curating the picklist behind "Catalog Item" is a
+  // step above just filing/handling requests (requests_create/_edit stay
+  // open to everyone, same as before), so this is its own key rather than
+  // riding on requests_edit. Service Desk gets it too since they're the
+  // ones who'll notice a typo'd auto-added entry day to day.
+  requests_catalog_manage: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK],
 
   // Problems
   problems_create: [ROLE.ADMIN, ROLE.MANAGER, ROLE.SERVICE_DESK, ROLE.ENGINEER, ROLE.VIEWER],
