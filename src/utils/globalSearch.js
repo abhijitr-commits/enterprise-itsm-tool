@@ -1,9 +1,12 @@
 /*************************************************************
  * globalSearch.js — port of RecordEngine.gs's globalSearch(keyword).
- * Searches the same 9 modules the original did (its own header
+ * Searches the original 9 modules it always did (its own header
  * comment undersells this as "5 modules" but the actual code — the
  * source of truth — covers all 9): Incidents, Requests, Problems,
- * Changes, Assets, CMDB, Knowledge, Employees, Purchases. Same
+ * Changes, Assets, CMDB, Knowledge, Employees, Purchases — PLUS the 7
+ * Admin-team modules built this session (Vendor Management, Stock,
+ * Scrap, Asset Register, Purchase/Procurement, Facility Helpdesk,
+ * Facility Ops Tasks), which had never been wired in here before. Same
  * per-module field matching as each module's own list-page search,
  * same 25-result cap, same "keyword must be at least 2 characters"
  * guard.
@@ -17,6 +20,13 @@ const ConfigurationItem = require("../models/ConfigurationItem");
 const KnowledgeArticle = require("../models/KnowledgeArticle");
 const Employee = require("../models/Employee");
 const PurchaseOrder = require("../models/PurchaseOrder");
+const AdminVendor = require("../models/AdminVendor");
+const AdminStockItem = require("../models/AdminStockItem");
+const AdminScrapItem = require("../models/AdminScrapItem");
+const AdminAsset = require("../models/AdminAsset");
+const AdminPurchase = require("../models/AdminPurchase");
+const AdminComplaint = require("../models/AdminComplaint");
+const AdminFacilityTask = require("../models/AdminFacilityTask");
 
 const RESULT_CAP = 25;
 
@@ -26,7 +36,10 @@ async function globalSearch(keyword) {
   const rx = new RegExp(keyword.trim(), "i");
   const results = [];
 
-  const [incidents, requests, problems, changes, assets, cis, articles, employees, purchases] = await Promise.all([
+  const [
+    incidents, requests, problems, changes, assets, cis, articles, employees, purchases,
+    adminVendors, adminStock, adminScrap, adminAssets, adminPurchases, adminHelpdesk, adminFacilityTasks,
+  ] = await Promise.all([
     Incident.find({ $or: ["incidentId", "employeeName", "department", "location", "category", "priority", "subject", "status", "engineer"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
     ServiceRequest.find({ $or: ["requestId", "requester", "department", "catalogItem", "details"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
     Problem.find({ $or: ["problemId", "title", "description", "owner", "linkedIncidents"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
@@ -36,6 +49,13 @@ async function globalSearch(keyword) {
     KnowledgeArticle.find({ $or: ["articleId", "title", "content", "category"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
     Employee.find({ $or: ["employeeId", "name", "email", "department", "designation"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
     PurchaseOrder.find({ $or: ["poId", "vendor", "itemDescription"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
+    AdminVendor.find({ $or: ["name", "contactPerson", "email", "category"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
+    AdminStockItem.find({ $or: ["itemId", "itemCode", "itemName", "category", "location"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
+    AdminScrapItem.find({ $or: ["scrapId", "itemCode", "itemName", "category", "reason"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
+    AdminAsset.find({ $or: ["assetId", "assetName", "type", "serialNumber", "assignedTo", "department", "location", "vendor"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
+    AdminPurchase.find({ $or: ["poId", "itemDescription", "category", "vendor"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
+    AdminComplaint.find({ $or: ["complaintId", "complainant", "department", "category", "subject", "description"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
+    AdminFacilityTask.find({ $or: ["taskId", "taskName", "area", "assignedStaff"].map((f) => ({ [f]: rx })) }).limit(RESULT_CAP).lean(),
   ]);
 
   incidents.forEach((r) => results.push({ module: "Incident", id: r._id, label: `${r.incidentId} — ${r.subject}`, sub: r.status, link: `/incidents/${r._id}` }));
@@ -49,6 +69,17 @@ async function globalSearch(keyword) {
   // Purchases have no individual detail page (list + inline status
   // update only, per purchaseRoutes.js) — link to the register instead.
   purchases.forEach((r) => results.push({ module: "Purchase", id: r._id, label: `${r.poId} — ${r.itemDescription}`, sub: r.status, link: "/purchases" }));
+
+  // None of the 7 Admin-team modules have an individual detail page
+  // either (same list + inline-action pattern as Purchases above) —
+  // every one of these links to its own register/list page.
+  adminVendors.forEach((r) => results.push({ module: "Admin Vendor", id: r._id, label: r.name, sub: r.category, link: "/admin/vendors" }));
+  adminStock.forEach((r) => results.push({ module: "Admin Stock", id: r._id, label: `${r.itemCode} — ${r.itemName}`, sub: r.category, link: "/admin/stock" }));
+  adminScrap.forEach((r) => results.push({ module: "Scrap", id: r._id, label: `${r.scrapId} — ${r.itemName}`, sub: r.status, link: "/admin/scrap" }));
+  adminAssets.forEach((r) => results.push({ module: "Admin Asset", id: r._id, label: `${r.assetId} — ${r.assetName}`, sub: r.status, link: "/admin/assets" }));
+  adminPurchases.forEach((r) => results.push({ module: "Admin Purchase", id: r._id, label: `${r.poId} — ${r.itemDescription}`, sub: r.status, link: "/admin/purchases" }));
+  adminHelpdesk.forEach((r) => results.push({ module: "Facility Helpdesk", id: r._id, label: `${r.complaintId} — ${r.subject}`, sub: r.status, link: "/admin/helpdesk" }));
+  adminFacilityTasks.forEach((r) => results.push({ module: "Facility Task", id: r._id, label: `${r.taskId} — ${r.taskName}`, sub: r.status, link: "/admin/facility-tasks" }));
 
   return results.slice(0, RESULT_CAP);
 }

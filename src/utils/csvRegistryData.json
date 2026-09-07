@@ -1,0 +1,5666 @@
+{
+  "accessRequest": {
+    "modelName": "AccessRequest",
+    "label": "Access Requests",
+    "columns": [
+      {
+        "key": "requestId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "employee",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "system",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "accessType",
+        "type": "string",
+        "required": true,
+        "enum": [
+          "New Access",
+          "Password Reset",
+          "Access Revoke",
+          "Permission Change"
+        ]
+      },
+      {
+        "key": "justification",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending",
+          "Approved",
+          "Rejected",
+          "Completed"
+        ]
+      },
+      {
+        "key": "approver",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "completedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "requestedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "requestId",
+    "idPrefix": "ACC",
+    "importable": true,
+    "exportTeam": "it",
+    "exportPermission": null,
+    "importTeam": "it",
+    "importPermission": null
+  },
+  "adminAsset": {
+    "modelName": "AdminAsset",
+    "label": "Admin Asset Register",
+    "columns": [
+      {
+        "key": "assetId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "assetName",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "type",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "serialNumber",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "assignedTo",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "location",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "In Service",
+          "In Storage",
+          "Under Repair",
+          "Decommissioned"
+        ]
+      },
+      {
+        "key": "purchaseDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "warrantyExpiry",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "vendor",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "remarks",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "assetId",
+    "idPrefix": "ADAST",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": "admin",
+    "importPermission": null
+  },
+  "adminComplaint": {
+    "modelName": "AdminComplaint",
+    "label": "Facility Helpdesk",
+    "columns": [
+      {
+        "key": "complaintId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "complainant",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "complainantEmail",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "category",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "subject",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "description",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Open",
+          "In Progress",
+          "Resolved",
+          "Closed"
+        ]
+      },
+      {
+        "key": "assignedTo",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "resolvedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "resolutionNotes",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "complaintId",
+    "idPrefix": "ADCOMP",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": "admin",
+    "importPermission": null
+  },
+  "adminFacilityTask": {
+    "modelName": "AdminFacilityTask",
+    "label": "Facility Ops Tasks",
+    "columns": [
+      {
+        "key": "taskId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "taskName",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "area",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "assignedStaff",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "frequency",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Daily",
+          "Weekly",
+          "Monthly",
+          "One-time"
+        ]
+      },
+      {
+        "key": "scheduledDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending",
+          "Completed",
+          "Skipped"
+        ]
+      },
+      {
+        "key": "completedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "remarks",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "raisedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "taskId",
+    "idPrefix": "ADTASK",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": "admin",
+    "importPermission": null
+  },
+  "adminPurchase": {
+    "modelName": "AdminPurchase",
+    "label": "Admin Purchase/Procurement",
+    "columns": [
+      {
+        "key": "poId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "itemDescription",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "category",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "quantity",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "estimatedAmount",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "vendor",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending Approval",
+          "Approved",
+          "Received",
+          "Cancelled"
+        ]
+      },
+      {
+        "key": "approvedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "approvedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "receivedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "referenceBillNo",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "actualAmount",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "paymentStatus",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Unpaid",
+          "Paid"
+        ]
+      },
+      {
+        "key": "paymentDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "remarks",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "raisedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "poId",
+    "idPrefix": "ADPO",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": "admin",
+    "importPermission": null
+  },
+  "adminScrapItem": {
+    "modelName": "AdminScrapItem",
+    "label": "Scrap Management",
+    "columns": [
+      {
+        "key": "scrapId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "itemCode",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "itemName",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "category",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "quantity",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "unit",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "reason",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "scrapDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending Approval",
+          "Approved",
+          "Disposed"
+        ]
+      },
+      {
+        "key": "approvedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "approvedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "disposalMethod",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Recycled",
+          "Sold",
+          "Discarded",
+          "Donated",
+          "Other"
+        ]
+      },
+      {
+        "key": "valueRecovered",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "disposedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "remarks",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "raisedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "scrapId",
+    "idPrefix": "SCRAP",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": "admin",
+    "importPermission": null
+  },
+  "adminStockItem": {
+    "modelName": "AdminStockItem",
+    "label": "Admin Stock Items",
+    "columns": [
+      {
+        "key": "itemId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "itemCode",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "itemName",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "category",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "unit",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "piecesPerBox",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "openingBoxes",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "openingLoosePieces",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "openingStock",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "minBufferStock",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "orderFlag",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Hold",
+          "Order",
+          "Done"
+        ]
+      },
+      {
+        "key": "location",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "remarks",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "itemId",
+    "idPrefix": "ASTK",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": "admin",
+    "importPermission": null
+  },
+  "adminStockOrder": {
+    "modelName": "AdminStockOrder",
+    "label": "Admin Stock Orders",
+    "columns": [
+      {
+        "key": "orderId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "itemId",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "itemCode",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "itemName",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "piecesPerBox",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "orderDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending",
+          "Received"
+        ]
+      },
+      {
+        "key": "receivedBoxes",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "receivedLoosePieces",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "receivedStockPieces",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "receivedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "referenceBillNo",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "paymentStatus",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending",
+          "Paid"
+        ]
+      },
+      {
+        "key": "paymentDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "remarks",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "raisedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "orderId",
+    "idPrefix": "ASTKORD",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": "admin",
+    "importPermission": null
+  },
+  "adminStockTransaction": {
+    "modelName": "AdminStockTransaction",
+    "label": "Admin Stock Transaction Log",
+    "columns": [
+      {
+        "key": "transactionId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "itemId",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "itemName",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "type",
+        "type": "string",
+        "required": true,
+        "enum": [
+          "IN",
+          "OUT"
+        ]
+      },
+      {
+        "key": "quantity",
+        "type": "number",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "reason",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "performedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "date",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "transactionId",
+    "idPrefix": "ASTKTX",
+    "importable": false,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": null
+  },
+  "adminVendor": {
+    "modelName": "AdminVendor",
+    "label": "Admin Vendor Management",
+    "columns": [
+      {
+        "key": "name",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "contactPerson",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "email",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "phone",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "category",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Housekeeping",
+          "Stationery & Office Supplies",
+          "Pantry / Cafeteria",
+          "Facility Maintenance",
+          "Security Services",
+          "Courier & Logistics",
+          "AMC / Contract Services",
+          "Other"
+        ]
+      },
+      {
+        "key": "amcExpiry",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Active",
+          "Inactive"
+        ]
+      },
+      {
+        "key": "notes",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "name",
+    "idPrefix": null,
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": "admin",
+    "importPermission": null
+  },
+  "asset": {
+    "modelName": "Asset",
+    "label": "IT Asset Register",
+    "columns": [
+      {
+        "key": "assetId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "assetName",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "type",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "serialNumber",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "assignedTo",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "location",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "In Service",
+          "In Storage",
+          "Under Repair",
+          "Decommissioned"
+        ]
+      },
+      {
+        "key": "purchaseDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "warrantyExpiry",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "vendor",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "hardwareType",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "IT Equipment",
+          "Robot Unit",
+          "Sensor",
+          "Actuator",
+          "Controller",
+          "Battery",
+          "Other"
+        ]
+      },
+      {
+        "key": "maintenanceIntervalDays",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "lastMaintenanceDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "nextMaintenanceDue",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "assetId",
+    "idPrefix": "AST",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "assets_create"
+  },
+  "assetHistory": {
+    "modelName": "AssetHistory",
+    "label": "Asset History Log",
+    "columns": [
+      {
+        "key": "assetId",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "action",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "from",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "to",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "notes",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "date",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "assetId",
+    "idPrefix": null,
+    "importable": false,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": null
+  },
+  "attendance": {
+    "modelName": "Attendance",
+    "label": "Attendance",
+    "columns": [
+      {
+        "key": "date",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "employee",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "checkIn",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "checkOut",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "hours",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "date",
+    "idPrefix": null,
+    "importable": false,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": null
+  },
+  "auditLog": {
+    "modelName": "AuditLog",
+    "label": "Audit Log",
+    "columns": [
+      {
+        "key": "action",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "entityType",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "ipAddress",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "user",
+    "idPrefix": null,
+    "importable": false,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": null
+  },
+  "benefitEnrollment": {
+    "modelName": "BenefitEnrollment",
+    "label": "Benefit Enrollments",
+    "columns": [
+      {
+        "key": "enrollmentId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "employee",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "benefitType",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "planName",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "coverageDetails",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Active",
+          "Inactive"
+        ]
+      },
+      {
+        "key": "enrolledBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "enrollmentDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "enrollmentId",
+    "idPrefix": "BEN",
+    "importable": true,
+    "exportTeam": "hr",
+    "exportPermission": null,
+    "importTeam": "hr",
+    "importPermission": null
+  },
+  "candidate": {
+    "modelName": "Candidate",
+    "label": "Recruitment Candidates",
+    "columns": [
+      {
+        "key": "candidateId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "jobId",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "jobTitle",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "name",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "email",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "phone",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "stage",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Applied",
+          "Screening",
+          "Interview",
+          "Offer",
+          "Hired",
+          "Rejected"
+        ]
+      },
+      {
+        "key": "resumeLink",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "notes",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "appliedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "candidateId",
+    "idPrefix": "CAN",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "recruitment_manage"
+  },
+  "category": {
+    "modelName": "Category",
+    "label": "Master Data: Categories",
+    "columns": [
+      {
+        "key": "name",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "module",
+        "type": "string",
+        "required": true,
+        "enum": [
+          "Incident",
+          "Request",
+          "Problem",
+          "Change",
+          "Asset"
+        ]
+      },
+      {
+        "key": "subCategory",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "name",
+    "idPrefix": null,
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": "admin_manage_settings",
+    "importTeam": null,
+    "importPermission": "admin_manage_settings"
+  },
+  "certificate": {
+    "modelName": "Certificate",
+    "label": "Training Certificates",
+    "columns": [
+      {
+        "key": "certificateId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "employee",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "courseTitle",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "enrollmentId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "issuedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "certificateId",
+    "idPrefix": "CERT",
+    "importable": false,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": null
+  },
+  "change": {
+    "modelName": "Change",
+    "label": "Change Management",
+    "columns": [
+      {
+        "key": "changeId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "title",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "description",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "riskLevel",
+        "type": "string",
+        "required": true,
+        "enum": [
+          "Low",
+          "Medium",
+          "High"
+        ]
+      },
+      {
+        "key": "cabStatus",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending Approval",
+          "Approved",
+          "Rejected"
+        ]
+      },
+      {
+        "key": "plannedDate",
+        "type": "date",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "implementationStatus",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Not Started",
+          "In Progress",
+          "Implemented",
+          "Rolled Back"
+        ]
+      },
+      {
+        "key": "pirNotes",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "closedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "requestedBy",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "changeId",
+    "idPrefix": "CHG",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "changes_create"
+  },
+  "checklist": {
+    "modelName": "Checklist",
+    "label": "Checklist",
+    "columns": [
+      {
+        "key": "type",
+        "type": "string",
+        "required": true,
+        "enum": [
+          "Pre-Onboarding",
+          "Onboarding",
+          "Offboarding",
+          "Admin Onboarding",
+          "Admin Offboarding"
+        ]
+      },
+      {
+        "key": "employee",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "task",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "category",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending",
+          "Done"
+        ]
+      },
+      {
+        "key": "dueDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "completedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "type",
+    "idPrefix": null,
+    "importable": false,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": null
+  },
+  "complaint": {
+    "modelName": "Complaint",
+    "label": "Complaints",
+    "columns": [
+      {
+        "key": "complaintId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "complainant",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "complainantEmail",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "category",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "subject",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "description",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Open",
+          "In Progress",
+          "Resolved",
+          "Closed"
+        ]
+      },
+      {
+        "key": "assignedTo",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "resolvedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "resolutionNotes",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "complaintId",
+    "idPrefix": "COMP",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "complaints_submit"
+  },
+  "configurationItem": {
+    "modelName": "ConfigurationItem",
+    "label": "CMDB (Configuration Items)",
+    "columns": [
+      {
+        "key": "ciId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "ciName",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "type",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "ipAddress",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "owner",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Active",
+          "Inactive",
+          "Decommissioned"
+        ]
+      },
+      {
+        "key": "dependencies",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "vlan",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "subnet",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "ciId",
+    "idPrefix": "CI",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "cmdb_create"
+  },
+  "course": {
+    "modelName": "Course",
+    "label": "Training Courses",
+    "columns": [
+      {
+        "key": "courseId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "title",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "type",
+        "type": "string",
+        "required": true,
+        "enum": [
+          "Online",
+          "Offline"
+        ]
+      },
+      {
+        "key": "category",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "durationHours",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "provider",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "description",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "linkOrLocation",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Active",
+          "Inactive"
+        ]
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "courseId",
+    "idPrefix": "CRS",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "training_manage"
+  },
+  "department": {
+    "modelName": "Department",
+    "label": "Master Data: Departments",
+    "columns": [
+      {
+        "key": "name",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "head",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "location",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "name",
+    "idPrefix": null,
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": "admin_manage_settings",
+    "importTeam": null,
+    "importPermission": "admin_manage_settings"
+  },
+  "employee": {
+    "modelName": "Employee",
+    "label": "Employee Directory",
+    "columns": [
+      {
+        "key": "employeeId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "name",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "email",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "location",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "designation",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "New",
+          "Active",
+          "Left"
+        ]
+      },
+      {
+        "key": "employmentType",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "On-Roll",
+          "Contract"
+        ]
+      },
+      {
+        "key": "contractEndDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "reportsTo",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "employeeId",
+    "idPrefix": "EMP",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": "hr",
+    "importPermission": null
+  },
+  "engineeringChangeRequest": {
+    "modelName": "EngineeringChangeRequest",
+    "label": "Engineering Change Requests",
+    "columns": [
+      {
+        "key": "ecrId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "title",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "relatedAsset",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "description",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "reason",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Proposed",
+          "Under Review",
+          "Approved",
+          "Rejected",
+          "Implemented"
+        ]
+      },
+      {
+        "key": "requestedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "reviewedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "reviewNotes",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "decidedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "requestedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "ecrId",
+    "idPrefix": "ECR",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "ecr_create"
+  },
+  "enrollment": {
+    "modelName": "Enrollment",
+    "label": "Training Enrollments",
+    "columns": [
+      {
+        "key": "enrollmentId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "employee",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "courseId",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "courseTitle",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Enrolled",
+          "Completed",
+          "Withdrawn"
+        ]
+      },
+      {
+        "key": "completionDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "scoreNotes",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "enrollmentDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "enrollmentId",
+    "idPrefix": "ENR",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "training_manage"
+  },
+  "exitInterview": {
+    "modelName": "ExitInterview",
+    "label": "Exit Interviews",
+    "columns": [
+      {
+        "key": "interviewId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "resignationId",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "employee",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "primaryReason",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "satisfactionRating",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "wouldRecommend",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "managerFeedback",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "suggestions",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "conductedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "completedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "interviewId",
+    "idPrefix": "EXIT",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": "hr",
+    "importPermission": null
+  },
+  "expenseClaim": {
+    "modelName": "ExpenseClaim",
+    "label": "Expense Claims",
+    "columns": [
+      {
+        "key": "claimId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "employee",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "category",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "amount",
+        "type": "number",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "expenseDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "description",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "receiptUrl",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending Approval",
+          "Approved",
+          "Rejected",
+          "Reimbursed"
+        ]
+      },
+      {
+        "key": "approver",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "submittedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "claimId",
+    "idPrefix": "EXP",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "expenses_submit"
+  },
+  "goal": {
+    "modelName": "Goal",
+    "label": "Performance Goals",
+    "columns": [
+      {
+        "key": "goalId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "employee",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "goalTitle",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "description",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "targetDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Not Started",
+          "In Progress",
+          "Completed"
+        ]
+      },
+      {
+        "key": "progress",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "goalId",
+    "idPrefix": "GOAL",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": "hr",
+    "importPermission": null
+  },
+  "holiday": {
+    "modelName": "Holiday",
+    "label": "Master Data: Holidays",
+    "columns": [
+      {
+        "key": "date",
+        "type": "date",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "description",
+        "type": "string",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "date",
+    "idPrefix": null,
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": "admin_manage_settings",
+    "importTeam": null,
+    "importPermission": "admin_manage_settings"
+  },
+  "itAllocation": {
+    "modelName": "ITAllocation",
+    "label": "IT Allocations",
+    "columns": [
+      {
+        "key": "allocationId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "employee",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "designation",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "assetIds",
+        "type": "stringlist",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "notes",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "allocatedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "allocationDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "allocationId",
+    "idPrefix": "ALLOC",
+    "importable": true,
+    "exportTeam": "it",
+    "exportPermission": null,
+    "importTeam": "it",
+    "importPermission": null
+  },
+  "itClearanceRecord": {
+    "modelName": "ITClearanceRecord",
+    "label": "IT Clearance Records",
+    "columns": [
+      {
+        "key": "clearanceId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "resignationId",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "employee",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "assetsReturned",
+        "type": "stringlist",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "accessRevoked",
+        "type": "boolean",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "accountsDeactivated",
+        "type": "boolean",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "dataBackupCompleted",
+        "type": "boolean",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "notes",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "completedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "completedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "clearanceId",
+    "idPrefix": "ITCLR",
+    "importable": true,
+    "exportTeam": "it",
+    "exportPermission": null,
+    "importTeam": "it",
+    "importPermission": null
+  },
+  "incident": {
+    "modelName": "Incident",
+    "label": "Incident Management",
+    "columns": [
+      {
+        "key": "incidentId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "employeeName",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "location",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "category",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "priority",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ]
+      },
+      {
+        "key": "subject",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "description",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Open",
+          "In Progress",
+          "On Hold",
+          "Resolved",
+          "Closed",
+          "Cancelled"
+        ]
+      },
+      {
+        "key": "engineer",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "slaDue",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "closedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "remarks",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "relatedAsset",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "incidentId",
+    "idPrefix": "INC",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "incidents_create"
+  },
+  "jobPosting": {
+    "modelName": "JobPosting",
+    "label": "Job Postings",
+    "columns": [
+      {
+        "key": "jobId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "title",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Open",
+          "Closed"
+        ]
+      },
+      {
+        "key": "description",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "postedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "jobId",
+    "idPrefix": "JOB",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "recruitment_manage"
+  },
+  "knowledgeArticle": {
+    "modelName": "KnowledgeArticle",
+    "label": "Knowledge Base",
+    "columns": [
+      {
+        "key": "articleId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "title",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "category",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "content",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "author",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Draft",
+          "Published",
+          "Archived"
+        ]
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "lastUpdated",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "articleId",
+    "idPrefix": "KB",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "knowledge_create"
+  },
+  "kudos": {
+    "modelName": "Kudos",
+    "label": "Kudos",
+    "columns": [
+      {
+        "key": "kudosId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "from",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "to",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "message",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "date",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "kudosId",
+    "idPrefix": "KUDOS",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "kudos_give"
+  },
+  "leaveRequest": {
+    "modelName": "LeaveRequest",
+    "label": "LeaveRequest",
+    "columns": [
+      {
+        "key": "leaveId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "employee",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "leaveType",
+        "type": "string",
+        "required": true,
+        "enum": [
+          "Casual Leave",
+          "Sick Leave",
+          "Earned Leave",
+          "Unpaid Leave"
+        ]
+      },
+      {
+        "key": "fromDate",
+        "type": "date",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "toDate",
+        "type": "date",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "days",
+        "type": "number",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "reason",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending Approval",
+          "Approved",
+          "Rejected"
+        ]
+      },
+      {
+        "key": "approver",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "delegateTo",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "appliedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "leaveId",
+    "idPrefix": "LV",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "leave_create"
+  },
+  "letter": {
+    "modelName": "Letter",
+    "label": "Generated Letters",
+    "columns": [
+      {
+        "key": "letterId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "type",
+        "type": "string",
+        "required": true,
+        "enum": [
+          "Offer Letter",
+          "Appointment Letter",
+          "No Dues Certificate",
+          "Relieving Letter"
+        ]
+      },
+      {
+        "key": "recipientName",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "recipientEmail",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "content",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "relatedId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "generatedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "generatedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "letterId",
+    "idPrefix": "LTR",
+    "importable": true,
+    "exportTeam": "hr",
+    "exportPermission": null,
+    "importTeam": "hr",
+    "importPermission": null
+  },
+  "location": {
+    "modelName": "Location",
+    "label": "Master Data: Locations",
+    "columns": [
+      {
+        "key": "name",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "address",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "name",
+    "idPrefix": null,
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": "admin_manage_settings",
+    "importTeam": null,
+    "importPermission": "admin_manage_settings"
+  },
+  "maintenanceAnnouncement": {
+    "modelName": "MaintenanceAnnouncement",
+    "label": "Maintenance Announcements",
+    "columns": [
+      {
+        "key": "announcementId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "title",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "description",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "site",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "scheduledStart",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "scheduledEnd",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "announcementId",
+    "idPrefix": "MAINT",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": "it",
+    "importPermission": null
+  },
+  "materialRequest": {
+    "modelName": "MaterialRequest",
+    "label": "Material Requests",
+    "columns": [
+      {
+        "key": "materialRequestId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "requestedBy",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "itemName",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "quantity",
+        "type": "number",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "purpose",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending",
+          "Issued",
+          "Rejected"
+        ]
+      },
+      {
+        "key": "issuedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "issuedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "rejectionReason",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "requestedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "materialRequestId",
+    "idPrefix": "MREQ",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "material_requests_submit"
+  },
+  "permission": {
+    "modelName": "Permission",
+    "label": "Master Data: Permissions",
+    "columns": [
+      {
+        "key": "action",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "allowedRoles",
+        "type": "stringlist",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "action",
+    "idPrefix": null,
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": "admin_manage_settings",
+    "importTeam": null,
+    "importPermission": "admin_manage_settings"
+  },
+  "policy": {
+    "modelName": "Policy",
+    "label": "Policies",
+    "columns": [
+      {
+        "key": "policyId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "policyName",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "version",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "content",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "active",
+        "type": "boolean",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "policyId",
+    "idPrefix": "POL",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": "it",
+    "importPermission": null
+  },
+  "policyAcknowledgment": {
+    "modelName": "PolicyAcknowledgment",
+    "label": "Policy Acknowledgments",
+    "columns": [
+      {
+        "key": "ackId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "policyId",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "policyName",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "employee",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "acknowledgedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "ackId",
+    "idPrefix": "ACK",
+    "importable": true,
+    "exportTeam": "it",
+    "exportPermission": null,
+    "importTeam": "it",
+    "importPermission": null
+  },
+  "preOnboardingDetail": {
+    "modelName": "PreOnboardingDetail",
+    "label": "PreOnboardingDetail",
+    "columns": [
+      {
+        "key": "employee",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "candidateEmail",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "designation",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "joiningDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "bgvVendorEmail",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "bgvStatus",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Not Started",
+          "In Progress",
+          "Cleared",
+          "Flagged"
+        ]
+      },
+      {
+        "key": "itProvisioningStatus",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Not Started",
+          "In Progress",
+          "Completed"
+        ]
+      },
+      {
+        "key": "welcomeKitItems",
+        "type": "stringlist",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "employee",
+    "idPrefix": null,
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": null
+  },
+  "problem": {
+    "modelName": "Problem",
+    "label": "Problem Management",
+    "columns": [
+      {
+        "key": "problemId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "title",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "description",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "linkedIncidents",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "rootCause",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "knownError",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Open",
+          "In Progress",
+          "On Hold",
+          "Resolved",
+          "Closed",
+          "Cancelled"
+        ]
+      },
+      {
+        "key": "owner",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "closedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "problemId",
+    "idPrefix": "PRB",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "problems_create"
+  },
+  "pulseResponse": {
+    "modelName": "PulseResponse",
+    "label": "Pulse Survey Responses",
+    "columns": [
+      {
+        "key": "responseId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "surveyId",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "rating",
+        "type": "number",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "comment",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "submittedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "responseId",
+    "idPrefix": "PRESP",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "wellness_manage"
+  },
+  "pulseSurvey": {
+    "modelName": "PulseSurvey",
+    "label": "Pulse Surveys",
+    "columns": [
+      {
+        "key": "surveyId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "question",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Open",
+          "Closed"
+        ]
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "surveyId",
+    "idPrefix": "PULSE",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "wellness_manage"
+  },
+  "purchaseOrder": {
+    "modelName": "PurchaseOrder",
+    "label": "Purchase Orders",
+    "columns": [
+      {
+        "key": "poId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "vendor",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "itemDescription",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "quantity",
+        "type": "number",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "amount",
+        "type": "number",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Ordered",
+          "Received",
+          "Cancelled"
+        ]
+      },
+      {
+        "key": "date",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "poId",
+    "idPrefix": "PO",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": "purchases_create",
+    "importTeam": null,
+    "importPermission": "purchases_create"
+  },
+  "referral": {
+    "modelName": "Referral",
+    "label": "Employee Referrals",
+    "columns": [
+      {
+        "key": "referralId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "referrer",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "candidateName",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "candidateEmail",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "jobId",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "jobTitle",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Submitted",
+          "Applied",
+          "Screening",
+          "Interview",
+          "Offer",
+          "Hired",
+          "Rejected"
+        ]
+      },
+      {
+        "key": "rewardStatus",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending",
+          "Paid"
+        ]
+      },
+      {
+        "key": "submittedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "referralId",
+    "idPrefix": "REF",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "referrals_submit"
+  },
+  "requirement": {
+    "modelName": "Requirement",
+    "label": "Vendor Requirements",
+    "columns": [
+      {
+        "key": "requirementId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "raisedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "vendorName",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "vendorEmail",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "description",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "priority",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Normal",
+          "Critical"
+        ]
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Sent",
+          "Acknowledged",
+          "Quoted",
+          "Fulfilled",
+          "Rejected"
+        ]
+      },
+      {
+        "key": "notes",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "sentDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "requirementId",
+    "idPrefix": "REQMT",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": null
+  },
+  "resignation": {
+    "modelName": "Resignation",
+    "label": "Resignations",
+    "columns": [
+      {
+        "key": "resignationId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "employee",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "resignationDate",
+        "type": "date",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "lastWorkingDay",
+        "type": "date",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "noticePeriodDays",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "reason",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Submitted",
+          "Completed"
+        ]
+      },
+      {
+        "key": "clearances.it",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending",
+          "Cleared"
+        ]
+      },
+      {
+        "key": "clearances.finance",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending",
+          "Cleared"
+        ]
+      },
+      {
+        "key": "clearances.hr",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending",
+          "Cleared"
+        ]
+      },
+      {
+        "key": "clearances.manager",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending",
+          "Cleared"
+        ]
+      },
+      {
+        "key": "clearances.admin",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending",
+          "Cleared"
+        ]
+      },
+      {
+        "key": "exitInterviewNotes",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "resignationId",
+    "idPrefix": "RES",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "resignation_submit"
+  },
+  "review": {
+    "modelName": "Review",
+    "label": "Performance Reviews",
+    "columns": [
+      {
+        "key": "reviewId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "employee",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "reviewPeriod",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "reviewer",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "rating",
+        "type": "number",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "strengths",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "areasForImprovement",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Submitted",
+          "Acknowledged"
+        ]
+      },
+      {
+        "key": "reviewDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "reviewId",
+    "idPrefix": "REV",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": "hr",
+    "importPermission": null
+  },
+  "room": {
+    "modelName": "Room",
+    "label": "Rooms & Resources",
+    "columns": [
+      {
+        "key": "roomId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "roomName",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "resourceType",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Room",
+          "Equipment"
+        ]
+      },
+      {
+        "key": "location",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "capacity",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Active",
+          "Inactive"
+        ]
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "roomId",
+    "idPrefix": "ROOM",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "rooms_manage"
+  },
+  "roomBooking": {
+    "modelName": "RoomBooking",
+    "label": "Room Bookings",
+    "columns": [
+      {
+        "key": "bookingId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "roomId",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "roomName",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "date",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "startTime",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "endTime",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "bookedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "purpose",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Confirmed",
+          "Cancelled"
+        ]
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "bookingId",
+    "idPrefix": "BOOK",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "rooms_book"
+  },
+  "rosterEntry": {
+    "modelName": "RosterEntry",
+    "label": "Shift Roster",
+    "columns": [
+      {
+        "key": "rosterId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "employee",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "shiftId",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "shiftName",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "date",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "rosterId",
+    "idPrefix": "ROSTER",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "shifts_manage"
+  },
+  "slaMatrix": {
+    "modelName": "SLAMatrix",
+    "label": "Master Data: SLA Matrix",
+    "columns": [
+      {
+        "key": "module",
+        "type": "string",
+        "required": true,
+        "enum": [
+          "Incident",
+          "Request",
+          "Problem",
+          "Change"
+        ]
+      },
+      {
+        "key": "priority",
+        "type": "string",
+        "required": true,
+        "enum": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ]
+      },
+      {
+        "key": "responseTimeHours",
+        "type": "number",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "resolutionTimeHours",
+        "type": "number",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "module",
+    "idPrefix": null,
+    "importable": false,
+    "exportTeam": null,
+    "exportPermission": "admin_manage_settings",
+    "importTeam": null,
+    "importPermission": null
+  },
+  "safetyIncident": {
+    "modelName": "SafetyIncident",
+    "label": "Safety Incidents",
+    "columns": [
+      {
+        "key": "safetyIncidentId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "reporter",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "reporterEmail",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "location",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "severity",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Near Miss",
+          "Minor",
+          "Moderate",
+          "Severe"
+        ]
+      },
+      {
+        "key": "injuryInvolved",
+        "type": "boolean",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "relatedAsset",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "description",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "immediateActionTaken",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "correctiveAction",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Open",
+          "Under Investigation",
+          "Closed"
+        ]
+      },
+      {
+        "key": "assignedTo",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "closedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "safetyIncidentId",
+    "idPrefix": "SAF",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": "safety_manage",
+    "importTeam": null,
+    "importPermission": "safety_manage"
+  },
+  "salesOrder": {
+    "modelName": "SalesOrder",
+    "label": "Sales Orders",
+    "columns": [
+      {
+        "key": "salesOrderId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "customerName",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "customerEmail",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "itemDescription",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "quantity",
+        "type": "number",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "amount",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Enquiry",
+          "Quoted",
+          "Confirmed",
+          "In Production",
+          "Dispatched",
+          "Delivered",
+          "Cancelled"
+        ]
+      },
+      {
+        "key": "expectedDeliveryDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "notes",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "salesOrderId",
+    "idPrefix": "SO",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "sales_create"
+  },
+  "serviceRequest": {
+    "modelName": "ServiceRequest",
+    "label": "Service Requests",
+    "columns": [
+      {
+        "key": "requestId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "requester",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "catalogItem",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "details",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "approver",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "approvalStatus",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Pending Approval",
+          "Approved",
+          "Rejected"
+        ]
+      },
+      {
+        "key": "fulfillmentStatus",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Open",
+          "In Progress",
+          "On Hold",
+          "Resolved",
+          "Closed",
+          "Cancelled"
+        ]
+      },
+      {
+        "key": "closedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "requestId",
+    "idPrefix": "REQ",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "requests_create"
+  },
+  "setting": {
+    "modelName": "Setting",
+    "label": "System Settings",
+    "columns": [
+      {
+        "key": "key",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "value",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "key",
+    "idPrefix": null,
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": "admin_manage_settings",
+    "importTeam": null,
+    "importPermission": "admin_manage_settings"
+  },
+  "shift": {
+    "modelName": "Shift",
+    "label": "Shifts",
+    "columns": [
+      {
+        "key": "shiftId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "shiftName",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "startTime",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "endTime",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "shiftId",
+    "idPrefix": "SHIFT",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "shifts_manage"
+  },
+  "shipment": {
+    "modelName": "Shipment",
+    "label": "Shipments",
+    "columns": [
+      {
+        "key": "shipmentId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "direction",
+        "type": "string",
+        "required": true,
+        "enum": [
+          "Inbound",
+          "Outbound"
+        ]
+      },
+      {
+        "key": "relatedOrder",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "carrier",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "trackingNumber",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "origin",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "destination",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Preparing",
+          "Dispatched",
+          "In Transit",
+          "Delivered",
+          "Delayed",
+          "Cancelled"
+        ]
+      },
+      {
+        "key": "dispatchDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "expectedDeliveryDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "actualDeliveryDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "notes",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "shipmentId",
+    "idPrefix": "SHIP",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "shipments_create"
+  },
+  "softwareLicense": {
+    "modelName": "SoftwareLicense",
+    "label": "Software Licenses",
+    "columns": [
+      {
+        "key": "licenseId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "softwareName",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "vendor",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "licenseType",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "seatsTotal",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "seatsUsed",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "cost",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "purchaseDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "expiryDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Active",
+          "Inactive"
+        ]
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "licenseId",
+    "idPrefix": "LIC",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": "admin",
+    "importPermission": null
+  },
+  "stockItem": {
+    "modelName": "StockItem",
+    "label": "Stock Management",
+    "columns": [
+      {
+        "key": "itemId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "itemName",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "category",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "unit",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "openingStock",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "reorderLevel",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "location",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Active",
+          "Inactive"
+        ]
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "itemId",
+    "idPrefix": "STK",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": "admin",
+    "importPermission": null
+  },
+  "stockTransaction": {
+    "modelName": "StockTransaction",
+    "label": "Stock Transaction Log",
+    "columns": [
+      {
+        "key": "transactionId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "itemId",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "itemName",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "type",
+        "type": "string",
+        "required": true,
+        "enum": [
+          "IN",
+          "OUT"
+        ]
+      },
+      {
+        "key": "quantity",
+        "type": "number",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "reason",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "performedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "date",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "transactionId",
+    "idPrefix": "STKTX",
+    "importable": false,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": null
+  },
+  "successionPlan": {
+    "modelName": "SuccessionPlan",
+    "label": "Succession Plans",
+    "columns": [
+      {
+        "key": "planId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "position",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "currentHolder",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "successor1",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "successor1Readiness",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Ready Now",
+          "1-2 Years",
+          "3+ Years",
+          ""
+        ]
+      },
+      {
+        "key": "successor2",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "successor2Readiness",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Ready Now",
+          "1-2 Years",
+          "3+ Years",
+          ""
+        ]
+      },
+      {
+        "key": "notes",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "lastUpdated",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "planId",
+    "idPrefix": "SUCC",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": "succession_manage",
+    "importTeam": null,
+    "importPermission": "succession_manage"
+  },
+  "user": {
+    "modelName": "User",
+    "label": "Users",
+    "columns": [
+      {
+        "key": "name",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "email",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "role",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Administrator",
+          "Service Desk",
+          "Engineer",
+          "Manager",
+          "Viewer"
+        ]
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "active",
+        "type": "boolean",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "lastLoginAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "email",
+    "idPrefix": null,
+    "importable": false,
+    "exportTeam": null,
+    "exportPermission": "admin_manage_users",
+    "importTeam": null,
+    "importPermission": null
+  },
+  "vendor": {
+    "modelName": "Vendor",
+    "label": "Vendor Management",
+    "columns": [
+      {
+        "key": "name",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "contactPerson",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "email",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "phone",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "category",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Hardware",
+          "Software",
+          "Networking",
+          "Maintenance/AMC",
+          "Other"
+        ]
+      },
+      {
+        "key": "amcExpiry",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Active",
+          "Inactive"
+        ]
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "name",
+    "idPrefix": null,
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "vendors_create"
+  },
+  "vendorServiceLog": {
+    "modelName": "VendorServiceLog",
+    "label": "Vendor Service Log",
+    "columns": [
+      {
+        "key": "logId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "vendor",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "issue",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "priority",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Normal",
+          "High",
+          "Critical"
+        ]
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Open",
+          "Resolved"
+        ]
+      },
+      {
+        "key": "raisedBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "resolvedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "raisedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "logId",
+    "idPrefix": "VSVC",
+    "importable": true,
+    "exportTeam": "it",
+    "exportPermission": null,
+    "importTeam": "it",
+    "importPermission": null
+  },
+  "wellnessProgram": {
+    "modelName": "WellnessProgram",
+    "label": "Wellness Programs",
+    "columns": [
+      {
+        "key": "programId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "title",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "type",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "date",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "description",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Upcoming",
+          "Completed",
+          "Cancelled"
+        ]
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "programId",
+    "idPrefix": "WEL",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "wellness_manage"
+  },
+  "workOrder": {
+    "modelName": "WorkOrder",
+    "label": "Work Orders",
+    "columns": [
+      {
+        "key": "workOrderId",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "department",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "relatedSalesOrder",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "relatedAsset",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "itemDescription",
+        "type": "string",
+        "required": true,
+        "enum": null
+      },
+      {
+        "key": "quantity",
+        "type": "number",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "status",
+        "type": "string",
+        "required": false,
+        "enum": [
+          "Not Started",
+          "In Progress",
+          "Quality Check",
+          "Completed",
+          "On Hold",
+          "Cancelled"
+        ]
+      },
+      {
+        "key": "assignedTo",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "startDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "targetCompletionDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "completedDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "defectNotes",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdBy",
+        "type": "string",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "createdDate",
+        "type": "date",
+        "required": false,
+        "enum": null
+      },
+      {
+        "key": "updatedAt",
+        "type": "date",
+        "required": false,
+        "enum": null
+      }
+    ],
+    "idField": "workOrderId",
+    "idPrefix": "WO",
+    "importable": true,
+    "exportTeam": null,
+    "exportPermission": null,
+    "importTeam": null,
+    "importPermission": "workorders_create"
+  }
+}
