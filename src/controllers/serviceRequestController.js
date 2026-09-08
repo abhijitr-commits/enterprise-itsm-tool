@@ -152,11 +152,19 @@ async function showRequest(req, res) {
   const request = await ServiceRequest.findById(req.params.id).lean();
   if (!request) return res.status(404).render("errors/404");
 
-  const [attachments, auditEntries, canUpload, catalogEntry] = await Promise.all([
+  const [attachments, auditEntries, canUpload, catalogEntry, catalogItems] = await Promise.all([
     getAttachmentsForRecord("requests", request._id),
     getAuditTrailForRecord(request._id),
     hasPermission(req.user.role, "requests_edit"),
     findCatalogEntryFor(request.catalogItem),
+    // Audit backlog #80/#106 — the New Service Request form (showNewForm,
+    // above) already offers a <datalist> of existing catalog items so a
+    // requester can pick from what exists instead of re-typing/misspelling
+    // it; the Edit form on this same detail page had a plain text input
+    // with no such list, so an edit could silently fork a near-duplicate
+    // catalog entry (e.g. "VPN Access" vs "Vpn access"). Same source, same
+    // "active only" filter, same shape as showNewForm's — see detail.ejs.
+    RequestCatalog.find({ active: true }).sort({ name: 1 }).select("name").lean(),
   ]);
 
   res.render("requests/detail", {
@@ -169,6 +177,7 @@ async function showRequest(req, res) {
     canUpload,
     moduleKey: "requests",
     catalogEntry,
+    catalogItems: catalogItems.map((c) => c.name),
   });
 }
 
