@@ -22,12 +22,13 @@ const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
 const { resolveAssigneeRef } = require("../utils/userDirectory");
+const { paginate } = require("../utils/pagination");
 
 async function listComplaints(req, res) {
-  const complaints = await Complaint.find().sort({ createdDate: -1 }).lean();
+  const { rows: complaints, pageInfo } = await paginate(Complaint, {}, { createdDate: -1 }, req.query);
   const canManage = await hasPermission(req.user.role, "complaints_manage");
 
-  res.render("complaints/list", { complaints, canManage, COMPLAINT_STATUS, message: req.query.message || null });
+  res.render("complaints/list", { complaints, canManage, COMPLAINT_STATUS, message: req.query.message || null, pageInfo });
 }
 
 async function myComplaints(req, res) {
