@@ -83,7 +83,14 @@ async function listRequests(req, res) {
 
 async function showNewForm(req, res) {
   const catalogItems = await RequestCatalog.find({ active: true }).sort({ name: 1 }).select("name").lean();
-  res.render("requests/new", { error: null, form: {}, catalogItems: catalogItems.map((c) => c.name) });
+  // ?catalogItem=... lets the Service Portal (Architecture Phase 2) deep-link
+  // straight into a pre-filled form from a "Request This" / "Popular Requests"
+  // tile, instead of the requester having to re-type or re-pick the item.
+  res.render("requests/new", {
+    error: null,
+    form: { catalogItem: req.query.catalogItem || "" },
+    catalogItems: catalogItems.map((c) => c.name),
+  });
 }
 
 async function createRequest(req, res) {
