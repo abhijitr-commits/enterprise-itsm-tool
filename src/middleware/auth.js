@@ -8,6 +8,7 @@ const { isAdminTeam } = require("../utils/teamAccess");
 const { csvUiMeta } = require("../utils/csvMeta");
 const { resolveCsvImportAccess } = require("../utils/csvAccess");
 const { unreadCount } = require("../utils/notifications");
+const { getAssignableUsers } = require("../utils/userDirectory");
 
 // Short in-memory cache for the Department master list (Admin Console ->
 // Master Data -> Departments), so every "Department" field across the
@@ -108,6 +109,12 @@ async function attachUser(req, res, next) {
     res.locals.employeeList = req.user ? await getEmployeeNames() : [];
     res.locals.locationList = req.user ? await getLocationNames() : [];
     res.locals.assetNameList = req.user ? await getAssetNames() : [];
+    // Task #102 — real User accounts for the engineer/assignee suggestion
+    // list (see utils/userDirectory.js), same cached/global pattern as
+    // the lists above. A separate list from employeeList on purpose: an
+    // assignee is someone who logs into THIS app and works tickets, not
+    // just anyone in the HR employee directory.
+    res.locals.assignableUsers = req.user ? await getAssignableUsers() : [];
     // Unread in-app notification count for the bell icon (partials/header.ejs)
     // — cheap (one indexed count query) and only run for signed-in users.
     res.locals.unreadNotifications = req.user ? await unreadCount(req.user._id) : 0;
