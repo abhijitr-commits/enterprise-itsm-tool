@@ -53,6 +53,7 @@
       <% if (tasks.length === 0) { %><tr><td colspan="11" class="empty-row">No facility tasks yet.</td></tr><% } %>
     </tbody>
   </table>
+  <%- include('../partials/pagination', { pageInfo }) %>
   </div>
 </div>
 
