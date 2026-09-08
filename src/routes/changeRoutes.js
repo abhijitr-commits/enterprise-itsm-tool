@@ -27,6 +27,7 @@ function guardOrDelegate(action) {
 router.use(requireLogin);
 
 router.get("/", changeController.listChanges);
+router.get("/calendar", changeController.showCalendar);
 router.get("/new", guard("changes_create"), changeController.showNewForm);
 router.post("/", guard("changes_create"), changeController.createChange);
 router.post("/bulk-decide", guardOrDelegate("changes_approve"), changeController.bulkDecideChanges);
