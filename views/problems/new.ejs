@@ -12,7 +12,11 @@
       <input type="text" name="owner" list="employeeList" value="<%= form.owner || '' %>" placeholder="Unassigned" />
     </label>
     <label>Linked Incidents (optional)
-      <input type="text" name="linkedIncidents" value="<%= form.linkedIncidents || '' %>" placeholder="e.g. INC-2026-000012, INC-2026-000015" />
+      <input type="text" name="linkedIncidents" list="incidentCodeList" value="<%= form.linkedIncidents || '' %>" placeholder="e.g. INC-2026-000012, INC-2026-000015" />
+      <span class="hint">Comma-separated Incident IDs — each one that matches becomes a real, clickable link.</span>
+      <datalist id="incidentCodeList">
+        <% incidentCodes.forEach(function(c) { %><option value="<%= c %>"><% }) %>
+      </datalist>
     </label>
   </div>
   <label>Title

@@ -33,7 +33,11 @@
         </select>
       </label>
       <label>Linked Incidents
-        <input type="text" name="linkedIncidents" value="<%= problem.linkedIncidents || '' %>" />
+        <input type="text" name="linkedIncidents" list="incidentCodeList" value="<%= problem.linkedIncidents || '' %>" />
+        <span class="hint">Comma-separated Incident IDs — each one that matches becomes a real, clickable link below.</span>
+        <datalist id="incidentCodeList">
+          <% incidentCodes.forEach(function(c) { %><option value="<%= c %>"><% }) %>
+        </datalist>
       </label>
     </div>
     <label>Title
@@ -57,6 +61,30 @@
       <dt>Created By</dt><dd><%= problem.createdBy %></dd>
       <dt>Closed</dt><dd><%= problem.closedDate ? new Date(problem.closedDate).toLocaleString() : '—' %></dd>
     </dl>
+
+    <div class="panel-header"><h2>Linked Records</h2></div>
+    <div class="meta-list">
+      <p style="margin: 0 0 6px; font-weight: 600;">Incidents</p>
+      <% if ((problem.linkedIncidentIds || []).length === 0) { %>
+        <p class="empty-row" style="padding: 8px 0;">No linked incidents.</p>
+      <% } else { %>
+        <% problem.linkedIncidentIds.forEach(function(inc) { %>
+          <p><a href="/incidents/<%= inc._id %>"><%= inc.incidentId %></a> — <%= inc.subject %>
+            <span class="badge badge-status-<%= inc.status.toLowerCase().replace(/ /g,'-') %>"><%= inc.status %></span>
+          </p>
+        <% }) %>
+      <% } %>
+      <p style="margin: 12px 0 6px; font-weight: 600;">Changes raised from this Problem</p>
+      <% if ((linkedChanges || []).length === 0) { %>
+        <p class="empty-row" style="padding: 8px 0;">No changes linked yet.</p>
+      <% } else { %>
+        <% linkedChanges.forEach(function(c) { %>
+          <p><a href="/changes/<%= c._id %>"><%= c.changeId %></a> — <%= c.title %>
+            <span class="badge badge-approval-<%= c.cabStatus.toLowerCase().replace(/ /g,'-') %>"><%= c.cabStatus %></span>
+          </p>
+        <% }) %>
+      <% } %>
+    </div>
 
     <div class="panel-header"><h2>Comments</h2></div>
     <div class="comment-list">
