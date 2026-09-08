@@ -17,7 +17,7 @@
   <form class="panel form-panel" method="post" action="/problems/<%= problem._id %>">
     <div class="form-grid">
       <label>Owner
-        <input type="text" name="owner" value="<%= problem.owner || '' %>" placeholder="Unassigned" />
+        <input type="text" name="owner" list="assignableUsersList" value="<%= problem.owner || '' %>" placeholder="Unassigned" />
       </label>
       <label>Status
         <select name="status">
