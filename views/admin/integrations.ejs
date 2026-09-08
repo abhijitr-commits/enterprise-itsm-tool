@@ -37,6 +37,57 @@
   </details>
 </div>
 
+<div class="panel form-panel">
+  <div class="panel-header"><h2>Integration API</h2></div>
+  <p class="admin-tile-sub" style="margin-bottom:16px;">
+    A token-gated REST API so an outside system — a monitoring tool, a company website's contact form, a CI
+    pipeline — can file or read tickets without a human logging in. Nothing is sent anywhere on its own: it only
+    answers requests that arrive with the key below in an <code>X-Api-Key</code> header. Disabled (every request
+    gets a 503) until you generate a key.
+  </p>
+  <% if (apiToken) { %>
+    <div class="form-grid">
+      <label>Current API Key
+        <input type="text" readonly value="<%= apiToken %>" onclick="this.select()" style="font-family: monospace;" />
+      </label>
+    </div>
+    <div class="form-actions">
+      <form method="post" action="/admin/integrations/api-key/generate" style="display:inline;">
+        <button type="submit" class="btn btn-secondary">Regenerate (invalidates the key above)</button>
+      </form>
+      <form method="post" action="/admin/integrations/api-key/revoke" style="display:inline;" onsubmit="return confirm('Disable the Integration API? Every /api/v1/* request will start failing until a new key is generated.');">
+        <button type="submit" class="btn btn-danger">Revoke</button>
+      </form>
+    </div>
+  <% } else { %>
+    <div class="form-actions">
+      <form method="post" action="/admin/integrations/api-key/generate">
+        <button type="submit" class="btn btn-primary">Generate API Key</button>
+      </form>
+    </div>
+  <% } %>
+  <details style="margin-top:16px;" <%= apiToken ? 'open' : '' %>>
+    <summary>API reference</summary>
+    <p>Send the key in an <code>X-Api-Key</code> header on every request. All bodies/responses are JSON.</p>
+    <table class="table" style="margin-top:8px;">
+      <thead><tr><th>Method</th><th>Path</th><th>Body / notes</th></tr></thead>
+      <tbody>
+        <tr><td>POST</td><td>/api/v1/incidents</td><td>employeeName, department, location, category, priority, subject, description</td></tr>
+        <tr><td>GET</td><td>/api/v1/incidents</td><td>optional ?status=&priority=&limit= (max 200)</td></tr>
+        <tr><td>GET</td><td>/api/v1/incidents/:incidentId</td><td>lookup by Incident ID, e.g. INC-2026-000123</td></tr>
+        <tr><td>POST</td><td>/api/v1/requests</td><td>requester, department, catalogItem, details</td></tr>
+        <tr><td>POST</td><td>/api/v1/problems</td><td>title, description (owner, linkedIncidents optional)</td></tr>
+        <tr><td>POST</td><td>/api/v1/changes</td><td>title, description, riskLevel, plannedDate, requestedBy, department</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:8px;">Example:</p>
+    <pre style="white-space:pre-wrap;">curl -X POST https://YOUR-APP.onrender.com/api/v1/incidents \
+  -H "X-Api-Key: YOUR_KEY" -H "Content-Type: application/json" \
+  -d '{"employeeName":"Jane Doe","department":"IT","location":"HQ","category":"Network","priority":"High","subject":"VPN down","description":"Cannot connect to VPN since 9am."}'</pre>
+    <p>Every ticket created this way runs through the same automation rules, SLA calculation, and audit trail as one filed in the browser — it just shows "via Integration API" in its audit entry.</p>
+  </details>
+</div>
+
 <div class="panel">
   <div class="panel-header"><h2>Test</h2></div>
   <p class="admin-tile-sub" style="margin-bottom:16px;">Sends a one-off test message to every channel that's configured above.</p>
