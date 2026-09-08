@@ -9,6 +9,8 @@
  *************************************************************/
 const Incident = require("../models/Incident");
 const ServiceRequest = require("../models/ServiceRequest");
+const Problem = require("../models/Problem");
+const Change = require("../models/Change");
 const Asset = require("../models/Asset");
 const Employee = require("../models/Employee");
 const Vendor = require("../models/Vendor");
@@ -403,14 +405,129 @@ function pendingFacilityTasksReport(tasks) {
     .sort((a, b) => new Date(a.scheduledDate) - new Date(b.scheduledDate));
 }
 
+/**
+ * Architecture Phase 3 addition (see itsm_architecture_comparison.md) —
+ * combined ticket-volume trend across all four core ticket modules,
+ * last 6 calendar months (oldest first), for the Reports page's new BI
+ * Dashboard section. Same idea as monthlyVolumeReport() above but
+ * merges Incidents/Requests/Problems/Changes into one comparable trend
+ * instead of Incidents alone.
+ */
+function ticketVolumeTrend(incidents, requests, problems, changes) {
+  const months = [];
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push(d.toLocaleString("en-US", { month: "short", year: "numeric" }));
+  }
+  const base = () => Object.fromEntries(months.map((m) => [m, 0]));
+  const counts = { incidents: base(), requests: base(), problems: base(), changes: base() };
+
+  function tally(rows, key) {
+    rows.forEach((r) => {
+      if (!r.createdDate) return;
+      const m = new Date(r.createdDate).toLocaleString("en-US", { month: "short", year: "numeric" });
+      if (m in counts[key]) counts[key][m]++;
+    });
+  }
+  tally(incidents, "incidents");
+  tally(requests, "requests");
+  tally(problems, "problems");
+  tally(changes, "changes");
+
+  return months.map((m) => ({
+    month: m,
+    incidents: counts.incidents[m],
+    requests: counts.requests[m],
+    problems: counts.problems[m],
+    changes: counts.changes[m],
+    total: counts.incidents[m] + counts.requests[m] + counts.problems[m] + counts.changes[m],
+  }));
+}
+
+/**
+ * Architecture Phase 3 addition — aggregates slaComplianceReport()'s
+ * per-incident output into the Met/Breached/At Risk/On Track counts
+ * the new SLA Compliance donut needs, plus an overall compliance %
+ * (Met / (Met + Breached), since On Track/At Risk haven't finished yet
+ * so counting them either way would understate or overstate compliance).
+ */
+function slaComplianceSummary(slaRows) {
+  const counts = { Met: 0, Breached: 0, "At Risk": 0, "On Track": 0 };
+  slaRows.forEach((r) => {
+    if (counts[r.slaStatus] !== undefined) counts[r.slaStatus]++;
+  });
+  const decided = counts.Met + counts.Breached;
+  const compliancePct = decided > 0 ? Math.round((counts.Met / decided) * 100) : null;
+  return { ...counts, decided, compliancePct };
+}
+
+/**
+ * Architecture Phase 3 addition — Mean Time To Resolve, in hours, for
+ * Incidents that have both a createdDate and a closedDate. Trended by
+ * month (last 6 months) plus an all-time overall average — no
+ * equivalent existed anywhere in this app before (SLA Compliance only
+ * tracks met-vs-breached against the SLA due date, not actual
+ * resolution speed).
+ */
+function mttrReport(incidents) {
+  const resolved = incidents.filter((r) => r.createdDate && r.closedDate);
+  const hoursFor = (r) => (new Date(r.closedDate) - new Date(r.createdDate)) / (1000 * 60 * 60);
+
+  const overallAvg = resolved.length ? Math.round(resolved.reduce((sum, r) => sum + hoursFor(r), 0) / resolved.length) : null;
+
+  const months = [];
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push(d.toLocaleString("en-US", { month: "short", year: "numeric" }));
+  }
+  const byMonth = Object.fromEntries(months.map((m) => [m, { sum: 0, count: 0 }]));
+  resolved.forEach((r) => {
+    const m = new Date(r.closedDate).toLocaleString("en-US", { month: "short", year: "numeric" });
+    if (byMonth[m]) {
+      byMonth[m].sum += hoursFor(r);
+      byMonth[m].count++;
+    }
+  });
+
+  const trend = months.map((m) => ({
+    month: m,
+    avgHours: byMonth[m].count ? Math.round(byMonth[m].sum / byMonth[m].count) : 0,
+    count: byMonth[m].count,
+  }));
+
+  return { overallAvg, resolvedCount: resolved.length, trend };
+}
+
+/**
+ * Architecture Phase 3 addition — Change Failure Rate, the standard
+ * DevOps/ITSM health metric (% of completed changes that had to be
+ * rolled back). Only counts changes that actually reached a terminal
+ * implementation state (Implemented or Rolled Back) — a change still
+ * Not Started/In Progress hasn't succeeded or failed yet. Directly
+ * powered by this week's rollback PIR feature (Change.implementationStatus
+ * plus rootCause/correctiveAction/lessonsLearned), so this number now
+ * means something instead of being unmeasurable.
+ */
+function changeFailureRateReport(changes) {
+  const implemented = changes.filter((c) => c.implementationStatus === "Implemented").length;
+  const rolledBack = changes.filter((c) => c.implementationStatus === "Rolled Back").length;
+  const completed = implemented + rolledBack;
+  const failureRatePct = completed > 0 ? Math.round((rolledBack / completed) * 100) : null;
+  return { implemented, rolledBack, completed, failureRatePct };
+}
+
 async function showReports(req, res) {
   const [
-    incidents, requests, assets, employees, vendors, licenses, purchases, expenses,
+    incidents, requests, problems, changes, assets, employees, vendors, licenses, purchases, expenses,
     adminVendors, adminStockItems, adminStockOrders, adminScrapItems,
     adminAssets, adminPurchases, adminComplaints, adminFacilityTasks,
   ] = await Promise.all([
     Incident.find().lean(),
     ServiceRequest.find().lean(),
+    Problem.find().lean(),
+    Change.find().lean(),
     Asset.find().lean(),
     Employee.find().lean(),
     Vendor.find().lean(),
@@ -429,8 +546,16 @@ async function showReports(req, res) {
 
   const adminStockCritical = await adminStockCriticalReport(adminStockItems);
 
+  // Architecture Phase 3 — BI Dashboard section, computed once here and
+  // rendered as charts (not tables) at the top of reports/index.ejs.
+  const slaRows = slaComplianceReport(incidents);
+
   res.render("reports/index", {
-    sla: slaComplianceReport(incidents),
+    biVolumeTrend: ticketVolumeTrend(incidents, requests, problems, changes),
+    biSlaSummary: slaComplianceSummary(slaRows),
+    biMttr: mttrReport(incidents),
+    biChangeFailureRate: changeFailureRateReport(changes),
+    sla: slaRows,
     volume: monthlyVolumeReport(incidents),
     engineers: engineerPerformanceReport(incidents),
     aging: ticketAgingReport(incidents),
@@ -455,6 +580,10 @@ async function showReports(req, res) {
 
 module.exports = {
   showReports,
+  ticketVolumeTrend,
+  slaComplianceSummary,
+  mttrReport,
+  changeFailureRateReport,
   departmentWorkloadReport,
   assetWarrantyReport,
   contractExpiryReport,
