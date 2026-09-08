@@ -4,10 +4,11 @@
 const Vendor = require("../models/Vendor");
 const { VENDOR_CATEGORY, VENDOR_STATUS } = Vendor;
 const { logAudit } = require("../utils/auditLog");
+const { paginate } = require("../utils/pagination");
 
 async function listVendors(req, res) {
-  const vendors = await Vendor.find().sort({ name: 1 }).lean();
-  res.render("vendors/list", { vendors, message: req.query.message || null });
+  const { rows: vendors, pageInfo } = await paginate(Vendor, {}, { name: 1 }, req.query);
+  res.render("vendors/list", { vendors, message: req.query.message || null, pageInfo });
 }
 
 function showNewForm(req, res) {
