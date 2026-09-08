@@ -43,6 +43,7 @@ const { logAudit } = require("../utils/auditLog");
 const { markChecklistTaskDone } = require("../utils/checklists");
 const { CHECKLIST_TYPE } = require("../models/Checklist");
 const { isHRTeam } = require("../utils/teamAccess");
+const { paginate } = require("../utils/pagination");
 
 const DEFAULT_OFFER_LETTER_TEMPLATE = `Dear {{EmployeeName}},
 
@@ -228,8 +229,8 @@ async function saveTemplates(req, res) {
 /* ---------- GENERATE ---------- */
 
 async function listLetters(req, res) {
-  const letters = await Letter.find().sort({ generatedDate: -1 }).lean();
-  res.render("letters/list", { letters, message: req.query.message || null });
+  const { rows: letters, pageInfo } = await paginate(Letter, {}, { generatedDate: -1 }, req.query);
+  res.render("letters/list", { letters, message: req.query.message || null, pageInfo });
 }
 
 // "Select a name and ready to go": offer/interview-stage candidates,
