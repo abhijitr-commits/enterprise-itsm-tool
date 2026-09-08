@@ -2,7 +2,10 @@
 
 <div class="page-header">
   <h1>My Access Requests</h1>
-  <a class="btn btn-primary" href="/access-requests/new">+ New Access Request</a>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/it">← IT Hub</a>
+    <a class="btn btn-primary" href="/access-requests/new">+ New Access Request</a>
+  </div>
 </div>
 
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
