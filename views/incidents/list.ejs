@@ -4,6 +4,7 @@
   <h1>Incident Register</h1>
   <div class="header-actions">
     <a class="btn btn-secondary" href="/itsm">← ITSM Hub</a>
+    <a class="btn btn-secondary" href="/incidents/major">🚨 Major Incidents</a>
     <a class="btn btn-primary" href="/incidents/new">+ New Incident</a>
   </div>
 </div>
@@ -36,7 +37,7 @@
       <% incidents.forEach(function(inc) { %>
         <tr onclick="location.href='/incidents/<%= inc._id %>'">
           <td><%= inc.incidentId %></td>
-          <td><%= inc.subject %></td>
+          <td><% if (inc.isMajorIncident) { %>🚨 <% } %><%= inc.subject %></td>
           <td><%= inc.employeeName %></td>
           <td><span class="badge badge-priority-<%= inc.priority.toLowerCase() %>"><%= inc.priority %></span></td>
           <td><span class="badge badge-status-<%= inc.status.toLowerCase().replace(/ /g,'-') %>"><%= inc.status %></span></td>

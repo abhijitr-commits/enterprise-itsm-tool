@@ -1,8 +1,18 @@
 <%- include('../partials/header', { title: incident.incidentId }) %>
 
 <div class="page-header">
-  <h1><%= incident.incidentId %> — <%= incident.subject %></h1>
+  <h1><% if (incident.isMajorIncident) { %>🚨 <% } %><%= incident.incidentId %> — <%= incident.subject %></h1>
   <div class="header-actions">
+    <% if (canManageMajorIncident && !incident.isMajorIncident) { %>
+      <form method="post" action="/incidents/<%= incident._id %>/declare-major" onsubmit="return confirm('Declare this a Major Incident? This broadcasts to Slack/Teams immediately.')">
+        <button class="btn btn-danger" type="submit">🚨 Declare Major Incident</button>
+      </form>
+    <% } %>
+    <% if (canManageMajorIncident && incident.isMajorIncident && !incident.majorIncidentStoodDownAt) { %>
+      <form method="post" action="/incidents/<%= incident._id %>/stand-down-major" onsubmit="return confirm('Stand down this Major Incident? The ticket itself stays open until you resolve/close it separately.')">
+        <button class="btn btn-secondary" type="submit">Stand Down</button>
+      </form>
+    <% } %>
     <% if (incident.status !== 'Closed') { %>
       <form method="post" action="/incidents/<%= incident._id %>/close" onsubmit="return confirm('Close this incident?')">
         <button class="btn btn-secondary" type="submit">Close Incident</button>
@@ -15,6 +25,18 @@
 </div>
 
 <% if (justCreated) { %><div class="alert alert-success">Incident created successfully.</div><% } %>
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+<% if (incident.isMajorIncident && !incident.majorIncidentStoodDownAt) { %>
+  <div class="alert alert-error">
+    🚨 <strong>Active Major Incident</strong> — declared <%= new Date(incident.majorIncidentDeclaredAt).toLocaleString() %> by <%= incident.majorIncidentDeclaredBy %>.
+    <a href="/incidents/major">View the war room board →</a>
+  </div>
+<% } else if (incident.isMajorIncident) { %>
+  <div class="alert alert-success">
+    This was a Major Incident (declared <%= new Date(incident.majorIncidentDeclaredAt).toLocaleString() %>, stood down <%= new Date(incident.majorIncidentStoodDownAt).toLocaleString() %>).
+    <% if (!incident.pirNotes) { %>A Post-Incident Review is still pending — see the field below.<% } %>
+  </div>
+<% } %>
 
 <div class="detail-grid">
   <form class="panel form-panel" method="post" action="/incidents/<%= incident._id %>">
@@ -61,6 +83,11 @@
     <label>Remarks
       <textarea name="remarks" rows="2"><%= incident.remarks || '' %></textarea>
     </label>
+    <% if (incident.isMajorIncident) { %>
+      <label>Post-Incident Review <span class="hint">(root cause, timeline, follow-up actions)</span>
+        <textarea name="pirNotes" rows="4" placeholder="What happened, why, and what changes as a result…"><%= incident.pirNotes || '' %></textarea>
+      </label>
+    <% } %>
     <label>Related Robot / Equipment (optional)
       <input type="text" name="relatedAsset" value="<%= incident.relatedAsset || '' %>" list="assetNamesList" placeholder="Search by name or asset ID" />
       <datalist id="assetNamesList">

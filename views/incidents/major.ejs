@@ -1,0 +1,67 @@
+<%- include('../partials/header', { title: 'Major Incidents' }) %>
+
+<div class="page-header">
+  <h1>🚨 Major Incidents</h1>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/incidents">← Incident Register</a>
+  </div>
+</div>
+
+<p class="hint" style="margin-bottom: 18px;">
+  Every Incident ever declared a Major Incident (see "Declare Major Incident" on an incident's own page) — the
+  team's war-room board. Declaring broadcasts to Slack/Teams immediately; standing one down closes the war room
+  without closing the underlying ticket, so a Post-Incident Review can still happen before it's fully resolved.
+</p>
+
+<div class="panel">
+  <div class="panel-header"><h2>Active — <%= active.length %></h2></div>
+  <table class="table">
+    <thead>
+      <tr><th>ID</th><th>Subject</th><th>Priority</th><th>Status</th><th>SLA</th><th>Engineer</th><th>Declared</th><th>Declared By</th></tr>
+    </thead>
+    <tbody>
+      <% active.forEach(function(inc) { %>
+        <tr onclick="location.href='/incidents/<%= inc._id %>'">
+          <td><%= inc.incidentId %></td>
+          <td><%= inc.subject %></td>
+          <td><span class="badge badge-priority-<%= inc.priority.toLowerCase() %>"><%= inc.priority %></span></td>
+          <td><span class="badge badge-status-<%= inc.status.toLowerCase().replace(/ /g,'-') %>"><%= inc.status %></span></td>
+          <% var mSlaStatus = inc.slaStatus || 'On Track'; %>
+          <td><span class="badge badge-sla-<%= mSlaStatus.toLowerCase().replace(/ /g,'-') %>"><%= mSlaStatus %></span></td>
+          <td><%= inc.engineer || '—' %></td>
+          <td><%= inc.majorIncidentDeclaredAt ? new Date(inc.majorIncidentDeclaredAt).toLocaleString() : '—' %></td>
+          <td><%= inc.majorIncidentDeclaredBy || '—' %></td>
+        </tr>
+      <% }) %>
+      <% if (active.length === 0) { %>
+        <tr><td colspan="8" class="empty-row">No active Major Incidents right now.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="panel" style="margin-top: 18px;">
+  <div class="panel-header"><h2>Stood Down — <%= stoodDown.length %></h2></div>
+  <table class="table">
+    <thead>
+      <tr><th>ID</th><th>Subject</th><th>Status</th><th>Declared</th><th>Stood Down</th><th>PIR</th></tr>
+    </thead>
+    <tbody>
+      <% stoodDown.forEach(function(inc) { %>
+        <tr onclick="location.href='/incidents/<%= inc._id %>'">
+          <td><%= inc.incidentId %></td>
+          <td><%= inc.subject %></td>
+          <td><span class="badge badge-status-<%= inc.status.toLowerCase().replace(/ /g,'-') %>"><%= inc.status %></span></td>
+          <td><%= inc.majorIncidentDeclaredAt ? new Date(inc.majorIncidentDeclaredAt).toLocaleString() : '—' %></td>
+          <td><%= inc.majorIncidentStoodDownAt ? new Date(inc.majorIncidentStoodDownAt).toLocaleString() : '—' %></td>
+          <td><%= inc.pirNotes ? '✅ Recorded' : '⏳ Pending' %></td>
+        </tr>
+      <% }) %>
+      <% if (stoodDown.length === 0) { %>
+        <tr><td colspan="6" class="empty-row">None stood down yet.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>
