@@ -4,6 +4,7 @@
 const Change = require("../models/Change");
 const Problem = require("../models/Problem");
 const Incident = require("../models/Incident");
+const ChangeFreezeWindow = require("../models/ChangeFreezeWindow");
 const { APPROVAL } = require("../models/ServiceRequest");
 const { logAudit } = require("../utils/auditLog");
 const { generateSequentialId } = require("../utils/idGenerator");
@@ -13,6 +14,7 @@ const { paginate } = require("../utils/pagination");
 const { applyAutomation, recordAutomationRun } = require("../utils/automationEngine");
 const { notifyUser } = require("../utils/notifications");
 const { resolveIdsByCode, resolveOneIdByCode } = require("../utils/linkedRecords");
+const { findFreezeWindowFor, findFreezeWindowsInRange } = require("../utils/changeFreeze");
 
 const { IMPL } = Change;
 
@@ -23,6 +25,99 @@ async function listLinkOptions() {
     Incident.find().select("incidentId").sort({ createdDate: -1 }).limit(500).lean(),
   ]);
   return { problemCodes: problems.map((p) => p.problemId), incidentCodes: incidents.map((i) => i.incidentId) };
+}
+
+/**
+ * Audit backlog — "Change Management maturity: freeze windows, calendar
+ * view, conflict detection." A freeze window (see Master Data ->
+ * Change Freeze Windows) blocks routine changes from being planned
+ * inside it — but not High risk ones, since a freeze exists to keep
+ * routine work off the calendar during a sensitive period, not to make
+ * a genuine emergency change impossible to file. Thrown as a plain
+ * Error so both createChange and updateChange's existing try/catch ->
+ * re-render-with-error path picks it up with no extra plumbing.
+ */
+async function assertNotFrozen(plannedDate, riskLevel) {
+  if (riskLevel === "High") return; // emergency changes may still be filed during a freeze
+  const freezeWindow = await findFreezeWindowFor(plannedDate);
+  if (!freezeWindow) return;
+  const range = `${new Date(freezeWindow.startDate).toLocaleDateString()}–${new Date(freezeWindow.endDate).toLocaleDateString()}`;
+  throw new Error(
+    `This planned date falls inside a change freeze window — "${freezeWindow.title}" (${range})${freezeWindow.reason ? ": " + freezeWindow.reason : ""}. ` +
+      `Pick a date outside the freeze, or submit this as a High risk change if it's a genuine emergency.`
+  );
+}
+
+/**
+ * Audit backlog — "calendar view, conflict detection." A month grid of
+ * every Change's plannedDate plus every freeze window overlapping that
+ * month, so CAB can see at a glance which days are frozen and which
+ * days already have more than one change stacked on them (a same-day
+ * conflict — not blocked like a freeze window, since two low-risk
+ * changes on the same day isn't necessarily a problem, just something
+ * a human should notice and judge).
+ */
+async function showCalendar(req, res) {
+  const now = new Date();
+  const year = parseInt(req.query.year, 10) || now.getFullYear();
+  const month = parseInt(req.query.month, 10) || now.getMonth() + 1; // 1-12
+
+  const monthStart = new Date(year, month - 1, 1);
+  const monthEnd = new Date(year, month, 0, 23, 59, 59, 999); // last instant of the last day
+
+  const [changes, freezeWindows] = await Promise.all([
+    Change.find({ plannedDate: { $gte: monthStart, $lte: monthEnd } })
+      .select("changeId title riskLevel cabStatus plannedDate")
+      .sort({ plannedDate: 1 })
+      .lean(),
+    findFreezeWindowsInRange(monthStart, monthEnd),
+  ]);
+
+  const changesByDay = {}; // "1".."31" -> [change,...]
+  changes.forEach((c) => {
+    const day = new Date(c.plannedDate).getDate();
+    (changesByDay[day] = changesByDay[day] || []).push(c);
+  });
+
+  function freezeWindowCovering(day) {
+    const dayDate = new Date(year, month - 1, day);
+    return freezeWindows.find((fw) => new Date(fw.startDate) <= dayDate && new Date(fw.endDate) >= dayDate) || null;
+  }
+
+  const daysInMonth = monthEnd.getDate();
+  const leadingBlanks = monthStart.getDay(); // 0 (Sun) .. 6 (Sat)
+
+  const cells = [];
+  for (let i = 0; i < leadingBlanks; i++) cells.push(null);
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayChanges = changesByDay[day] || [];
+    cells.push({
+      day,
+      changes: dayChanges,
+      conflict: dayChanges.length > 1,
+      freezeWindow: freezeWindowCovering(day),
+      isToday: year === now.getFullYear() && month === now.getMonth() + 1 && day === now.getDate(),
+    });
+  }
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const weeks = [];
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+
+  const prevMonthDate = new Date(year, month - 2, 1);
+  const nextMonthDate = new Date(year, month, 1);
+
+  res.render("changes/calendar", {
+    monthLabel: monthStart.toLocaleString("en-US", { month: "long", year: "numeric" }),
+    weeks,
+    freezeWindows,
+    prevYear: prevMonthDate.getFullYear(),
+    prevMonth: prevMonthDate.getMonth() + 1,
+    nextYear: nextMonthDate.getFullYear(),
+    nextMonth: nextMonthDate.getMonth() + 1,
+    currentYear: year,
+    currentMonth: month,
+  });
 }
 
 async function listChanges(req, res) {
@@ -67,6 +162,8 @@ async function createChange(req, res) {
     for (const field of ["title", "description", "riskLevel", "plannedDate", "requestedBy", "department"]) {
       if (!data[field]) throw new Error(`${field} is required.`);
     }
+
+    await assertNotFrozen(data.plannedDate, data.riskLevel);
 
     const changeId = await generateSequentialId("CHG");
     const [linkedProblemId, linkedIncidentIds] = await Promise.all([
@@ -149,6 +246,8 @@ async function updateChange(req, res) {
         `This change has already been ${change.cabStatus.toLowerCase()} by CAB and can no longer be edited directly. Use the implementation/close actions instead.`
       );
     }
+
+    await assertNotFrozen(data.plannedDate, data.riskLevel);
 
     change.title = data.title;
     change.description = data.description;
@@ -375,6 +474,7 @@ async function addComment(req, res) {
 
 module.exports = {
   listChanges,
+  showCalendar,
   showNewForm,
   createChange,
   showChange,

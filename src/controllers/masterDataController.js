@@ -18,6 +18,7 @@ const Location = require("../models/Location");
 const Category = require("../models/Category");
 const SLAMatrix = require("../models/SLAMatrix");
 const Holiday = require("../models/Holiday");
+const ChangeFreezeWindow = require("../models/ChangeFreezeWindow");
 const { PRIORITY } = require("../config/constants");
 const { logAudit } = require("../utils/auditLog");
 
@@ -97,6 +98,29 @@ const MASTER_DATA_TABLES = {
     model: Holiday,
     fields: HOLIDAY_FIELDS,
   },
+  // Audit backlog — "Change Management maturity: freeze windows,
+  // calendar view, conflict detection." Reusing the generic Master Data
+  // CRUD here means a full Admin add/edit/delete screen for zero new
+  // view code — see src/models/ChangeFreezeWindow.js and
+  // src/utils/changeFreeze.js for how changeController and the new
+  // /changes/calendar view actually use these rows.
+  changefreezewindows: {
+    label: "Change Freeze Windows",
+    model: ChangeFreezeWindow,
+    fields: [
+      { name: "title", label: "Title", type: "text", required: true },
+      { name: "startDate", label: "Start Date", type: "date", required: true },
+      { name: "endDate", label: "End Date", type: "date", required: true },
+      { name: "reason", label: "Reason", type: "text" },
+    ],
+    // Optional per-table hook (see createRow/updateRow below) — every
+    // other table skips this, so it changes nothing for them.
+    validate(doc) {
+      if (doc.startDate && doc.endDate && new Date(doc.endDate) < new Date(doc.startDate)) {
+        throw new Error("End Date must be on or after Start Date.");
+      }
+    },
+  },
 };
 
 function getTableOr404(req, res) {
@@ -154,6 +178,8 @@ async function createRow(req, res) {
       }
       doc[field.name] = req.body[field.name] || undefined;
     }
+
+    if (typeof table.validate === "function") table.validate(doc);
 
     await table.model.create(doc);
 
@@ -217,6 +243,8 @@ async function updateRow(req, res) {
       }
       row[field.name] = req.body[field.name] || undefined;
     }
+
+    if (typeof table.validate === "function") table.validate(row);
 
     await row.save();
 
