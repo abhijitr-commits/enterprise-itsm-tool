@@ -17,6 +17,7 @@ const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 const { notifyUser } = require("../utils/notifications");
 const { paginate } = require("../utils/pagination");
+const { applyAutomation, recordAutomationRun } = require("../utils/automationEngine");
 
 const { APPROVAL } = ServiceRequest;
 
@@ -94,7 +95,7 @@ async function createRequest(req, res) {
 
     const requestId = await generateSequentialId("REQ");
 
-    const request = await ServiceRequest.create({
+    const request = new ServiceRequest({
       requestId,
       requester: data.requester,
       department: data.department,
@@ -104,6 +105,10 @@ async function createRequest(req, res) {
       fulfillmentStatus: STATUS.OPEN,
       createdBy: req.user.email,
     });
+
+    const automationResult = await applyAutomation({ moduleName: "ServiceRequest", trigger: "onCreate", doc: request });
+
+    await request.save();
 
     await logAudit({
       user: req.user._id,
@@ -116,6 +121,8 @@ async function createRequest(req, res) {
     // Non-blocking: grow/track the catalog, but never let this delay or
     // fail the redirect the person filing the request is waiting on.
     recordCatalogUsage(data.catalogItem, req.user.email);
+
+    await recordAutomationRun(automationResult, { entityType: "Service Request", entityId: request._id, userId: req.user._id });
 
     res.redirect(`/requests/${request._id}?created=1`);
   } catch (err) {
@@ -161,6 +168,8 @@ async function updateRequest(req, res) {
       request.closedDate = new Date();
     }
 
+    const automationResult = await applyAutomation({ moduleName: "ServiceRequest", trigger: "onUpdate", doc: request });
+
     await request.save();
 
     await logAudit({
@@ -170,6 +179,8 @@ async function updateRequest(req, res) {
       entityId: request._id,
       details: `Fulfillment: ${request.fulfillmentStatus}`,
     });
+
+    await recordAutomationRun(automationResult, { entityType: "Service Request", entityId: request._id, userId: req.user._id });
 
     res.redirect(`/requests/${request._id}`);
   } catch (err) {

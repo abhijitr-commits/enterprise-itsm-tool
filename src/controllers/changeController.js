@@ -8,6 +8,7 @@ const { generateSequentialId } = require("../utils/idGenerator");
 const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 const { paginate } = require("../utils/pagination");
+const { applyAutomation, recordAutomationRun } = require("../utils/automationEngine");
 
 const { IMPL } = Change;
 
@@ -55,7 +56,7 @@ async function createChange(req, res) {
 
     const changeId = await generateSequentialId("CHG");
 
-    const change = await Change.create({
+    const change = new Change({
       changeId,
       title: data.title,
       description: data.description,
@@ -68,13 +69,19 @@ async function createChange(req, res) {
       createdBy: req.user.email,
     });
 
+    const automationResult = await applyAutomation({ moduleName: "Change", trigger: "onCreate", doc: change });
+
+    await change.save();
+
     await logAudit({
       user: req.user._id,
       action: "Create",
       entityType: "Change",
       entityId: change._id,
-      details: `${data.title} (${data.riskLevel} risk)`,
+      details: `${data.title} (${change.riskLevel} risk)`,
     });
+
+    await recordAutomationRun(automationResult, { entityType: "Change", entityId: change._id, userId: req.user._id });
 
     res.redirect(`/changes/${change._id}?created=1`);
   } catch (err) {
@@ -232,6 +239,9 @@ async function updateImplementationStatus(req, res) {
     }
 
     change.implementationStatus = implementationStatus;
+
+    const automationResult = await applyAutomation({ moduleName: "Change", trigger: "onUpdate", doc: change });
+
     await change.save();
 
     await logAudit({
@@ -244,6 +254,8 @@ async function updateImplementationStatus(req, res) {
           ? `${implementationStatus} — root cause: ${change.rootCause}`
           : implementationStatus,
     });
+
+    await recordAutomationRun(automationResult, { entityType: "Change", entityId: change._id, userId: req.user._id });
 
     res.redirect(`/changes/${change._id}`);
   } catch (err) {

@@ -16,6 +16,7 @@ const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 const { notifyUser } = require("../utils/notifications");
 const { paginate } = require("../utils/pagination");
+const { applyAutomation, recordAutomationRun } = require("../utils/automationEngine");
 
 /**
  * Phase 9 helper — a light "Asset Name (Asset ID)" list for the
@@ -88,9 +89,8 @@ async function createIncident(req, res) {
 
     const incidentId = await generateSequentialId("INC");
     const createdDate = new Date();
-    const slaDue = await calculateSLADue("Incident", createdDate, data.priority);
 
-    const incident = await Incident.create({
+    const incident = new Incident({
       incidentId,
       createdDate,
       employeeName: data.employeeName,
@@ -101,11 +101,19 @@ async function createIncident(req, res) {
       subject: data.subject,
       description: data.description,
       status: STATUS.OPEN,
-      slaDue,
       remarks: data.remarks || "",
       relatedAsset: data.relatedAsset || "",
       createdBy: req.user.email,
     });
+
+    // Automation engine (see utils/automationEngine.js) runs before the SLA
+    // due date is calculated, so an escalatePriority action is reflected in
+    // the SLA clock, not just the priority label.
+    const automationResult = await applyAutomation({ moduleName: "Incident", trigger: "onCreate", doc: incident });
+
+    incident.slaDue = await calculateSLADue("Incident", createdDate, incident.priority);
+
+    await incident.save();
 
     await logAudit({
       user: req.user._id,
@@ -114,6 +122,8 @@ async function createIncident(req, res) {
       entityId: incident._id,
       details: data.subject,
     });
+
+    await recordAutomationRun(automationResult, { entityType: "Incident", entityId: incident._id, userId: req.user._id });
 
     res.redirect(`/incidents/${incident._id}?created=1`);
   } catch (err) {
@@ -172,6 +182,8 @@ async function updateIncident(req, res) {
       incident.closedDate = new Date();
     }
 
+    const automationResult = await applyAutomation({ moduleName: "Incident", trigger: "onUpdate", doc: incident });
+
     await incident.save();
 
     if (data.engineer && data.engineer !== previousEngineer) {
@@ -203,6 +215,8 @@ async function updateIncident(req, res) {
       entityId: incident._id,
       details: `Status: ${incident.status}`,
     });
+
+    await recordAutomationRun(automationResult, { entityType: "Incident", entityId: incident._id, userId: req.user._id });
 
     res.redirect(`/incidents/${incident._id}`);
   } catch (err) {

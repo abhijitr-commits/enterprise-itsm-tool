@@ -8,6 +8,7 @@ const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 const { paginate } = require("../utils/pagination");
+const { applyAutomation, recordAutomationRun } = require("../utils/automationEngine");
 
 async function listProblems(req, res) {
   const { q, status } = req.query;
@@ -42,7 +43,7 @@ async function createProblem(req, res) {
 
     const problemId = await generateSequentialId("PRB");
 
-    const problem = await Problem.create({
+    const problem = new Problem({
       problemId,
       title: data.title,
       description: data.description,
@@ -54,6 +55,10 @@ async function createProblem(req, res) {
       createdBy: req.user.email,
     });
 
+    const automationResult = await applyAutomation({ moduleName: "Problem", trigger: "onCreate", doc: problem });
+
+    await problem.save();
+
     await logAudit({
       user: req.user._id,
       action: "Create",
@@ -61,6 +66,8 @@ async function createProblem(req, res) {
       entityId: problem._id,
       details: data.title,
     });
+
+    await recordAutomationRun(automationResult, { entityType: "Problem", entityId: problem._id, userId: req.user._id });
 
     res.redirect(`/problems/${problem._id}?created=1`);
   } catch (err) {
@@ -107,6 +114,8 @@ async function updateProblem(req, res) {
       problem.closedDate = new Date();
     }
 
+    const automationResult = await applyAutomation({ moduleName: "Problem", trigger: "onUpdate", doc: problem });
+
     await problem.save();
 
     await logAudit({
@@ -116,6 +125,8 @@ async function updateProblem(req, res) {
       entityId: problem._id,
       details: `Status: ${problem.status}`,
     });
+
+    await recordAutomationRun(automationResult, { entityType: "Problem", entityId: problem._id, userId: req.user._id });
 
     res.redirect(`/problems/${problem._id}`);
   } catch (err) {
