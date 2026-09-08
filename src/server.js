@@ -81,6 +81,7 @@ const adminFacilityTaskRoutes = require("./routes/adminFacilityTaskRoutes");
 const csvRoutes = require("./routes/csvRoutes");
 const adminAttachmentsRoutes = require("./routes/adminAttachmentsRoutes");
 const automationRoutes = require("./routes/automationRoutes");
+const portalRoutes = require("./routes/portalRoutes");
 
 /*************************************************************
  * Auto-seed on boot — runs automatically every time the server
@@ -390,6 +391,10 @@ async function start() {
   // sits its ticket modules on top of. See routes/automationRoutes.js /
   // utils/automationEngine.js.
   app.use("/automation", automationRoutes);
+  // Service Portal — Architecture Phase 2 (see itsm_architecture_comparison.md):
+  // a search-first storefront combining the Request Catalog + Knowledge Base,
+  // open to every signed-in user. See routes/portalRoutes.js.
+  app.use("/portal", portalRoutes);
 
   app.use((req, res) => res.status(404).render("errors/404"));
 
