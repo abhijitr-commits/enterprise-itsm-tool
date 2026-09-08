@@ -47,6 +47,7 @@
       <% if (claims.length === 0) { %><tr><td colspan="<%= canApprove ? 8 : 7 %>" class="empty-row">No expense claims yet.</td></tr><% } %>
     </tbody>
   </table>
+  <%- include('../partials/pagination', { pageInfo }) %>
 </div>
 
 <%- include('../partials/footer') %>
