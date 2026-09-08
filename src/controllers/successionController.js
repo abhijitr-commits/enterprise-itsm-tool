@@ -22,10 +22,11 @@ const SuccessionPlan = require("../models/SuccessionPlan");
 const { READINESS_LEVELS } = require("../models/SuccessionPlan");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { paginate } = require("../utils/pagination");
 
 async function listPlans(req, res) {
-  const plans = await SuccessionPlan.find().sort({ position: 1 }).lean();
-  res.render("succession/list", { plans, READINESS_LEVELS, message: req.query.message || null });
+  const { rows: plans, pageInfo } = await paginate(SuccessionPlan, {}, { position: 1 }, req.query);
+  res.render("succession/list", { plans, READINESS_LEVELS, message: req.query.message || null, pageInfo });
 }
 
 function showNewForm(req, res) {
