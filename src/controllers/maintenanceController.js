@@ -16,10 +16,11 @@
 const MaintenanceAnnouncement = require("../models/MaintenanceAnnouncement");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { paginate } = require("../utils/pagination");
 
 async function listAnnouncements(req, res) {
-  const announcements = await MaintenanceAnnouncement.find().sort({ createdDate: -1 }).lean();
-  res.render("maintenance/list", { announcements, message: req.query.message || null });
+  const { rows: announcements, pageInfo } = await paginate(MaintenanceAnnouncement, {}, { createdDate: -1 }, req.query);
+  res.render("maintenance/list", { announcements, message: req.query.message || null, pageInfo });
 }
 
 function showNewForm(req, res) {
