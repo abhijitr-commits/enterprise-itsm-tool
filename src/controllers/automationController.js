@@ -18,6 +18,7 @@
  *************************************************************/
 const AutomationRule = require("../models/AutomationRule");
 const { MODULE_META } = require("../utils/automationEngine");
+const { paginate } = require("../utils/pagination");
 
 const MODULE_OPTIONS = Object.keys(MODULE_META); // ["Incident", "ServiceRequest", "Problem", "Change"]
 
@@ -103,8 +104,8 @@ function ruleShapeFromBody(body, idForDisplay) {
 }
 
 async function listRules(req, res) {
-  const rules = await AutomationRule.find().sort({ module: 1, order: 1, createdAt: 1 }).lean();
-  res.render("automation/list", { rules, message: req.query.message || null });
+  const { rows: rules, pageInfo } = await paginate(AutomationRule, {}, { module: 1, order: 1, createdAt: 1 }, req.query);
+  res.render("automation/list", { rules, message: req.query.message || null, pageInfo });
 }
 
 function showNewForm(req, res) {
