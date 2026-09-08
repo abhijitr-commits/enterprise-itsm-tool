@@ -9,10 +9,11 @@ const SalesOrder = require("../models/SalesOrder");
 const { SALES_ORDER_STATUS } = SalesOrder;
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { paginate } = require("../utils/pagination");
 
 async function listSalesOrders(req, res) {
-  const orders = await SalesOrder.find().sort({ createdDate: -1 }).lean();
-  res.render("sales/list", { orders, SALES_ORDER_STATUS, message: req.query.message || null });
+  const { rows: orders, pageInfo } = await paginate(SalesOrder, {}, { createdDate: -1 }, req.query);
+  res.render("sales/list", { orders, SALES_ORDER_STATUS, message: req.query.message || null, pageInfo });
 }
 
 function showNewForm(req, res) {
