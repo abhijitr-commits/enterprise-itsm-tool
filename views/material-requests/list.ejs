@@ -44,6 +44,7 @@
       <% if (requests.length === 0) { %><tr><td colspan="<%= canIssue ? 9 : 8 %>" class="empty-row">No material requests yet.</td></tr><% } %>
     </tbody>
   </table>
+  <%- include('../partials/pagination', { pageInfo }) %>
 </div>
 
 <%- include('../partials/footer') %>
