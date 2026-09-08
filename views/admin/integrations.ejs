@@ -109,4 +109,18 @@
   </form>
 </div>
 
+<div class="panel">
+  <div class="panel-header"><h2>SLA Breach Alerts</h2></div>
+  <p class="admin-tile-sub" style="margin-bottom:16px;">
+    Every open incident already shows a live SLA badge (Breached/At Risk/On Track) on the Incident list and its
+    own page. This posts a Slack/Teams alert for any incident that has breached its SLA since the last time this
+    was run — same on-demand pattern as the Expiry Digest above, for the same reason (no free-tier scheduler to
+    run it automatically). Safe to click as often as you like: an incident already flagged is never alerted twice
+    unless its status changes.
+  </p>
+  <form method="post" action="/admin/integrations/check-sla-breaches">
+    <button type="submit" class="btn btn-secondary">Check SLA Breaches Now</button>
+  </form>
+</div>
+
 <%- include('../partials/footer') %>
