@@ -12,10 +12,11 @@ const AdminAsset = require("../models/AdminAsset");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { positiveNumber } = require("../utils/validation");
+const { paginate } = require("../utils/pagination");
 
 async function listPurchases(req, res) {
-  const purchases = await AdminPurchase.find().sort({ createdAt: -1 }).lean();
-  res.render("admin-purchases/list", { purchases, ADMIN_PURCHASE_STATUS, PAYMENT_STATUS, message: req.query.message || null });
+  const { rows: purchases, pageInfo } = await paginate(AdminPurchase, {}, { createdAt: -1 }, req.query);
+  res.render("admin-purchases/list", { purchases, ADMIN_PURCHASE_STATUS, PAYMENT_STATUS, message: req.query.message || null, pageInfo });
 }
 
 function showNewForm(req, res) {
