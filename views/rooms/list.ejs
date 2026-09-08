@@ -54,6 +54,7 @@
       <% if (rooms.length === 0) { %><tr><td colspan="5" class="empty-row">Nothing added yet.</td></tr><% } %>
     </tbody>
   </table>
+  <%- include('../partials/pagination', { pageInfo }) %>
 </div>
 
 <%- include('../partials/footer') %>
