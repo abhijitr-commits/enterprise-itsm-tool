@@ -78,6 +78,7 @@
       <% if (purchases.length === 0) { %><tr><td colspan="8" class="empty-row">No purchase orders yet.</td></tr><% } %>
     </tbody>
   </table>
+  <%- include('../partials/pagination', { pageInfo }) %>
 </div>
 
 <%- include('../partials/footer') %>
