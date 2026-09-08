@@ -19,14 +19,15 @@ const { REQUIREMENT_STATUS } = Requirement;
 const Vendor = require("../models/Vendor");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { paginate } = require("../utils/pagination");
 
 async function listRequirements(req, res) {
-  const [requirements, vendors] = await Promise.all([
-    Requirement.find().sort({ sentDate: -1 }).lean(),
+  const [{ rows: requirements, pageInfo }, vendors] = await Promise.all([
+    paginate(Requirement, {}, { sentDate: -1 }, req.query),
     Vendor.find({ status: "Active" }).sort({ name: 1 }).lean(),
   ]);
 
-  res.render("requirements/list", { requirements, vendors, REQUIREMENT_STATUS, message: req.query.message || null });
+  res.render("requirements/list", { requirements, vendors, REQUIREMENT_STATUS, message: req.query.message || null, pageInfo });
 }
 
 async function submitRequirement(req, res) {
