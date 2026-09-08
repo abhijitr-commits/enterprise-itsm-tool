@@ -85,6 +85,19 @@
       <dt>Closed</dt><dd><%= incident.closedDate ? new Date(incident.closedDate).toLocaleString() : '—' %></dd>
     </dl>
 
+    <% if ((relatedKnownErrors || []).length > 0) { %>
+      <div class="panel-header"><h2>Possible Known Errors</h2></div>
+      <div class="meta-list">
+        <p class="hint" style="margin: 0 0 8px;">Matched by category/subject keywords — check before starting from scratch.</p>
+        <% relatedKnownErrors.forEach(function(ke) { %>
+          <p style="margin:6px 0; padding:8px; background: var(--primary-50); border-radius: 8px;">
+            <a href="/problems/<%= ke._id %>"><%= ke.problemId %></a> — <%= ke.title %><br />
+            <strong>Workaround:</strong> <%= ke.workaround || 'None documented yet — open the Problem for details.' %>
+          </p>
+        <% }) %>
+      </div>
+    <% } %>
+
     <% if ((linkedProblems || []).length > 0 || (linkedChanges || []).length > 0) { %>
       <div class="panel-header"><h2>Linked Records</h2></div>
       <div class="meta-list">
