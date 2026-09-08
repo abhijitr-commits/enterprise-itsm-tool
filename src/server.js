@@ -80,6 +80,7 @@ const adminHelpdeskRoutes = require("./routes/adminHelpdeskRoutes");
 const adminFacilityTaskRoutes = require("./routes/adminFacilityTaskRoutes");
 const csvRoutes = require("./routes/csvRoutes");
 const adminAttachmentsRoutes = require("./routes/adminAttachmentsRoutes");
+const automationRoutes = require("./routes/automationRoutes");
 
 /*************************************************************
  * Auto-seed on boot — runs automatically every time the server
@@ -384,6 +385,11 @@ async function start() {
   app.use("/notifications", notificationRoutes);
   app.use("/csv", csvRoutes);
   app.use("/admin-attachments", adminAttachmentsRoutes);
+  // Automation Rules — Architecture Phase 1 (see itsm_architecture_comparison.md):
+  // the "if condition X, then action Z" engine every commercial ITSM platform
+  // sits its ticket modules on top of. See routes/automationRoutes.js /
+  // utils/automationEngine.js.
+  app.use("/automation", automationRoutes);
 
   app.use((req, res) => res.status(404).render("errors/404"));
 
