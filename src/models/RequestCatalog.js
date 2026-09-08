@@ -39,6 +39,22 @@ const requestCatalogSchema = new mongoose.Schema(
     source: { type: String, enum: ["manual", "auto"], default: "manual" },
     requestCount: { type: Number, default: 0 },
     createdBy: { type: String, trim: true },
+
+    // Audit backlog — "Structured Service Catalog with approval routing."
+    // Two knobs, both optional and both default to today's behavior (every
+    // request needs approval, from anyone with requests_approve) so this
+    // is purely additive:
+    //  - requiresApproval: false lets a low-risk, high-volume item (e.g.
+    //    "Password Reset", "How-To Question") skip the approval gate
+    //    entirely — serviceRequestController.createRequest auto-approves
+    //    it on submission and it goes straight to fulfillment.
+    //  - approverRole: when set, restricts WHO may decide a request for
+    //    this item beyond the base requests_approve permission (e.g. only
+    //    Administrators approve "New Server", while Managers can still
+    //    approve everything else) — enforced in decideRequest/
+    //    bulkDecideRequests. Empty string ("") means no extra restriction.
+    requiresApproval: { type: Boolean, default: true },
+    approverRole: { type: String, trim: true, default: "" },
   },
   { timestamps: true }
 );
