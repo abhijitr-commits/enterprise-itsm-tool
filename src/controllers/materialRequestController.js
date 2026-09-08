@@ -12,12 +12,13 @@ const { recordTransactionInternal } = require("./stockController");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
+const { paginate } = require("../utils/pagination");
 
 async function listMaterialRequests(req, res) {
-  const requests = await MaterialRequest.find().sort({ requestedDate: -1 }).lean();
+  const { rows: requests, pageInfo } = await paginate(MaterialRequest, {}, { requestedDate: -1 }, req.query);
   const canIssue = await hasPermission(req.user.role, "material_requests_issue");
 
-  res.render("material-requests/list", { requests, canIssue, MATERIAL_REQUEST_STATUS, message: req.query.message || null });
+  res.render("material-requests/list", { requests, canIssue, MATERIAL_REQUEST_STATUS, message: req.query.message || null, pageInfo });
 }
 
 async function showNewForm(req, res) {
