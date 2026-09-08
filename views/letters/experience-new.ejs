@@ -1,7 +1,7 @@
-<%- include('../partials/header', { title: 'Generate Relieving Letter' }) %>
+<%- include('../partials/header', { title: 'Generate Experience Letter' }) %>
 
 <div class="page-header">
-  <h1>Generate a Relieving Letter</h1>
+  <h1>Generate an Experience Letter</h1>
 </div>
 
 <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
@@ -10,11 +10,11 @@
   <div class="alert alert-success">The template is already filled in — pick an employee below and every field auto-fills, ready to generate.</div>
 <% } %>
 
-<form class="panel form-panel" method="post" action="/letters/relieving" id="relieving-letter-form">
-  <input type="hidden" name="employeeId" id="relieving-employeeId" value="<%= form.employeeId || '' %>" />
+<form class="panel form-panel" method="post" action="/letters/experience" id="experience-letter-form">
+  <input type="hidden" name="employeeId" id="experience-employeeId" value="<%= form.employeeId || '' %>" />
   <div class="form-grid">
     <label>Employee
-      <select id="relieving-employee-select">
+      <select id="experience-employee-select">
         <option value="">— Select an employee —</option>
         <% (employees || []).forEach(function(e) { %>
           <option
@@ -28,17 +28,17 @@
         <option value="__other__">Other (type a name manually)…</option>
       </select>
     </label>
-    <label id="relieving-employeeName-label" style="display:none">Employee Name
-      <input type="text" id="relieving-employeeName-manual" value="<%= form.employeeName || '' %>" />
+    <label id="experience-employeeName-label" style="display:none">Employee Name
+      <input type="text" id="experience-employeeName-manual" value="<%= form.employeeName || '' %>" />
     </label>
     <label>Department
-      <input type="text" name="department" list="departmentList" id="relieving-department" value="<%= form.department || '' %>" />
+      <input type="text" name="department" list="departmentList" id="experience-department" value="<%= form.department || '' %>" />
     </label>
     <label>Designation
-      <input type="text" name="designation" id="relieving-designation" value="<%= form.designation || '' %>" />
+      <input type="text" name="designation" id="experience-designation" value="<%= form.designation || '' %>" />
     </label>
     <label>Date of Joining
-      <input type="date" name="joiningDate" id="relieving-joiningDate" value="<%= form.joiningDate || '' %>" required />
+      <input type="date" name="joiningDate" id="experience-joiningDate" value="<%= form.joiningDate || '' %>" required />
     </label>
     <label>Last Working Day
       <input type="date" name="lastWorkingDay" value="<%= form.lastWorkingDay || '' %>" required />
@@ -46,20 +46,20 @@
   </div>
   <div class="form-actions">
     <a class="btn btn-secondary" href="/letters">Cancel</a>
-    <button type="submit" class="btn btn-primary">Generate Relieving Letter</button>
+    <button type="submit" class="btn btn-primary">Generate Experience Letter</button>
   </div>
 </form>
 
 <script>
   (function () {
-    var select = document.getElementById('relieving-employee-select');
-    var nameLabel = document.getElementById('relieving-employeeName-label');
-    var nameManual = document.getElementById('relieving-employeeName-manual');
-    var department = document.getElementById('relieving-department');
-    var designation = document.getElementById('relieving-designation');
-    var joiningDate = document.getElementById('relieving-joiningDate');
-    var employeeId = document.getElementById('relieving-employeeId');
-    var form = document.getElementById('relieving-letter-form');
+    var select = document.getElementById('experience-employee-select');
+    var nameLabel = document.getElementById('experience-employeeName-label');
+    var nameManual = document.getElementById('experience-employeeName-manual');
+    var department = document.getElementById('experience-department');
+    var designation = document.getElementById('experience-designation');
+    var joiningDate = document.getElementById('experience-joiningDate');
+    var employeeId = document.getElementById('experience-employeeId');
+    var form = document.getElementById('experience-letter-form');
 
     select.addEventListener('change', function () {
       var opt = select.options[select.selectedIndex];
