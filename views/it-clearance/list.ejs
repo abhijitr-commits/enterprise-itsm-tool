@@ -29,6 +29,7 @@
       <% if (pending.length === 0) { %><tr><td colspan="5" class="empty-row">No one currently awaiting IT clearance.</td></tr><% } %>
     </tbody>
   </table>
+  <%- include('../partials/pagination', { pageInfo }) %>
 </div>
 
 <%- include('../partials/footer') %>
