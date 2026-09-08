@@ -15,6 +15,14 @@ const problemSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true, trim: true },
     linkedIncidents: { type: String, trim: true }, // free-text list of incident IDs, as in the original sheet
+    // Audit backlog addition — real references alongside the legacy
+    // free-text field above (kept as-is for old data, search, and the
+    // Integration API's existing "linkedIncidents" body field). Both are
+    // written from the same form input by problemController.js, via
+    // utils/linkedRecords.js, so a linked Incident is now something you
+    // can actually click through to instead of just a string that
+    // happens to look like an Incident ID.
+    linkedIncidentIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Incident" }],
     rootCause: { type: String, trim: true },
     knownError: { type: String, enum: ["Yes", "No"], default: "No" },
     status: { type: String, enum: Object.values(STATUS), default: STATUS.OPEN },

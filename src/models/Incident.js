@@ -27,6 +27,14 @@ const incidentSchema = new mongoose.Schema(
     engineer: { type: String, trim: true }, // assigned engineer's display name
 
     slaDue: { type: Date },
+    // Audit backlog addition — set the moment a breach on this incident is
+    // sent to Slack/Teams by adminController.checkSlaBreaches(), so the
+    // same breach is never alerted twice; cleared automatically the next
+    // time this incident's status or slaDue actually changes (see
+    // incidentController.updateIncident), so a re-opened or re-prioritized
+    // ticket that breaches again gets a fresh alert instead of staying
+    // silently suppressed forever.
+    slaBreachNotifiedAt: { type: Date },
     closedDate: { type: Date },
     remarks: { type: String, trim: true },
     createdBy: { type: String, trim: true }, // email of whoever filed it

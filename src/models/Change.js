@@ -44,6 +44,16 @@ const changeSchema = new mongoose.Schema(
     requestedBy: { type: String, required: true, trim: true },
     department: { type: String, required: true, trim: true },
 
+    // Audit backlog addition — no equivalent in the original sheet. A
+    // Change often exists BECAUSE of a Problem's root cause, and may
+    // also be raised directly against one or more Incidents; both are
+    // real references (see utils/linkedRecords.js), resolved from a
+    // plain "type the ID" form field the same way Problem.linkedIncidentIds
+    // is, so CAB can click straight through to the Problem/Incidents that
+    // justify this change instead of hunting for them by title.
+    linkedProblemId: { type: mongoose.Schema.Types.ObjectId, ref: "Problem" },
+    linkedIncidentIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Incident" }],
+
     createdBy: { type: String, trim: true },
 
     comments: [commentSchema],
