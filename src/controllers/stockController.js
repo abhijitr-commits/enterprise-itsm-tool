@@ -11,6 +11,7 @@ const StockTransaction = require("../models/StockTransaction");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { positiveNumber } = require("../utils/validation");
+const { paginate } = require("../utils/pagination");
 
 /** Port of getAllStockItemsSafe()'s derivation step — pulls all transactions once, then sums per item, far faster than querying per item. */
 async function withCurrentStock(items) {
@@ -30,7 +31,7 @@ async function withCurrentStock(items) {
 }
 
 async function listStock(req, res) {
-  const items = await StockItem.find().sort({ itemName: 1 }).lean();
+  const { rows: items, pageInfo } = await paginate(StockItem, {}, { itemName: 1 }, req.query);
   let withStock = await withCurrentStock(items);
 
   const lowStockOnly = req.query.lowStock === "1";
@@ -40,6 +41,7 @@ async function listStock(req, res) {
     items: withStock,
     lowStockOnly,
     message: req.query.message || null,
+    pageInfo,
   });
 }
 
