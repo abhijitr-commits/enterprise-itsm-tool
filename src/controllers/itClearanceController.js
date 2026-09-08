@@ -17,20 +17,21 @@ const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { returnAssetInternal } = require("./assetController");
 const { updateClearanceInternal } = require("./resignationController");
+const { paginate } = require("../utils/pagination");
 
 /**
  * Port of getPendingITClearancesSafe() — Resignations where IT
  * Clearance isn't done yet, so IT sees exactly who needs processing.
  */
 async function listPendingClearances(req, res) {
-  const pending = await Resignation.find({
+  const filter = {
     "clearances.it": { $ne: "Cleared" },
     status: { $ne: "Completed" },
-  })
-    .sort({ createdDate: -1 })
-    .lean();
+  };
 
-  res.render("it-clearance/list", { pending, message: req.query.message || null });
+  const { rows: pending, pageInfo } = await paginate(Resignation, filter, { createdDate: -1 }, req.query);
+
+  res.render("it-clearance/list", { pending, message: req.query.message || null, pageInfo });
 }
 
 /**
