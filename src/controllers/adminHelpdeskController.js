@@ -14,11 +14,12 @@ const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { isAdminTeam } = require("../utils/teamAccess");
 const { resolveAssigneeRef } = require("../utils/userDirectory");
+const { paginate } = require("../utils/pagination");
 
 async function listComplaints(req, res) {
-  const complaints = await AdminComplaint.find().sort({ createdDate: -1 }).lean();
+  const { rows: complaints, pageInfo } = await paginate(AdminComplaint, {}, { createdDate: -1 }, req.query);
   const canManage = isAdminTeam(req.user);
-  res.render("admin-helpdesk/list", { complaints, canManage, ADMIN_COMPLAINT_STATUS, message: req.query.message || null });
+  res.render("admin-helpdesk/list", { complaints, canManage, ADMIN_COMPLAINT_STATUS, message: req.query.message || null, pageInfo });
 }
 
 function showNewForm(req, res) {
