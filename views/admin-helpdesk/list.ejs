@@ -2,7 +2,10 @@
 
 <div class="page-header">
   <h1>Admin Facility Helpdesk</h1>
-  <a class="btn btn-primary" href="/admin/helpdesk/new">+ Raise Request</a>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/admin/ops">← Admin Ops Hub</a>
+    <a class="btn btn-primary" href="/admin/helpdesk/new">+ Raise Request</a>
+  </div>
 </div>
 
 <%- include('../partials/csvActions', { moduleKey: 'adminComplaint' }) %>
