@@ -10,7 +10,8 @@
  *************************************************************/
 const ServiceRequest = require("../models/ServiceRequest");
 const RequestCatalog = require("../models/RequestCatalog");
-const { STATUS } = require("../config/constants");
+const { STATUS, ROLE } = require("../config/constants");
+const { findCatalogEntryFor } = require("../utils/catalogRouting");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
@@ -78,6 +79,7 @@ async function listRequests(req, res) {
     APPROVAL,
     canManageCatalog,
     pageInfo,
+    warning: req.query.warning || null,
   });
 }
 
@@ -102,13 +104,22 @@ async function createRequest(req, res) {
 
     const requestId = await generateSequentialId("REQ");
 
+    // Audit backlog — "Structured Service Catalog with approval routing."
+    // A catalog item flagged requiresApproval:false (see RequestCatalog.js
+    // — e.g. "Password Reset") skips the approval gate entirely and goes
+    // straight to fulfillment; anything else (including a brand-new item
+    // nobody has curated yet) keeps today's default of needing approval.
+    const catalogEntry = await findCatalogEntryFor(data.catalogItem);
+    const skipsApproval = !!catalogEntry && catalogEntry.requiresApproval === false;
+
     const request = new ServiceRequest({
       requestId,
       requester: data.requester,
       department: data.department,
       catalogItem: data.catalogItem,
       details: data.details,
-      approvalStatus: APPROVAL.PENDING,
+      approvalStatus: skipsApproval ? APPROVAL.APPROVED : APPROVAL.PENDING,
+      approver: skipsApproval ? "Auto-approved (catalog item does not require approval)" : undefined,
       fulfillmentStatus: STATUS.OPEN,
       createdBy: req.user.email,
     });
@@ -141,10 +152,11 @@ async function showRequest(req, res) {
   const request = await ServiceRequest.findById(req.params.id).lean();
   if (!request) return res.status(404).render("errors/404");
 
-  const [attachments, auditEntries, canUpload] = await Promise.all([
+  const [attachments, auditEntries, canUpload, catalogEntry] = await Promise.all([
     getAttachmentsForRecord("requests", request._id),
     getAuditTrailForRecord(request._id),
     hasPermission(req.user.role, "requests_edit"),
+    findCatalogEntryFor(request.catalogItem),
   ]);
 
   res.render("requests/detail", {
@@ -156,6 +168,7 @@ async function showRequest(req, res) {
     auditEntries,
     canUpload,
     moduleKey: "requests",
+    catalogEntry,
   });
 }
 
@@ -218,6 +231,17 @@ async function decideRequest(req, res) {
   const request = await ServiceRequest.findById(req.params.id);
   if (!request) return res.status(404).render("errors/404");
 
+  // Audit backlog — approval routing: a catalog item can restrict WHO may
+  // decide it (RequestCatalog.approverRole) beyond the base
+  // requests_approve/delegate permission the route guard already checked.
+  // Empty approverRole ("") means no extra restriction — today's behavior.
+  const catalogEntry = await findCatalogEntryFor(request.catalogItem);
+  if (catalogEntry && catalogEntry.approverRole && catalogEntry.approverRole !== req.user.role) {
+    return res.status(403).render("errors/403", {
+      action: `approve "${request.catalogItem}" requests (requires the ${catalogEntry.approverRole} role)`,
+    });
+  }
+
   request.approver = req.user.email;
   request.approvalStatus = decision;
   request.history.push({ field: "approvalStatus", oldValue: APPROVAL.PENDING, newValue: decision, changedBy: req.user._id });
@@ -265,12 +289,31 @@ async function bulkDecideRequests(req, res) {
   // Fetched before the update so the bulk-decision notifications below know
   // which requests were actually still PENDING (the same filter the update
   // itself uses) and have their requestId/catalogItem/createdBy to hand.
-  const affected = await ServiceRequest.find({ _id: { $in: ids }, approvalStatus: APPROVAL.PENDING })
+  const candidates = await ServiceRequest.find({ _id: { $in: ids }, approvalStatus: APPROVAL.PENDING })
     .select("_id requestId catalogItem createdBy")
     .lean();
 
+  // Audit backlog — approval routing: same per-item approverRole
+  // restriction as the single-request decideRequest path, applied across
+  // the batch. A request whose catalog item is routed to a role the
+  // current user doesn't have is silently excluded from this decision
+  // (not an error — the rest of the batch still goes through) and
+  // reported back as a skipped count.
+  const catalogEntries = await RequestCatalog.find({
+    nameKey: { $in: [...new Set(candidates.map((r) => String(r.catalogItem || "").trim().toLowerCase()))] },
+  })
+    .select("nameKey approverRole")
+    .lean();
+  const approverRoleByKey = new Map(catalogEntries.map((c) => [c.nameKey, c.approverRole]));
+
+  const affected = candidates.filter((r) => {
+    const requiredRole = approverRoleByKey.get(String(r.catalogItem || "").trim().toLowerCase());
+    return !requiredRole || requiredRole === req.user.role;
+  });
+  const skippedCount = candidates.length - affected.length;
+
   const result = await ServiceRequest.updateMany(
-    { _id: { $in: ids }, approvalStatus: APPROVAL.PENDING },
+    { _id: { $in: affected.map((r) => r._id) }, approvalStatus: APPROVAL.PENDING },
     { $set: update }
   );
 
@@ -278,7 +321,7 @@ async function bulkDecideRequests(req, res) {
     user: req.user._id,
     action: "Bulk Decision",
     entityType: "Service Request",
-    details: `${result.modifiedCount} of ${ids.length} request(s) ${decision.toLowerCase()}.`,
+    details: `${result.modifiedCount} of ${ids.length} request(s) ${decision.toLowerCase()}.${skippedCount ? ` ${skippedCount} skipped (role-restricted approval).` : ""}`,
   });
 
   // Same in-app notification as the single-request decision path, once
@@ -291,7 +334,11 @@ async function bulkDecideRequests(req, res) {
     });
   });
 
-  res.redirect("/requests");
+  res.redirect(
+    skippedCount
+      ? `/requests?warning=${encodeURIComponent(`${skippedCount} request(s) were skipped — their catalog item requires approval from a specific role you don't have.`)}`
+      : "/requests"
+  );
 }
 
 async function closeRequest(req, res) {
@@ -347,6 +394,7 @@ async function listCatalog(req, res) {
     message: req.query.message || null,
     error: null,
     form: {},
+    ROLE,
   });
 }
 
@@ -365,6 +413,11 @@ async function createCatalogEntry(req, res) {
       nameKey,
       category: (data.category || "").trim(),
       description: (data.description || "").trim(),
+      // Checkbox defaults to checked in the Add form (see catalog.ejs), so
+      // an admin who doesn't touch it still gets today's default of
+      // "requires approval" — only an explicit uncheck turns it off.
+      requiresApproval: data.requiresApproval === "on",
+      approverRole: (data.approverRole || "").trim(),
       source: "manual",
       createdBy: req.user.email,
     });
@@ -372,7 +425,7 @@ async function createCatalogEntry(req, res) {
     res.redirect(`/requests/catalog?message=${encodeURIComponent(`"${name}" added to the catalog.`)}`);
   } catch (err) {
     const entries = await RequestCatalog.find().sort({ name: 1 }).lean();
-    res.status(400).render("requests/catalog", { entries, message: null, error: err.message, form: req.body });
+    res.status(400).render("requests/catalog", { entries, message: null, error: err.message, form: req.body, ROLE });
   }
 }
 
@@ -396,13 +449,15 @@ async function updateCatalogEntry(req, res) {
     if (data.category !== undefined) entry.category = String(data.category).trim();
     if (data.description !== undefined) entry.description = String(data.description).trim();
     entry.active = data.active === "on" || data.active === "true";
+    entry.requiresApproval = data.requiresApproval === "on" || data.requiresApproval === "true";
+    if (data.approverRole !== undefined) entry.approverRole = String(data.approverRole).trim();
 
     await entry.save();
 
     res.redirect(`/requests/catalog?message=${encodeURIComponent(`"${entry.name}" updated.`)}`);
   } catch (err) {
     const entries = await RequestCatalog.find().sort({ name: 1 }).lean();
-    res.status(400).render("requests/catalog", { entries, message: null, error: err.message, form: {} });
+    res.status(400).render("requests/catalog", { entries, message: null, error: err.message, form: {}, ROLE });
   }
 }
 
