@@ -7,6 +7,7 @@ const Shipment = require("../models/Shipment");
 const { SHIPMENT_DIRECTION, SHIPMENT_STATUS } = Shipment;
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { paginate } = require("../utils/pagination");
 
 async function listShipments(req, res) {
   const { direction, status } = req.query;
@@ -15,8 +16,8 @@ async function listShipments(req, res) {
   if (direction) filter.direction = direction;
   if (status) filter.status = status;
 
-  const shipments = await Shipment.find(filter).sort({ createdDate: -1 }).lean();
-  res.render("shipments/list", { shipments, SHIPMENT_DIRECTION, SHIPMENT_STATUS, query: { direction: direction || "", status: status || "" }, message: req.query.message || null });
+  const { rows: shipments, pageInfo } = await paginate(Shipment, filter, { createdDate: -1 }, req.query);
+  res.render("shipments/list", { shipments, SHIPMENT_DIRECTION, SHIPMENT_STATUS, query: { direction: direction || "", status: status || "" }, message: req.query.message || null, pageInfo });
 }
 
 function showNewForm(req, res) {
