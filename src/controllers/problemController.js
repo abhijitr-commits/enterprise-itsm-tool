@@ -20,6 +20,34 @@ async function listIncidentCodes() {
   return incidents.map((i) => i.incidentId);
 }
 
+/**
+ * Audit backlog — "Known Error Database (KEDB) for Problem Management."
+ * A dedicated, searchable view of every Problem marked knownError:"Yes",
+ * showing the root cause AND the workaround side by side — the two
+ * things a Service Desk agent actually needs when a new incident comes
+ * in that looks like something already diagnosed but not yet fixed.
+ * Deliberately its own list (not just a filter link on the regular
+ * Problem Register) so it reads like the reference tool it's meant to
+ * be, matching how KEDB is its own screen in ServiceNow/Remedy.
+ */
+async function listKnownErrors(req, res) {
+  const { q } = req.query;
+
+  const filter = { knownError: "Yes" };
+  if (q) {
+    const rx = new RegExp(q, "i");
+    filter.$or = ["problemId", "title", "rootCause", "workaround", "linkedIncidents"].map((f) => ({ [f]: rx }));
+  }
+
+  const { rows: knownErrors, pageInfo } = await paginate(Problem, filter, { createdDate: -1 }, req.query);
+
+  res.render("problems/kedb", {
+    knownErrors,
+    query: { q: q || "" },
+    pageInfo,
+  });
+}
+
 async function listProblems(req, res) {
   const { q, status } = req.query;
 
@@ -130,6 +158,7 @@ async function updateProblem(req, res) {
     problem.linkedIncidents = data.linkedIncidents || "";
     problem.linkedIncidentIds = await resolveIdsByCode(Incident, "incidentId", data.linkedIncidents);
     problem.rootCause = data.rootCause || "";
+    problem.workaround = data.workaround || "";
     problem.knownError = data.knownError === "Yes" ? "Yes" : "No";
     problem.status = data.status || STATUS.OPEN;
     problem.owner = data.owner || "";
@@ -210,6 +239,7 @@ async function addComment(req, res) {
 }
 
 module.exports = {
+  listKnownErrors,
   listProblems,
   showNewForm,
   createProblem,

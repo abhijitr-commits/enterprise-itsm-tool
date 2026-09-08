@@ -18,6 +18,7 @@ const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 const { notifyUser } = require("../utils/notifications");
 const { paginate } = require("../utils/pagination");
+const { suggestKnownErrorsFor } = require("../utils/knownErrors");
 const { applyAutomation, recordAutomationRun } = require("../utils/automationEngine");
 
 /**
@@ -149,7 +150,7 @@ async function showIncident(req, res) {
 
   incident.slaStatus = slaStatusOf(incident);
 
-  const [attachments, auditEntries, canUpload, assetNames, categories, linkedProblems, linkedChanges] = await Promise.all([
+  const [attachments, auditEntries, canUpload, assetNames, categories, linkedProblems, linkedChanges, relatedKnownErrors] = await Promise.all([
     getAttachmentsForRecord("incidents", incident._id),
     getAuditTrailForRecord(incident._id),
     hasPermission(req.user.role, "incidents_edit"),
@@ -160,6 +161,9 @@ async function showIncident(req, res) {
     // both directions, not just Problem/Change -> Incident.
     Problem.find({ linkedIncidentIds: incident._id }).select("problemId title status").lean(),
     Change.find({ linkedIncidentIds: incident._id }).select("changeId title cabStatus").lean(),
+    // Audit backlog — KEDB: best-effort "you might already have a
+    // workaround for this" suggestions, see utils/knownErrors.js.
+    suggestKnownErrorsFor(incident),
   ]);
 
   res.render("incidents/detail", {
@@ -175,6 +179,7 @@ async function showIncident(req, res) {
     categories,
     linkedProblems,
     linkedChanges,
+    relatedKnownErrors,
   });
 }
 
