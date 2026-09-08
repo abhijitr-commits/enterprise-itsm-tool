@@ -17,12 +17,13 @@ const { EXPENSE_STATUS } = ExpenseClaim;
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
+const { paginate } = require("../utils/pagination");
 
 async function listExpenses(req, res) {
-  const claims = await ExpenseClaim.find().sort({ submittedDate: -1 }).lean();
+  const { rows: claims, pageInfo } = await paginate(ExpenseClaim, {}, { submittedDate: -1 }, req.query);
   const canApprove = await hasPermission(req.user.role, "expenses_approve");
 
-  res.render("expenses/list", { claims, canApprove, EXPENSE_STATUS, message: req.query.message || null });
+  res.render("expenses/list", { claims, canApprove, EXPENSE_STATUS, message: req.query.message || null, pageInfo });
 }
 
 async function myExpenses(req, res) {
