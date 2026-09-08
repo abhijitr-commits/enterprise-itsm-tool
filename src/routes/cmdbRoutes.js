@@ -15,11 +15,14 @@ function guard(action) {
 router.use(requireLogin);
 
 router.get("/", cmdbController.listCIs);
+router.get("/graph", cmdbController.showGraph);
 router.get("/new", guard("cmdb_create"), cmdbController.showNewForm);
 router.post("/", guard("cmdb_create"), cmdbController.createCI);
+router.post("/relationships/:relId/delete", guard("cmdb_edit"), cmdbController.deleteRelationship);
 router.get("/:id", cmdbController.showCI);
 router.get("/:id/impact", cmdbController.showImpact);
 router.post("/:id", guard("cmdb_edit"), cmdbController.updateCI);
 router.post("/:id/delete", guard("cmdb_delete"), cmdbController.deleteCI);
+router.post("/:id/relationships", guard("cmdb_edit"), cmdbController.addRelationship);
 
 module.exports = router;
