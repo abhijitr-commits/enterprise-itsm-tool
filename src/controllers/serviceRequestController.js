@@ -231,34 +231,62 @@ async function decideRequest(req, res) {
   const request = await ServiceRequest.findById(req.params.id);
   if (!request) return res.status(404).render("errors/404");
 
-  // Audit backlog — approval routing: a catalog item can restrict WHO may
-  // decide it (RequestCatalog.approverRole) beyond the base
-  // requests_approve/delegate permission the route guard already checked.
-  // Empty approverRole ("") means no extra restriction — today's behavior.
+  if (request.approvalStatus !== APPROVAL.PENDING && request.approvalStatus !== APPROVAL.PENDING_SECOND) {
+    return res.status(400).send(`This request has already been decided (${request.approvalStatus}).`);
+  }
+
+  // Audit backlog — "Multi-level / conditional approval chains." A
+  // PENDING request is the FIRST step; a PENDING_SECOND request is the
+  // SECOND, only reachable when the first approver approved a request
+  // whose catalog item has a secondApproverRole set (see below). Role
+  // routing checks the role for whichever step this actually is.
+  const isSecondStep = request.approvalStatus === APPROVAL.PENDING_SECOND;
   const catalogEntry = await findCatalogEntryFor(request.catalogItem);
-  if (catalogEntry && catalogEntry.approverRole && catalogEntry.approverRole !== req.user.role) {
+  const requiredRole = isSecondStep ? catalogEntry && catalogEntry.secondApproverRole : catalogEntry && catalogEntry.approverRole;
+
+  if (requiredRole && requiredRole !== req.user.role) {
     return res.status(403).render("errors/403", {
-      action: `approve "${request.catalogItem}" requests (requires the ${catalogEntry.approverRole} role)`,
+      action: `${isSecondStep ? "give the second approval on" : "approve"} "${request.catalogItem}" requests (requires the ${requiredRole} role)`,
     });
   }
 
-  request.approver = req.user.email;
-  request.approvalStatus = decision;
-  request.history.push({ field: "approvalStatus", oldValue: APPROVAL.PENDING, newValue: decision, changedBy: req.user._id });
+  // Segregation of duties — a two-level chain means two DIFFERENT people
+  // sign off, not one person clicking Approve twice. Only checked on the
+  // second step, and only when approving (a reject always ends the chain,
+  // so who does it doesn't matter the same way).
+  if (isSecondStep && decision === APPROVAL.APPROVED && request.approver === req.user.email) {
+    return res.status(400).send("The second approval must come from someone other than the first approver.");
+  }
+
+  const previousStatus = request.approvalStatus;
 
   if (decision === APPROVAL.REJECTED) {
+    if (isSecondStep) request.secondApprover = req.user.email;
+    else request.approver = req.user.email;
+    request.approvalStatus = APPROVAL.REJECTED;
     request.fulfillmentStatus = STATUS.CLOSED;
     request.closedDate = new Date();
+  } else if (!isSecondStep && catalogEntry && catalogEntry.secondApproverRole) {
+    // First step approved, and this catalog item needs a second sign-off —
+    // route it onward instead of finishing here.
+    request.approver = req.user.email;
+    request.approvalStatus = APPROVAL.PENDING_SECOND;
+  } else {
+    if (isSecondStep) request.secondApprover = req.user.email;
+    else request.approver = req.user.email;
+    request.approvalStatus = APPROVAL.APPROVED;
   }
+
+  request.history.push({ field: "approvalStatus", oldValue: previousStatus, newValue: request.approvalStatus, changedBy: req.user._id });
 
   await request.save();
 
   await logAudit({
     user: req.user._id,
-    action: "Decision",
+    action: isSecondStep ? "Second Decision" : "Decision",
     entityType: "Service Request",
     entityId: request._id,
-    details: decision,
+    details: request.approvalStatus,
   });
 
   // In-app bell notification to the requester. createdBy is a reliable
@@ -266,7 +294,10 @@ async function decideRequest(req, res) {
   // resolves cleanly — fire-and-forget, never blocks the redirect.
   notifyUser({
     email: request.createdBy,
-    message: `Your request ${request.requestId} (${request.catalogItem}) was ${decision.toLowerCase()}.`,
+    message:
+      request.approvalStatus === APPROVAL.PENDING_SECOND
+        ? `Your request ${request.requestId} (${request.catalogItem}) was approved and is now awaiting a second approval.`
+        : `Your request ${request.requestId} (${request.catalogItem}) was ${request.approvalStatus.toLowerCase()}.`,
     link: `/requests/${request._id}`,
   });
 
@@ -280,15 +311,11 @@ async function bulkDecideRequests(req, res) {
     return res.status(400).send("Invalid decision.");
   }
 
-  const update = { approver: req.user.email, approvalStatus: decision };
-  if (decision === APPROVAL.REJECTED) {
-    update.fulfillmentStatus = STATUS.CLOSED;
-    update.closedDate = new Date();
-  }
-
-  // Fetched before the update so the bulk-decision notifications below know
-  // which requests were actually still PENDING (the same filter the update
-  // itself uses) and have their requestId/catalogItem/createdBy to hand.
+  // Audit backlog — multi-level chains: bulk-decide is deliberately scoped
+  // to the FIRST approval step only (approvalStatus: PENDING) — a request
+  // already sitting at PENDING_SECOND needs its own individual review on
+  // its detail page, not a mass click, since that step exists specifically
+  // to be a distinct, deliberate second look.
   const candidates = await ServiceRequest.find({ _id: { $in: ids }, approvalStatus: APPROVAL.PENDING })
     .select("_id requestId catalogItem createdBy")
     .lean();
@@ -302,34 +329,71 @@ async function bulkDecideRequests(req, res) {
   const catalogEntries = await RequestCatalog.find({
     nameKey: { $in: [...new Set(candidates.map((r) => String(r.catalogItem || "").trim().toLowerCase()))] },
   })
-    .select("nameKey approverRole")
+    .select("nameKey approverRole secondApproverRole")
     .lean();
-  const approverRoleByKey = new Map(catalogEntries.map((c) => [c.nameKey, c.approverRole]));
+  const catalogByKey = new Map(catalogEntries.map((c) => [c.nameKey, c]));
 
-  const affected = candidates.filter((r) => {
-    const requiredRole = approverRoleByKey.get(String(r.catalogItem || "").trim().toLowerCase());
-    return !requiredRole || requiredRole === req.user.role;
+  const eligible = candidates.filter((r) => {
+    const entry = catalogByKey.get(String(r.catalogItem || "").trim().toLowerCase());
+    return !entry || !entry.approverRole || entry.approverRole === req.user.role;
   });
-  const skippedCount = candidates.length - affected.length;
+  const skippedCount = candidates.length - eligible.length;
 
-  const result = await ServiceRequest.updateMany(
-    { _id: { $in: affected.map((r) => r._id) }, approvalStatus: APPROVAL.PENDING },
-    { $set: update }
-  );
+  // An Approved decision on an item whose catalog entry has a
+  // secondApproverRole advances to PENDING_SECOND instead of finishing
+  // here — same routing decideRequest applies one request at a time.
+  const advancesToSecond =
+    decision === APPROVAL.APPROVED
+      ? eligible.filter((r) => {
+          const entry = catalogByKey.get(String(r.catalogItem || "").trim().toLowerCase());
+          return entry && entry.secondApproverRole;
+        })
+      : [];
+  const finalized = eligible.filter((r) => !advancesToSecond.includes(r));
+
+  let finalizedCount = 0;
+  if (finalized.length) {
+    const update = { approver: req.user.email, approvalStatus: decision };
+    if (decision === APPROVAL.REJECTED) {
+      update.fulfillmentStatus = STATUS.CLOSED;
+      update.closedDate = new Date();
+    }
+    const result = await ServiceRequest.updateMany(
+      { _id: { $in: finalized.map((r) => r._id) }, approvalStatus: APPROVAL.PENDING },
+      { $set: update }
+    );
+    finalizedCount = result.modifiedCount;
+  }
+  if (advancesToSecond.length) {
+    await ServiceRequest.updateMany(
+      { _id: { $in: advancesToSecond.map((r) => r._id) }, approvalStatus: APPROVAL.PENDING },
+      { $set: { approver: req.user.email, approvalStatus: APPROVAL.PENDING_SECOND } }
+    );
+  }
 
   await logAudit({
     user: req.user._id,
     action: "Bulk Decision",
     entityType: "Service Request",
-    details: `${result.modifiedCount} of ${ids.length} request(s) ${decision.toLowerCase()}.${skippedCount ? ` ${skippedCount} skipped (role-restricted approval).` : ""}`,
+    details:
+      `${finalizedCount} of ${ids.length} request(s) ${decision.toLowerCase()}.` +
+      (advancesToSecond.length ? ` ${advancesToSecond.length} advanced to second approval.` : "") +
+      (skippedCount ? ` ${skippedCount} skipped (role-restricted approval).` : ""),
   });
 
   // Same in-app notification as the single-request decision path, once
   // per affected request — fire-and-forget, never blocks the redirect.
-  affected.forEach((r) => {
+  finalized.forEach((r) => {
     notifyUser({
       email: r.createdBy,
       message: `Your request ${r.requestId} (${r.catalogItem}) was ${decision.toLowerCase()}.`,
+      link: `/requests/${r._id}`,
+    });
+  });
+  advancesToSecond.forEach((r) => {
+    notifyUser({
+      email: r.createdBy,
+      message: `Your request ${r.requestId} (${r.catalogItem}) was approved and is now awaiting a second approval.`,
       link: `/requests/${r._id}`,
     });
   });
@@ -418,6 +482,7 @@ async function createCatalogEntry(req, res) {
       // "requires approval" — only an explicit uncheck turns it off.
       requiresApproval: data.requiresApproval === "on",
       approverRole: (data.approverRole || "").trim(),
+      secondApproverRole: (data.secondApproverRole || "").trim(),
       source: "manual",
       createdBy: req.user.email,
     });
@@ -451,6 +516,7 @@ async function updateCatalogEntry(req, res) {
     entry.active = data.active === "on" || data.active === "true";
     entry.requiresApproval = data.requiresApproval === "on" || data.requiresApproval === "true";
     if (data.approverRole !== undefined) entry.approverRole = String(data.approverRole).trim();
+    if (data.secondApproverRole !== undefined) entry.secondApproverRole = String(data.secondApproverRole).trim();
 
     await entry.save();
 
