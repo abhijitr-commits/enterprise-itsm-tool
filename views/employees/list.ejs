@@ -2,7 +2,10 @@
 
 <div class="page-header">
   <h1>Employee Directory</h1>
-  <a class="btn btn-primary" href="/employees/new">+ New Employee</a>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/hr">← HR Hub</a>
+    <a class="btn btn-primary" href="/employees/new">+ New Employee</a>
+  </div>
 </div>
 
 <%- include('../partials/csvActions', { moduleKey: 'employee' }) %>
