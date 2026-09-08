@@ -39,6 +39,9 @@
     <label>Reports To (employee name)
       <input type="text" name="reportsTo" list="employeeList" value="<%= form.reportsTo || '' %>" />
     </label>
+    <label>Date of Joining
+      <input type="date" name="dateOfJoining" value="<%= form.dateOfJoining ? new Date(form.dateOfJoining).toISOString().slice(0,10) : '' %>" />
+    </label>
     <label>Status
       <select name="status">
         <% Object.values(EMPLOYEE_STATUS).forEach(function(s){ %>
