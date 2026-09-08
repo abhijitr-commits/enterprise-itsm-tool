@@ -2,7 +2,10 @@
 
 <div class="page-header">
   <h1>Change Register</h1>
-  <a class="btn btn-primary" href="/changes/new">+ New Change</a>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/itsm">← ITSM Hub</a>
+    <a class="btn btn-primary" href="/changes/new">+ New Change</a>
+  </div>
 </div>
 
 <%- include('../partials/csvActions', { moduleKey: 'change' }) %>
