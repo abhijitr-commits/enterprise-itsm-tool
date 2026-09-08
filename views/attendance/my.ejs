@@ -2,7 +2,10 @@
 
 <div class="page-header">
   <h1>My Attendance</h1>
-  <% if (canViewAll) { %><a class="btn btn-secondary" href="/attendance/all">View All Employees</a><% } %>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/hr">← HR Hub</a>
+    <% if (canViewAll) { %><a class="btn btn-secondary" href="/attendance/all">View All Employees</a><% } %>
+  </div>
 </div>
 
 <% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
