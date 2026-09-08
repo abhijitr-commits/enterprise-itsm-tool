@@ -13,10 +13,11 @@ const Vendor = require("../models/Vendor");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { logAssetHistory, listAssetTypeNames } = require("./assetController");
+const { paginate } = require("../utils/pagination");
 
 async function listPurchases(req, res) {
-  const [purchases, vendors, assetTypes] = await Promise.all([
-    PurchaseOrder.find().sort({ date: -1 }).lean(),
+  const [{ rows: purchases, pageInfo }, vendors, assetTypes] = await Promise.all([
+    paginate(PurchaseOrder, {}, { date: -1 }, req.query),
     Vendor.find({ status: "Active" }).sort({ name: 1 }).lean(),
     listAssetTypeNames(),
   ]);
@@ -28,6 +29,7 @@ async function listPurchases(req, res) {
     HARDWARE_TYPE: Asset.HARDWARE_TYPE,
     assetTypes,
     message: req.query.message || null,
+    pageInfo,
   });
 }
 
