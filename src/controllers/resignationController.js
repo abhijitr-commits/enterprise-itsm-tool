@@ -35,12 +35,13 @@ const { createChecklistIfMissing } = require("../utils/checklists");
 const { CHECKLIST_TYPE } = require("../models/Checklist");
 const { deactivateUserAccess } = require("../utils/provisioning");
 const { generateNoDuesCertificateInternal } = require("./lettersController");
+const { paginate } = require("../utils/pagination");
 
 const CLEARANCE_TYPES = ["it", "finance", "hr", "manager", "admin"];
 
 async function listResignations(req, res) {
-  const resignations = await Resignation.find().sort({ createdDate: -1 }).lean();
-  res.render("resignations/list", { resignations, message: req.query.message || null });
+  const { rows: resignations, pageInfo } = await paginate(Resignation, {}, { createdDate: -1 }, req.query);
+  res.render("resignations/list", { resignations, message: req.query.message || null, pageInfo });
 }
 
 function showNewForm(req, res) {
