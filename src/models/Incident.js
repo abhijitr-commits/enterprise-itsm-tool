@@ -54,6 +54,27 @@ const incidentSchema = new mongoose.Schema(
     // reportController.js.
     relatedAsset: { type: String, trim: true },
 
+    // Task #103 (audit backlog) — Major Incident workflow. Deliberately
+    // NOT a new module: a Major Incident is a regular Incident that gets
+    // escalated handling (a Slack/Teams broadcast, a dedicated "war room"
+    // board, a mandatory Post-Incident Review) — it isn't a different
+    // kind of record. `isMajorIncident` stays true forever once declared
+    // (so "was this ever a Major Incident" is always answerable for
+    // reporting), independent of `status`; the active/stood-down state is
+    // tracked separately below so a Major Incident can be stood down
+    // (war room closed, situation stable) before the ticket itself is
+    // Resolved/Closed.
+    isMajorIncident: { type: Boolean, default: false },
+    majorIncidentDeclaredAt: { type: Date },
+    majorIncidentDeclaredBy: { type: String, trim: true }, // email
+    majorIncidentStoodDownAt: { type: Date },
+    majorIncidentStoodDownBy: { type: String, trim: true }, // email
+    // Post-Incident Review — same free-text-fields-not-a-subform approach
+    // as Change.rootCause/correctiveAction/lessonsLearned for a rolled-
+    // back change. Only meaningful once isMajorIncident is true, but not
+    // schema-enforced to that.
+    pirNotes: { type: String, trim: true },
+
     comments: [commentSchema],
     history: [historyEntrySchema],
     attachments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Attachment" }],
@@ -64,6 +85,7 @@ const incidentSchema = new mongoose.Schema(
 incidentSchema.index({ status: 1, priority: 1 });
 incidentSchema.index({ engineer: 1, status: 1 });
 incidentSchema.index({ engineerRef: 1, status: 1 });
+incidentSchema.index({ isMajorIncident: 1, majorIncidentStoodDownAt: 1 });
 
 module.exports = mongoose.model("Incident", incidentSchema);
 module.exports.PREFIX = ID_PREFIX.INCIDENT;
