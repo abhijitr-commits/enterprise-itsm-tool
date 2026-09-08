@@ -25,6 +25,18 @@ const problemSchema = new mongoose.Schema(
     linkedIncidentIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Incident" }],
     rootCause: { type: String, trim: true },
     knownError: { type: String, enum: ["Yes", "No"], default: "No" },
+    // Audit backlog — "Known Error Database (KEDB) for Problem
+    // Management." rootCause is the permanent-fix analysis; workaround is
+    // the separate, deliberately different thing a KEDB actually exists
+    // for — a temporary mitigation a Service Desk agent can hand a user
+    // (or apply themselves) against a NEW incident right now, while the
+    // real fix behind rootCause is still pending. Only meaningful once
+    // knownError is "Yes", but not schema-enforced to that (a Problem can
+    // record a workaround before formally being marked a Known Error).
+    // Read by problemController.listKnownErrors (the KEDB view) and
+    // utils/knownErrors.js's suggestKnownErrorsFor (surfaced on the
+    // Incident detail page).
+    workaround: { type: String, trim: true },
     status: { type: String, enum: Object.values(STATUS), default: STATUS.OPEN },
     owner: { type: String, trim: true },
 
