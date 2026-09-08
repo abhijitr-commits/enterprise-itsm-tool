@@ -2,7 +2,10 @@
 
 <div class="page-header">
   <h1>Work Orders</h1>
-  <a href="/work-orders/new" class="btn btn-primary">New Work Order</a>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/operations">← Operations Hub</a>
+    <a href="/work-orders/new" class="btn btn-primary">New Work Order</a>
+  </div>
 </div>
 
 <%- include('../partials/csvActions', { moduleKey: 'workOrder' }) %>
