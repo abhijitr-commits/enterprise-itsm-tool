@@ -50,8 +50,13 @@
         <input type="text" name="department" list="departmentList" value="<%= request.department %>" required />
       </label>
       <label>Catalog Item
-        <input type="text" name="catalogItem" value="<%= request.catalogItem %>" required />
+        <input type="text" name="catalogItem" list="catalogItemList" value="<%= request.catalogItem %>" required />
       </label>
+      <% if (typeof catalogItems !== "undefined" && catalogItems.length) { %>
+        <datalist id="catalogItemList">
+          <% catalogItems.forEach(function(c) { %><option value="<%= c %>"><% }) %>
+        </datalist>
+      <% } %>
       <label>Fulfillment Status
         <select name="fulfillmentStatus">
           <% Object.values(STATUS).forEach(function(s){ %>
