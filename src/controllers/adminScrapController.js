@@ -18,10 +18,11 @@ const AdminStockTransaction = require("../models/AdminStockTransaction");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { positiveNumber } = require("../utils/validation");
+const { paginate } = require("../utils/pagination");
 
 async function listScrap(req, res) {
-  const items = await AdminScrapItem.find().sort({ createdAt: -1 }).lean();
-  res.render("admin-scrap/list", { items, DISPOSAL_METHOD, message: req.query.message || null });
+  const { rows: items, pageInfo } = await paginate(AdminScrapItem, {}, { createdAt: -1 }, req.query);
+  res.render("admin-scrap/list", { items, DISPOSAL_METHOD, message: req.query.message || null, pageInfo });
 }
 
 function showNewForm(req, res) {
