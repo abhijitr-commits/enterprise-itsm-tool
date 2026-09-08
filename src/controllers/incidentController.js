@@ -8,9 +8,11 @@
 const Incident = require("../models/Incident");
 const Asset = require("../models/Asset");
 const Category = require("../models/Category");
+const Problem = require("../models/Problem");
+const Change = require("../models/Change");
 const { STATUS, PRIORITY } = require("../config/constants");
 const { generateSequentialId } = require("../utils/idGenerator");
-const { calculateSLADue } = require("../utils/sla");
+const { calculateSLADue, slaStatusOf } = require("../utils/sla");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
@@ -64,6 +66,15 @@ async function listIncidents(req, res) {
   }
 
   const { rows: incidents, pageInfo } = await paginate(Incident, filter, { createdDate: -1 }, req.query);
+
+  // Audit backlog: live "SLA Breached"/"At Risk" badge on the list itself
+  // (see utils/sla.js's slaStatusOf) — the passive-but-visible half of
+  // proactive SLA breach handling; adminController.checkSlaBreaches is
+  // the active half (a Slack/Teams alert on a manual trigger, same
+  // no-free-cron pattern as the Expiry Digest).
+  incidents.forEach((inc) => {
+    inc.slaStatus = slaStatusOf(inc);
+  });
 
   res.render("incidents/list", {
     incidents,
@@ -136,12 +147,19 @@ async function showIncident(req, res) {
   const incident = await Incident.findById(req.params.id).lean();
   if (!incident) return res.status(404).render("errors/404");
 
-  const [attachments, auditEntries, canUpload, assetNames, categories] = await Promise.all([
+  incident.slaStatus = slaStatusOf(incident);
+
+  const [attachments, auditEntries, canUpload, assetNames, categories, linkedProblems, linkedChanges] = await Promise.all([
     getAttachmentsForRecord("incidents", incident._id),
     getAuditTrailForRecord(incident._id),
     hasPermission(req.user.role, "incidents_edit"),
     listAssetNames(),
     listIncidentCategoryNames(),
+    // Reverse of Problem.linkedIncidentIds / Change.linkedIncidentIds —
+    // audit backlog: linked records should navigate to each other in
+    // both directions, not just Problem/Change -> Incident.
+    Problem.find({ linkedIncidentIds: incident._id }).select("problemId title status").lean(),
+    Change.find({ linkedIncidentIds: incident._id }).select("changeId title cabStatus").lean(),
   ]);
 
   res.render("incidents/detail", {
@@ -155,6 +173,8 @@ async function showIncident(req, res) {
     moduleKey: "incidents",
     assetNames,
     categories,
+    linkedProblems,
+    linkedChanges,
   });
 }
 
@@ -181,6 +201,14 @@ async function updateIncident(req, res) {
 
     if (incident.status === STATUS.CLOSED && !incident.closedDate) {
       incident.closedDate = new Date();
+    }
+
+    // A status change means the breach picture may have changed (reopened,
+    // resolved, etc.) — clear the "already alerted" flag so a ticket that
+    // breaches again later (e.g. reopened past its original SLA due date)
+    // gets a fresh Slack/Teams alert instead of staying silently suppressed.
+    if (incident.status !== previousStatus) {
+      incident.slaBreachNotifiedAt = undefined;
     }
 
     const automationResult = await applyAutomation({ moduleName: "Incident", trigger: "onUpdate", doc: incident });

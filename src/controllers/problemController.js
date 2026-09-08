@@ -2,6 +2,8 @@
  * problemController.js — port of ProblemEngine.gs.
  *************************************************************/
 const Problem = require("../models/Problem");
+const Incident = require("../models/Incident");
+const Change = require("../models/Change");
 const { STATUS } = require("../config/constants");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
@@ -10,6 +12,13 @@ const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/re
 const { paginate } = require("../utils/pagination");
 const { applyAutomation, recordAutomationRun } = require("../utils/automationEngine");
 const { notifyUser } = require("../utils/notifications");
+const { resolveIdsByCode } = require("../utils/linkedRecords");
+
+/** <datalist> of Incident IDs for the Linked Incidents field — same convenience-list convention as incidentController's listAssetNames. Bare IDs, not "ID — subject", since resolveIdsByCode matches the typed text exactly against incidentId. */
+async function listIncidentCodes() {
+  const incidents = await Incident.find().select("incidentId").sort({ createdDate: -1 }).limit(500).lean();
+  return incidents.map((i) => i.incidentId);
+}
 
 async function listProblems(req, res) {
   const { q, status } = req.query;
@@ -31,8 +40,9 @@ async function listProblems(req, res) {
   });
 }
 
-function showNewForm(req, res) {
-  res.render("problems/new", { error: null, form: {} });
+async function showNewForm(req, res) {
+  const incidentCodes = await listIncidentCodes();
+  res.render("problems/new", { error: null, form: {}, incidentCodes });
 }
 
 async function createProblem(req, res) {
@@ -43,12 +53,14 @@ async function createProblem(req, res) {
     }
 
     const problemId = await generateSequentialId("PRB");
+    const linkedIncidentIds = await resolveIdsByCode(Incident, "incidentId", data.linkedIncidents);
 
     const problem = new Problem({
       problemId,
       title: data.title,
       description: data.description,
       linkedIncidents: data.linkedIncidents || "",
+      linkedIncidentIds,
       rootCause: "",
       knownError: "No",
       status: STATUS.OPEN,
@@ -72,18 +84,24 @@ async function createProblem(req, res) {
 
     res.redirect(`/problems/${problem._id}?created=1`);
   } catch (err) {
-    res.status(400).render("problems/new", { error: err.message, form: req.body });
+    const incidentCodes = await listIncidentCodes();
+    res.status(400).render("problems/new", { error: err.message, form: req.body, incidentCodes });
   }
 }
 
 async function showProblem(req, res) {
-  const problem = await Problem.findById(req.params.id).lean();
+  const problem = await Problem.findById(req.params.id).populate("linkedIncidentIds", "incidentId subject status priority").lean();
   if (!problem) return res.status(404).render("errors/404");
 
-  const [attachments, auditEntries, canUpload] = await Promise.all([
+  const [attachments, auditEntries, canUpload, incidentCodes, linkedChanges] = await Promise.all([
     getAttachmentsForRecord("problems", problem._id),
     getAuditTrailForRecord(problem._id),
     hasPermission(req.user.role, "problems_edit"),
+    listIncidentCodes(),
+    // Reverse of Change.linkedProblemId — audit backlog: linked records
+    // should actually navigate to each other, both directions, not just
+    // Problem -> Incident.
+    Change.find({ linkedProblemId: problem._id }).select("changeId title cabStatus implementationStatus").lean(),
   ]);
 
   res.render("problems/detail", {
@@ -93,6 +111,8 @@ async function showProblem(req, res) {
     attachments,
     auditEntries,
     canUpload,
+    incidentCodes,
+    linkedChanges,
     moduleKey: "problems",
   });
 }
@@ -108,6 +128,7 @@ async function updateProblem(req, res) {
     problem.title = data.title;
     problem.description = data.description;
     problem.linkedIncidents = data.linkedIncidents || "";
+    problem.linkedIncidentIds = await resolveIdsByCode(Incident, "incidentId", data.linkedIncidents);
     problem.rootCause = data.rootCause || "";
     problem.knownError = data.knownError === "Yes" ? "Yes" : "No";
     problem.status = data.status || STATUS.OPEN;

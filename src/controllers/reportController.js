@@ -27,32 +27,63 @@ const AdminComplaint = require("../models/AdminComplaint");
 const AdminFacilityTask = require("../models/AdminFacilityTask");
 const adminStockController = require("./adminStockController");
 const { STATUS } = require("../config/constants");
+const { slaStatusOf } = require("../utils/sla");
+const { APPROVAL } = require("../models/ServiceRequest");
+const { IMPL } = Change;
+
+/**
+ * Scalability fix (audit backlog item: "unbounded collection scans in
+ * reportController.js/executiveSummaryController.js"). Incidents,
+ * Service Requests, Problems, and Changes are append-only logs that
+ * grow forever — showReports() used to Model.find().lean() every row
+ * any of these four modules had ever accumulated, with no filter and
+ * no limit at all. Fine at today's data volume; a real problem once a
+ * few years of ticket history piles up.
+ *
+ * Every report on this page only ever needs two kinds of rows: (a)
+ * whatever is still open, no matter how old — a five-year-old Critical
+ * incident nobody closed still belongs in Ticket Aging — and (b)
+ * anything from a trailing window, for trend/volume/MTTR-shaped
+ * reports. Nothing here genuinely needs "every ticket this company
+ * has ever filed" loaded into Node memory on every /reports request.
+ * This is the same trailing-window default real ITSM reporting
+ * dashboards use (e.g. ServiceNow Performance Analytics). Older,
+ * fully-closed records stay reachable via CSV export — they just
+ * aren't pulled into every report page load.
+ */
+const REPORT_WINDOW_MONTHS = 12;
+function reportWindowStart() {
+  const d = new Date();
+  d.setMonth(d.getMonth() - REPORT_WINDOW_MONTHS);
+  return d;
+}
+const OPEN_STATUSES = Object.values(STATUS).filter((s) => s !== STATUS.CLOSED && s !== STATUS.RESOLVED && s !== STATUS.CANCELLED);
+
+/** Recent (within the trailing window) OR still-open, by the ticket's own status field. */
+function recentOrOpen(statusField) {
+  return { $or: [{ createdDate: { $gte: reportWindowStart() } }, { [statusField]: { $in: OPEN_STATUSES } }] };
+}
+
+/** Change has no single STATUS field — "open" means not CAB-rejected and not implementation-terminal. */
+function recentOrOpenChange() {
+  return {
+    $or: [
+      { createdDate: { $gte: reportWindowStart() } },
+      { cabStatus: { $ne: APPROVAL.REJECTED }, implementationStatus: { $nin: [IMPL.IMPLEMENTED, IMPL.ROLLED_BACK] } },
+    ],
+  };
+}
 
 function slaComplianceReport(incidents) {
-  const now = new Date();
-  return incidents.map((r) => {
-    let slaStatus = "On Track";
-    const slaDue = r.slaDue ? new Date(r.slaDue) : null;
-    const closedDate = r.closedDate ? new Date(r.closedDate) : null;
-
-    if (r.status === STATUS.CLOSED || r.status === STATUS.RESOLVED) {
-      slaStatus = slaDue && closedDate ? (closedDate <= slaDue ? "Met" : "Breached") : "Met";
-    } else if (slaDue) {
-      const hoursRemaining = (slaDue.getTime() - now.getTime()) / (1000 * 60 * 60);
-      if (hoursRemaining < 0) slaStatus = "Breached";
-      else if (hoursRemaining <= 4) slaStatus = "At Risk";
-    }
-
-    return {
-      incidentId: r.incidentId,
-      subject: r.subject,
-      priority: r.priority,
-      status: r.status,
-      engineer: r.engineer || "Unassigned",
-      slaDue: r.slaDue ? new Date(r.slaDue).toLocaleString() : "",
-      slaStatus,
-    };
-  });
+  return incidents.map((r) => ({
+    incidentId: r.incidentId,
+    subject: r.subject,
+    priority: r.priority,
+    status: r.status,
+    engineer: r.engineer || "Unassigned",
+    slaDue: r.slaDue ? new Date(r.slaDue).toLocaleString() : "",
+    slaStatus: slaStatusOf(r),
+  }));
 }
 
 function monthlyVolumeReport(incidents) {
@@ -524,10 +555,10 @@ async function showReports(req, res) {
     adminVendors, adminStockItems, adminStockOrders, adminScrapItems,
     adminAssets, adminPurchases, adminComplaints, adminFacilityTasks,
   ] = await Promise.all([
-    Incident.find().lean(),
-    ServiceRequest.find().lean(),
-    Problem.find().lean(),
-    Change.find().lean(),
+    Incident.find(recentOrOpen("status")).lean(),
+    ServiceRequest.find(recentOrOpen("fulfillmentStatus")).lean(),
+    Problem.find(recentOrOpen("status")).lean(),
+    Change.find(recentOrOpenChange()).lean(),
     Asset.find().lean(),
     Employee.find().lean(),
     Vendor.find().lean(),
@@ -580,6 +611,8 @@ async function showReports(req, res) {
 
 module.exports = {
   showReports,
+  recentOrOpen,
+  recentOrOpenChange,
   ticketVolumeTrend,
   slaComplianceSummary,
   mttrReport,

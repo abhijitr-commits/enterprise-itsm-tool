@@ -16,7 +16,7 @@ const Asset = require("../models/Asset");
 const Employee = require("../models/Employee");
 const Vendor = require("../models/Vendor");
 const SoftwareLicense = require("../models/SoftwareLicense");
-const { ROLE } = require("../config/constants");
+const { ROLE, STATUS } = require("../config/constants");
 const { ALL_ROLES_LIST, DEFAULT_PERMISSIONS_MAP } = require("../config/permissions");
 const { clearPermissionsCache } = require("../utils/permissions");
 const { logAudit } = require("../utils/auditLog");
@@ -434,6 +434,61 @@ async function sendExpiryDigest(req, res) {
   res.redirect("/admin/integrations?message=" + encodeURIComponent(parts.join(" ")));
 }
 
+/************************************************
+ * PROACTIVE SLA BREACH ALERTING — audit backlog item ("SLA due dates
+ * are calculated, but nothing actively flags or escalates a ticket
+ * once it breaches — it's a passive field today, not a trigger.").
+ * The live badge on the Incident list/detail pages (utils/sla.js's
+ * slaStatusOf) is the always-on, passive half of this; this is the
+ * active half — a Slack/Teams escalation, on the same manual-trigger
+ * pattern as sendExpiryDigest() just above (Render's free tier has no
+ * cron, and this project never stands up a third-party scheduled-ping
+ * service to fake one). Only alerts on incidents not already flagged
+ * (Incident.slaBreachNotifiedAt) so re-clicking this button, or a
+ * scheduled task firing it, never re-sends the same breach twice; a
+ * status change clears that flag (see incidentController.updateIncident)
+ * so a reopened ticket that breaches again gets a fresh alert.
+ ************************************************/
+async function checkSlaBreaches(req, res) {
+  const now = new Date();
+  const openStatuses = [STATUS.OPEN, STATUS.IN_PROGRESS, STATUS.ON_HOLD];
+
+  const breached = await Incident.find({
+    status: { $in: openStatuses },
+    slaDue: { $lt: now },
+    slaBreachNotifiedAt: null,
+  })
+    .select("incidentId subject priority engineer slaDue employeeName")
+    .sort({ slaDue: 1 })
+    .lean();
+
+  if (breached.length === 0) {
+    return res.redirect("/admin/integrations?message=" + encodeURIComponent("No new SLA breaches — nothing to report."));
+  }
+
+  let body = "SLA BREACHED — newly flagged:\n";
+  breached.forEach((r) => {
+    body += `- ${r.incidentId} [${r.priority}] ${r.subject} — engineer: ${r.engineer || "Unassigned"}, was due ${new Date(r.slaDue).toLocaleString()}\n`;
+  });
+
+  const result = await notifyChannels("SLA Breach Alert — Enterprise ITSM", body.trim());
+
+  await Incident.updateMany({ _id: { $in: breached.map((r) => r._id) } }, { $set: { slaBreachNotifiedAt: now } });
+
+  await logAudit({
+    user: req.user._id,
+    action: "Create",
+    entityType: "SLABreachAlert",
+    details: `${breached.length} incident(s) newly flagged as SLA-breached. Slack: ${result.slack.sent ? "sent" : "skipped"}, Teams: ${result.teams.sent ? "sent" : "skipped"}.`,
+  });
+
+  const parts = [`${breached.length} incident(s) newly flagged as breached.`];
+  parts.push(result.slack.sent ? "Slack: sent." : `Slack: ${result.slack.reason}`);
+  parts.push(result.teams.sent ? "Teams: sent." : `Teams: ${result.teams.reason}`);
+
+  res.redirect("/admin/integrations?message=" + encodeURIComponent(parts.join(" ")));
+}
+
 module.exports = {
   listUsers,
   showNewUserForm,
@@ -449,4 +504,5 @@ module.exports = {
   generateApiKey,
   revokeApiKey,
   sendExpiryDigest,
+  checkSlaBreaches,
 };

@@ -2,6 +2,8 @@
  * changeController.js — port of ChangeEngine.gs.
  *************************************************************/
 const Change = require("../models/Change");
+const Problem = require("../models/Problem");
+const Incident = require("../models/Incident");
 const { APPROVAL } = require("../models/ServiceRequest");
 const { logAudit } = require("../utils/auditLog");
 const { generateSequentialId } = require("../utils/idGenerator");
@@ -10,8 +12,18 @@ const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/re
 const { paginate } = require("../utils/pagination");
 const { applyAutomation, recordAutomationRun } = require("../utils/automationEngine");
 const { notifyUser } = require("../utils/notifications");
+const { resolveIdsByCode, resolveOneIdByCode } = require("../utils/linkedRecords");
 
 const { IMPL } = Change;
+
+/** <datalist> sources for the Linked Problem / Related Incidents fields — see problemController's listIncidentCodes for the same convention. */
+async function listLinkOptions() {
+  const [problems, incidents] = await Promise.all([
+    Problem.find().select("problemId").sort({ createdDate: -1 }).limit(500).lean(),
+    Incident.find().select("incidentId").sort({ createdDate: -1 }).limit(500).lean(),
+  ]);
+  return { problemCodes: problems.map((p) => p.problemId), incidentCodes: incidents.map((i) => i.incidentId) };
+}
 
 async function listChanges(req, res) {
   const { q, cabStatus, implementationStatus } = req.query;
@@ -44,8 +56,9 @@ async function listChanges(req, res) {
   });
 }
 
-function showNewForm(req, res) {
-  res.render("changes/new", { error: null, form: {} });
+async function showNewForm(req, res) {
+  const { problemCodes, incidentCodes } = await listLinkOptions();
+  res.render("changes/new", { error: null, form: {}, problemCodes, incidentCodes });
 }
 
 async function createChange(req, res) {
@@ -56,6 +69,10 @@ async function createChange(req, res) {
     }
 
     const changeId = await generateSequentialId("CHG");
+    const [linkedProblemId, linkedIncidentIds] = await Promise.all([
+      resolveOneIdByCode(Problem, "problemId", data.linkedProblem),
+      resolveIdsByCode(Incident, "incidentId", data.linkedIncidents),
+    ]);
 
     const change = new Change({
       changeId,
@@ -67,6 +84,8 @@ async function createChange(req, res) {
       implementationStatus: IMPL.NOT_STARTED,
       requestedBy: data.requestedBy,
       department: data.department,
+      linkedProblemId,
+      linkedIncidentIds,
       createdBy: req.user.email,
     });
 
@@ -86,18 +105,23 @@ async function createChange(req, res) {
 
     res.redirect(`/changes/${change._id}?created=1`);
   } catch (err) {
-    res.status(400).render("changes/new", { error: err.message, form: req.body });
+    const { problemCodes, incidentCodes } = await listLinkOptions();
+    res.status(400).render("changes/new", { error: err.message, form: req.body, problemCodes, incidentCodes });
   }
 }
 
 async function showChange(req, res) {
-  const change = await Change.findById(req.params.id).lean();
+  const change = await Change.findById(req.params.id)
+    .populate("linkedProblemId", "problemId title status")
+    .populate("linkedIncidentIds", "incidentId subject status priority")
+    .lean();
   if (!change) return res.status(404).render("errors/404");
 
-  const [attachments, auditEntries, canUpload] = await Promise.all([
+  const [attachments, auditEntries, canUpload, { problemCodes, incidentCodes }] = await Promise.all([
     getAttachmentsForRecord("changes", change._id),
     getAuditTrailForRecord(change._id),
     hasPermission(req.user.role, "changes_edit"),
+    listLinkOptions(),
   ]);
 
   res.render("changes/detail", {
@@ -108,6 +132,8 @@ async function showChange(req, res) {
     attachments,
     auditEntries,
     canUpload,
+    problemCodes,
+    incidentCodes,
     moduleKey: "changes",
   });
 }
@@ -128,6 +154,10 @@ async function updateChange(req, res) {
     change.description = data.description;
     change.riskLevel = data.riskLevel;
     change.plannedDate = new Date(data.plannedDate);
+    [change.linkedProblemId, change.linkedIncidentIds] = await Promise.all([
+      resolveOneIdByCode(Problem, "problemId", data.linkedProblem),
+      resolveIdsByCode(Incident, "incidentId", data.linkedIncidents),
+    ]);
 
     await change.save();
 

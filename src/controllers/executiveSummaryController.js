@@ -32,14 +32,22 @@ const {
   contractExpiryReport,
   amcExpiryReport,
   licenseExpiryReport,
+  recentOrOpen,
+  recentOrOpenChange,
 } = require("./reportController");
+
+// Same scalability fix as reportController.js's showReports() — see its
+// recentOrOpen()/recentOrOpenChange() doc comment. Pending Leave counts
+// here need the same "still-open regardless of age" guarantee a
+// years-old, never-decided leave request would otherwise silently drop
+// (APPROVAL is already imported above for pendingRequests/pendingChanges).
 
 async function showExecutiveSummary(req, res) {
   const [incidents, requests, changes, leave, assets, employees, resignations, vendors, licenses] = await Promise.all([
-    Incident.find().lean(),
-    ServiceRequest.find().lean(),
-    Change.find().lean(),
-    LeaveRequest.find().lean(),
+    Incident.find(recentOrOpen("status")).lean(),
+    ServiceRequest.find(recentOrOpen("fulfillmentStatus")).lean(),
+    Change.find(recentOrOpenChange()).lean(),
+    LeaveRequest.find({ status: APPROVAL.PENDING }).lean(),
     Asset.find().lean(),
     Employee.find().lean(),
     Resignation.find().lean(),
