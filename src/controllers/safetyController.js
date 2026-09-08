@@ -12,6 +12,7 @@ const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
 const { notifyChannels } = require("../utils/notifications");
+const { resolveAssigneeRef } = require("../utils/userDirectory");
 
 async function listSafetyIncidents(req, res) {
   const incidents = await SafetyIncident.find().sort({ createdDate: -1 }).lean();
@@ -75,7 +76,10 @@ async function updateStatus(req, res) {
     if (!incident) return res.status(404).render("errors/404");
 
     incident.status = status;
-    if (assignedTo !== undefined) incident.assignedTo = assignedTo;
+    if (assignedTo !== undefined) {
+      incident.assignedTo = assignedTo;
+      incident.assignedToRef = assignedTo ? await resolveAssigneeRef(assignedTo) : null; // task #102
+    }
     if (correctiveAction) incident.correctiveAction = correctiveAction;
     if (status === SAFETY_STATUS.CLOSED) incident.closedDate = new Date();
     await incident.save();

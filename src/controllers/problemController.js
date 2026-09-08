@@ -13,6 +13,7 @@ const { paginate } = require("../utils/pagination");
 const { applyAutomation, recordAutomationRun } = require("../utils/automationEngine");
 const { notifyUser } = require("../utils/notifications");
 const { resolveIdsByCode } = require("../utils/linkedRecords");
+const { resolveAssigneeRef } = require("../utils/userDirectory");
 
 /** <datalist> of Incident IDs for the Linked Incidents field — same convenience-list convention as incidentController's listAssetNames. Bare IDs, not "ID — subject", since resolveIdsByCode matches the typed text exactly against incidentId. */
 async function listIncidentCodes() {
@@ -93,6 +94,7 @@ async function createProblem(req, res) {
       knownError: "No",
       status: STATUS.OPEN,
       owner: data.owner || "",
+      ownerRef: data.owner ? await resolveAssigneeRef(data.owner) : null, // task #102
       createdBy: req.user.email,
     });
 
@@ -162,6 +164,7 @@ async function updateProblem(req, res) {
     problem.knownError = data.knownError === "Yes" ? "Yes" : "No";
     problem.status = data.status || STATUS.OPEN;
     problem.owner = data.owner || "";
+    problem.ownerRef = problem.owner ? await resolveAssigneeRef(problem.owner) : null; // task #102
 
     if (problem.status === STATUS.CLOSED && !problem.closedDate) {
       problem.closedDate = new Date();

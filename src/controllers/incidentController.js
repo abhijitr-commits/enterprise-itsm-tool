@@ -20,6 +20,7 @@ const { notifyUser } = require("../utils/notifications");
 const { paginate } = require("../utils/pagination");
 const { suggestKnownErrorsFor } = require("../utils/knownErrors");
 const { applyAutomation, recordAutomationRun } = require("../utils/automationEngine");
+const { resolveAssigneeRef } = require("../utils/userDirectory");
 
 /**
  * Phase 9 helper — a light "Asset Name (Asset ID)" list for the
@@ -201,6 +202,10 @@ async function updateIncident(req, res) {
     incident.description = data.description;
     incident.status = data.status || STATUS.OPEN;
     incident.engineer = data.engineer || "";
+    // Task #102 — resolve the typed name to a real User, when it matches
+    // one exactly, so "assigned to me" filtering (myWorkController) and
+    // future features can use a real reference instead of a name regex.
+    incident.engineerRef = incident.engineer ? await resolveAssigneeRef(incident.engineer) : null;
     incident.remarks = data.remarks || "";
     incident.relatedAsset = data.relatedAsset || "";
 

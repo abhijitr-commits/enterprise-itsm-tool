@@ -13,6 +13,7 @@ const { ADMIN_COMPLAINT_STATUS } = AdminComplaint;
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { isAdminTeam } = require("../utils/teamAccess");
+const { resolveAssigneeRef } = require("../utils/userDirectory");
 
 async function listComplaints(req, res) {
   const complaints = await AdminComplaint.find().sort({ createdDate: -1 }).lean();
@@ -58,7 +59,10 @@ async function updateStatus(req, res) {
     if (!complaint) return res.status(404).render("errors/404");
 
     complaint.status = status;
-    if (assignedTo !== undefined) complaint.assignedTo = assignedTo;
+    if (assignedTo !== undefined) {
+      complaint.assignedTo = assignedTo;
+      complaint.assignedToRef = assignedTo ? await resolveAssigneeRef(assignedTo) : null; // task #102
+    }
     if (resolutionNotes) complaint.resolutionNotes = resolutionNotes;
     if (status === ADMIN_COMPLAINT_STATUS.RESOLVED || status === ADMIN_COMPLAINT_STATUS.CLOSED) complaint.resolvedDate = new Date();
     await complaint.save();

@@ -8,6 +8,7 @@ const WorkOrder = require("../models/WorkOrder");
 const { WORK_ORDER_STATUS } = WorkOrder;
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { resolveAssigneeRef } = require("../utils/userDirectory");
 
 async function listWorkOrders(req, res) {
   const { department, status } = req.query;
@@ -39,6 +40,7 @@ async function createWorkOrder(req, res) {
       itemDescription: data.itemDescription,
       quantity: data.quantity || 1,
       assignedTo: data.assignedTo || "",
+      assignedToRef: data.assignedTo ? await resolveAssigneeRef(data.assignedTo) : null, // task #102
       startDate: data.startDate ? new Date(data.startDate) : undefined,
       targetCompletionDate: data.targetCompletionDate ? new Date(data.targetCompletionDate) : undefined,
       createdBy: req.user.email,
@@ -61,7 +63,10 @@ async function updateWorkOrder(req, res) {
     if (!order) return res.status(404).render("errors/404");
 
     order.status = status;
-    if (assignedTo !== undefined) order.assignedTo = assignedTo;
+    if (assignedTo !== undefined) {
+      order.assignedTo = assignedTo;
+      order.assignedToRef = assignedTo ? await resolveAssigneeRef(assignedTo) : null; // task #102
+    }
     if (defectNotes) order.defectNotes = defectNotes;
     if (status === WORK_ORDER_STATUS.COMPLETED && !order.completedDate) order.completedDate = new Date();
     await order.save();

@@ -5,10 +5,15 @@
  * Changes, and (as of Phase 4B) Leave requests I can actually act
  * on given my role.
  *
- * Matching is by name (req.user.name), same limitation the
- * original had matching by name via the Users sheet — a name
- * mismatch between your login and a ticket's free-typed name field
- * means it won't show up here.
+ * Matching is primarily by name (req.user.name), same limitation the
+ * original had matching by name via the Users sheet — a name mismatch
+ * between your login and a ticket's free-typed name field means it
+ * won't show up here. Task #102 narrows that gap for the "assigned
+ * engineer" half of "My Tickets": Incident.engineerRef (a real User
+ * reference, resolved server-side on save — see utils/userDirectory.js)
+ * is matched by exact ID alongside the legacy name regex, so a rename
+ * or a typo in the free-text field no longer drops an already-resolved
+ * ticket out of its engineer's queue.
  *
  * As of Phase 4D, "reviews awaiting my acknowledgement" (Review.status
  * === "Submitted" for MY name) is folded into the same "Pending My
@@ -47,7 +52,9 @@ async function showMyWork(req, res) {
     delegateLeave,
     myPendingReviews,
   ] = await Promise.all([
-    Incident.find({ $or: [{ employeeName: nameRx }, { engineer: nameRx }] }).sort({ createdDate: -1 }).lean(),
+    Incident.find({ $or: [{ employeeName: nameRx }, { engineer: nameRx }, { engineerRef: req.user._id }] })
+      .sort({ createdDate: -1 })
+      .lean(),
     ServiceRequest.find({ requester: nameRx }).sort({ createdDate: -1 }).lean(),
     hasPermission(req.user.role, "requests_approve"),
     hasPermission(req.user.role, "changes_approve"),
