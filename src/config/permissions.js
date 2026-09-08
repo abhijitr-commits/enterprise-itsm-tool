@@ -62,6 +62,11 @@ const DEFAULT_PERMISSIONS_MAP = {
   admin_manage_settings: [ROLE.ADMIN],
   admin_view_database: [ROLE.ADMIN],
 
+  // Automation Rules (Architecture Phase 1) — a mis-configured rule can
+  // change field values or fire notifications across an entire module, so
+  // this stays Administrator-only, same tier as admin_manage_settings.
+  automation_manage: [ROLE.ADMIN],
+
   // --- Phase 4 (HR suite) ---
   // Employee Directory management, Onboarding/Offboarding automation, and
   // creating Performance Goals/Reviews are NOT in this map — same as the
