@@ -1,0 +1,71 @@
+<%- include('../partials/header', { title: 'CMDB Graph View' }) %>
+
+<%
+  var REL_COLORS = {
+    "Depends On": "#64748b",
+    "Hosted On": "#2563eb",
+    "Connects To": "#16a34a",
+    "Part Of": "#9333ea",
+    "Backup For": "#ea580c",
+    "Related (legacy)": "#94a3b8",
+  };
+  var STATUS_FILL = { Active: "#16a34a", Inactive: "#94a3b8", Decommissioned: "#dc2626" };
+  function relColor(t) { return REL_COLORS[t] || "#64748b"; }
+  function statusFill(s) { return STATUS_FILL[s] || "#64748b"; }
+%>
+
+<div class="page-header">
+  <h1>CMDB Graph View</h1>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/cmdb">← CMDB List</a>
+  </div>
+</div>
+
+<p class="hint" style="margin-bottom: 14px;">
+  Every configuration item as a node, every relationship (typed, plus the legacy free-text Dependencies field) as a
+  directed edge. Arranged on a plain circle — for a "what does this one CI touch" view instead, use a CI's own
+  <strong>Impact Analysis</strong> page.
+</p>
+
+<div class="cmdb-graph-legend">
+  <% Object.keys(REL_COLORS).forEach(function(t) { %>
+    <span class="cmdb-graph-legend-item">
+      <span class="cmdb-graph-legend-swatch" style="background: <%= REL_COLORS[t] %>;"></span><%= t %>
+    </span>
+  <% }) %>
+  <span class="cmdb-graph-legend-item"><span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#16a34a;"></span>Active</span>
+  <span class="cmdb-graph-legend-item"><span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#94a3b8;"></span>Inactive</span>
+  <span class="cmdb-graph-legend-item"><span style="width:10px;height:10px;border-radius:50%;display:inline-block;background:#dc2626;"></span>Decommissioned</span>
+</div>
+
+<div class="panel">
+  <% if (isEmpty) { %>
+    <p class="donut-empty">No configuration items yet — <a href="/cmdb/new">add one</a> to start building the graph.</p>
+  <% } else { %>
+    <svg class="cmdb-graph-svg" viewBox="0 0 <%= width %> <%= height %>" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8" />
+        </marker>
+      </defs>
+      <% edges.forEach(function(e) { %>
+        <line
+          x1="<%= e.from.x %>" y1="<%= e.from.y %>" x2="<%= e.to.x %>" y2="<%= e.to.y %>"
+          stroke="<%= relColor(e.type) %>" stroke-width="1.5"
+          <%= e.type === 'Related (legacy)' ? 'stroke-dasharray="4,3"' : '' %>
+          marker-end="url(#arrow)" opacity="0.75"
+        ><title><%= e.from.ciId %> —<%= e.type %>→ <%= e.to.ciId %></title></line>
+      <% }) %>
+      <% nodes.forEach(function(n) { %>
+        <g onclick="location.href='/cmdb?q=<%= encodeURIComponent(n.ciId) %>'" style="cursor:pointer;">
+          <circle cx="<%= n.x %>" cy="<%= n.y %>" r="9" fill="<%= statusFill(n.status) %>" stroke="#fff" stroke-width="1.5">
+            <title><%= n.ciId %> — <%= n.ciName %> (<%= n.type %>, <%= n.status %>)</title>
+          </circle>
+          <text x="<%= n.x %>" y="<%= n.y - 13 %>" text-anchor="middle"><%= n.ciId %></text>
+        </g>
+      <% }) %>
+    </svg>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

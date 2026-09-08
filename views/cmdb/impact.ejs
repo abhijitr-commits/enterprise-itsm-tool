@@ -8,9 +8,9 @@
 </div>
 
 <p class="admin-tile-sub" style="margin-bottom:16px;">
-  Traces the <strong>Dependencies</strong> field across the whole CMDB, up to 3 hops out in each direction. Built
-  from whatever CI IDs are typed into that field today — nothing to configure, but only as complete as the
-  Dependencies data entered on each CI.
+  Traces both the typed <strong>Relationships</strong> below and the legacy free-text <strong>Dependencies</strong>
+  field, across the whole CMDB, up to 3 hops out in each direction. Only as complete as the relationship and
+  dependency data entered on each CI — see the <a href="/cmdb/graph">Graph View</a> for the whole picture at once.
 </p>
 
 <div class="dashboard-grid">
@@ -24,17 +24,18 @@
       <% upstream.forEach(function(level) { %>
         <div class="admin-tile-sub" style="margin: 12px 0 6px; font-weight:600;">Hop <%= level.depth %> — <%= level.nodes.length %> item(s)</div>
         <table class="table">
-          <thead><tr><th>CI ID</th><th>Name</th><th>Type</th><th>Status</th></tr></thead>
+          <thead><tr><th>CI ID</th><th>Name</th><th>Type</th><th>Status</th><th>Relationship</th></tr></thead>
           <tbody>
             <% level.nodes.forEach(function(n) { %>
               <% if (n.unknown) { %>
-                <tr><td><%= n.ciId %></td><td colspan="3" class="empty-row">Referenced but not found in the CMDB (typo, or since deleted).</td></tr>
+                <tr><td><%= n.ciId %></td><td colspan="3" class="empty-row">Referenced but not found in the CMDB (typo, or since deleted).</td><td><%= n.relType %></td></tr>
               <% } else { %>
                 <tr onclick="location.href='/cmdb?q=<%= encodeURIComponent(n.ciId) %>'">
                   <td><%= n.ciId %></td>
                   <td><%= n.ciName %></td>
                   <td><%= n.type %></td>
                   <td><span class="badge badge-status-<%= n.status.toLowerCase() %>"><%= n.status %></span></td>
+                  <td><%= n.relType %></td>
                 </tr>
               <% } %>
             <% }) %>
@@ -54,17 +55,18 @@
       <% downstream.forEach(function(level) { %>
         <div class="admin-tile-sub" style="margin: 12px 0 6px; font-weight:600;">Hop <%= level.depth %> — <%= level.nodes.length %> item(s)</div>
         <table class="table">
-          <thead><tr><th>CI ID</th><th>Name</th><th>Type</th><th>Status</th></tr></thead>
+          <thead><tr><th>CI ID</th><th>Name</th><th>Type</th><th>Status</th><th>Relationship</th></tr></thead>
           <tbody>
             <% level.nodes.forEach(function(n) { %>
               <% if (n.unknown) { %>
-                <tr><td><%= n.ciId %></td><td colspan="3" class="empty-row">Referenced but not found in the CMDB (typo, or since deleted).</td></tr>
+                <tr><td><%= n.ciId %></td><td colspan="3" class="empty-row">Referenced but not found in the CMDB (typo, or since deleted).</td><td><%= n.relType %></td></tr>
               <% } else { %>
                 <tr onclick="location.href='/cmdb?q=<%= encodeURIComponent(n.ciId) %>'">
                   <td><%= n.ciId %></td>
                   <td><%= n.ciName %></td>
                   <td><%= n.type %></td>
                   <td><span class="badge badge-status-<%= n.status.toLowerCase() %>"><%= n.status %></span></td>
+                  <td><%= n.relType %></td>
                 </tr>
               <% } %>
             <% }) %>
