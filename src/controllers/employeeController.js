@@ -147,6 +147,7 @@ async function createEmployee(req, res) {
       designation: data.designation || "",
       status,
       employmentType,
+      dateOfJoining: data.dateOfJoining ? new Date(data.dateOfJoining) : undefined,
       contractEndDate: employmentType === Employee.EMPLOYMENT_TYPE.CONTRACT ? data.contractEndDate : undefined,
       reportsTo: data.reportsTo || "",
       createdBy: req.user.email,
@@ -212,6 +213,11 @@ async function updateEmployee(req, res) {
     employee.designation = data.designation || "";
     employee.status = data.status;
     employee.employmentType = employmentType;
+    // Left blank on the edit form, an existing dateOfJoining is preserved
+    // rather than wiped — same "don't destroy data on a blank submit"
+    // consideration contractEndDate doesn't need (it's meaningless outside
+    // Contract type), but dateOfJoining is meaningful for every employee.
+    employee.dateOfJoining = data.dateOfJoining ? new Date(data.dateOfJoining) : employee.dateOfJoining;
     employee.contractEndDate = employmentType === Employee.EMPLOYMENT_TYPE.CONTRACT ? data.contractEndDate || undefined : undefined;
     employee.reportsTo = data.reportsTo || "";
 
