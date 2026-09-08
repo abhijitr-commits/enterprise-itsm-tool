@@ -9,6 +9,7 @@ const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 const { paginate } = require("../utils/pagination");
 const { applyAutomation, recordAutomationRun } = require("../utils/automationEngine");
+const { notifyUser } = require("../utils/notifications");
 
 async function listProblems(req, res) {
   const { q, status } = req.query;
@@ -102,6 +103,8 @@ async function updateProblem(req, res) {
     const problem = await Problem.findById(req.params.id);
     if (!problem) return res.status(404).render("errors/404");
 
+    const previousStatus = problem.status;
+
     problem.title = data.title;
     problem.description = data.description;
     problem.linkedIncidents = data.linkedIncidents || "";
@@ -126,6 +129,19 @@ async function updateProblem(req, res) {
       details: `Status: ${problem.status}`,
     });
 
+    // Architecture Phase 4 follow-up — "phase movement" notification: the
+    // person who raised the problem (createdBy is a reliable real email,
+    // unlike the free-text owner/linkedIncidents fields) hears about it
+    // the moment its status actually moves, not just on the initial log.
+    // Fire-and-forget, same convention as every other notifyUser() call.
+    if (problem.status !== previousStatus) {
+      notifyUser({
+        email: problem.createdBy,
+        message: `Problem ${problem.problemId} — ${problem.title} is now ${problem.status}.`,
+        link: `/problems/${problem._id}`,
+      });
+    }
+
     await recordAutomationRun(automationResult, { entityType: "Problem", entityId: problem._id, userId: req.user._id });
 
     res.redirect(`/problems/${problem._id}`);
@@ -147,6 +163,12 @@ async function closeProblem(req, res) {
     action: "Close",
     entityType: "Problem",
     entityId: problem._id,
+  });
+
+  notifyUser({
+    email: problem.createdBy,
+    message: `Problem ${problem.problemId} — ${problem.title} is now Closed.`,
+    link: `/problems/${problem._id}`,
   });
 
   res.redirect(`/problems/${problem._id}`);

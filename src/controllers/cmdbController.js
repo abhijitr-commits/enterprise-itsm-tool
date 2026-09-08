@@ -133,4 +133,105 @@ async function deleteCI(req, res) {
   res.redirect("/cmdb");
 }
 
-module.exports = { listCIs, showNewForm, createCI, showCI, updateCI, deleteCI };
+/************************************************
+ * IMPACT ANALYSIS — Architecture Phase 5 (see
+ * itsm_architecture_comparison.md): the Dependencies field has always
+ * been a free-text, comma-separated list of CI IDs (same trade-off as
+ * Problem.linkedIncidents — see ConfigurationItem.js's schema comment),
+ * which is fine for RECORDING a relationship but useless for ANSWERING
+ * "what breaks if this goes down", the actual point of a CMDB in every
+ * commercial ITSM platform. This treats that same free-text field as a
+ * real (if informally-typed) dependency graph and traverses it both
+ * ways, with no schema change and no new collection.
+ ************************************************/
+const MAX_IMPACT_DEPTH = 3;
+
+/** "CI-2026-000001, CI-2026-000003" -> ["CI-2026-000001", "CI-2026-000003"] */
+function parseDependencyIds(dependencies) {
+  return String(dependencies || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+/** One pass over the whole CMDB, keyed by ciId, each node carrying its own parsed dependsOn list. */
+async function buildCiGraph() {
+  const cis = await ConfigurationItem.find().select("ciId ciName type status dependencies").lean();
+  const byId = new Map();
+  cis.forEach((ci) => {
+    byId.set(ci.ciId, {
+      ciId: ci.ciId,
+      ciName: ci.ciName,
+      type: ci.type,
+      status: ci.status,
+      dependsOn: parseDependencyIds(ci.dependencies),
+    });
+  });
+  return byId;
+}
+
+/**
+ * Breadth-first walk out from `startId` along whatever edges `edgeFn`
+ * returns for a node, grouped by hop distance and capped at `maxDepth`.
+ * Cycle-safe (a dependency loop just stops expanding, it never re-visits
+ * a node) and tolerant of dangling references — a dependency string that
+ * names a CI ID nothing in the CMDB actually has comes back tagged
+ * `unknown: true` instead of throwing or silently vanishing, so a typo'd
+ * or since-deleted CI ID is visible on the page rather than hidden.
+ */
+function traverse(byId, startId, edgeFn, maxDepth) {
+  const levels = [];
+  const visited = new Set([startId]);
+  let frontier = [startId];
+
+  for (let depth = 1; depth <= maxDepth && frontier.length; depth++) {
+    const nextFrontier = [];
+    const levelNodes = [];
+    for (const id of frontier) {
+      const node = byId.get(id);
+      const neighbors = node ? edgeFn(node) : [];
+      for (const nId of neighbors) {
+        if (visited.has(nId)) continue;
+        visited.add(nId);
+        nextFrontier.push(nId);
+        const nNode = byId.get(nId);
+        levelNodes.push(nNode ? { ciId: nNode.ciId, ciName: nNode.ciName, type: nNode.type, status: nNode.status } : { ciId: nId, unknown: true });
+      }
+    }
+    if (levelNodes.length) levels.push({ depth, nodes: levelNodes });
+    frontier = nextFrontier;
+  }
+  return levels;
+}
+
+async function showImpact(req, res) {
+  const ci = await ConfigurationItem.findById(req.params.id).lean();
+  if (!ci) return res.status(404).render("errors/404");
+
+  const byId = await buildCiGraph();
+
+  // Downstream — what THIS CI needs to function: follow each node's own
+  // dependsOn list outward.
+  const downstream = traverse(byId, ci.ciId, (node) => node.dependsOn, MAX_IMPACT_DEPTH);
+
+  // Upstream — what BREAKS if this CI goes down: the reverse edge. The
+  // CMDB never stores a reverse pointer, so this is found by scanning
+  // every other node's dependsOn list for a match at each hop — fine at
+  // the size a small company's CMDB actually reaches.
+  const upstream = traverse(
+    byId,
+    ci.ciId,
+    (node) => {
+      const dependents = [];
+      for (const other of byId.values()) {
+        if (other.dependsOn.includes(node.ciId)) dependents.push(other.ciId);
+      }
+      return dependents;
+    },
+    MAX_IMPACT_DEPTH
+  );
+
+  res.render("cmdb/impact", { ci, downstream, upstream, moduleKey: "cmdb" });
+}
+
+module.exports = { listCIs, showNewForm, createCI, showCI, updateCI, deleteCI, showImpact };

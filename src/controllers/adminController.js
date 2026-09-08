@@ -22,6 +22,7 @@ const { clearPermissionsCache } = require("../utils/permissions");
 const { logAudit } = require("../utils/auditLog");
 const { getSetting, setSetting } = require("../utils/settings");
 const { notifyChannels } = require("../utils/notifications");
+const { getApiToken, generateApiToken, revokeApiToken } = require("../utils/apiAuth");
 const { assetWarrantyReport, contractExpiryReport, amcExpiryReport, licenseExpiryReport } = require("./reportController");
 
 /************************************************
@@ -267,14 +268,16 @@ async function showSummary(req, res) {
  * second settings-gating mechanism.
  ************************************************/
 async function showIntegrationSettings(req, res) {
-  const [slackWebhookUrl, teamsWebhookUrl] = await Promise.all([
+  const [slackWebhookUrl, teamsWebhookUrl, apiToken] = await Promise.all([
     getSetting("SlackWebhookURL", ""),
     getSetting("TeamsWebhookURL", ""),
+    getApiToken(),
   ]);
 
   res.render("admin/integrations", {
     slackWebhookUrl,
     teamsWebhookUrl,
+    apiToken,
     message: req.query.message || null,
     error: null,
   });
@@ -299,6 +302,7 @@ async function saveIntegrationSettings(req, res) {
     res.status(400).render("admin/integrations", {
       slackWebhookUrl: req.body.slackWebhookUrl || "",
       teamsWebhookUrl: req.body.teamsWebhookUrl || "",
+      apiToken: await getApiToken(),
       message: null,
       error: err.message,
     });
@@ -319,6 +323,37 @@ async function sendTestNotification(req, res) {
   else parts.push(`Teams: ${result.teams.reason}`);
 
   res.redirect("/admin/integrations?message=" + encodeURIComponent(parts.join(" ")));
+}
+
+/************************************************
+ * INTEGRATION API KEY — Architecture Phase 4 (see
+ * itsm_architecture_comparison.md). "Generate/Regenerate" makes a brand
+ * new random key and immediately invalidates any previous one (so a key
+ * that leaked can always be rotated out with one click); "Revoke" turns
+ * the whole /api/v1/* surface off (every request 503s — see
+ * utils/apiAuth.js) until a new key is generated. Same
+ * admin_manage_settings gate as the rest of this page.
+ ************************************************/
+async function generateApiKey(req, res) {
+  await generateApiToken();
+  await logAudit({
+    user: req.user._id,
+    action: "Update",
+    entityType: "Setting",
+    details: "Integration API key generated/rotated.",
+  });
+  res.redirect("/admin/integrations?message=" + encodeURIComponent("New API key generated. Any previous key stops working immediately."));
+}
+
+async function revokeApiKey(req, res) {
+  await revokeApiToken();
+  await logAudit({
+    user: req.user._id,
+    action: "Update",
+    entityType: "Setting",
+    details: "Integration API key revoked.",
+  });
+  res.redirect("/admin/integrations?message=" + encodeURIComponent("API key revoked. The Integration API is now disabled."));
 }
 
 /************************************************
@@ -411,5 +446,7 @@ module.exports = {
   showIntegrationSettings,
   saveIntegrationSettings,
   sendTestNotification,
+  generateApiKey,
+  revokeApiKey,
   sendExpiryDigest,
 };

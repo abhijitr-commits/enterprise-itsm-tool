@@ -165,6 +165,8 @@ async function updateRequest(req, res) {
     const request = await ServiceRequest.findById(req.params.id);
     if (!request) return res.status(404).render("errors/404");
 
+    const previousFulfillmentStatus = request.fulfillmentStatus;
+
     request.requester = data.requester;
     request.department = data.department;
     request.catalogItem = data.catalogItem;
@@ -186,6 +188,18 @@ async function updateRequest(req, res) {
       entityId: request._id,
       details: `Fulfillment: ${request.fulfillmentStatus}`,
     });
+
+    // Architecture Phase 4 follow-up — "phase movement" notification: the
+    // requester (createdBy is a reliable real email) hears about it the
+    // moment fulfillment status actually moves, not just on the approval
+    // decision (see decideRequest/bulkDecideRequests above).
+    if (request.fulfillmentStatus !== previousFulfillmentStatus) {
+      notifyUser({
+        email: request.createdBy,
+        message: `Your request ${request.requestId} (${request.catalogItem}) is now ${request.fulfillmentStatus}.`,
+        link: `/requests/${request._id}`,
+      });
+    }
 
     await recordAutomationRun(automationResult, { entityType: "Service Request", entityId: request._id, userId: req.user._id });
 
@@ -293,6 +307,12 @@ async function closeRequest(req, res) {
     action: "Close",
     entityType: "Service Request",
     entityId: request._id,
+  });
+
+  notifyUser({
+    email: request.createdBy,
+    message: `Your request ${request.requestId} (${request.catalogItem}) is now Closed.`,
+    link: `/requests/${request._id}`,
   });
 
   res.redirect(`/requests/${request._id}`);

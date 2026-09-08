@@ -9,6 +9,7 @@ const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
 const { paginate } = require("../utils/pagination");
 const { applyAutomation, recordAutomationRun } = require("../utils/automationEngine");
+const { notifyUser } = require("../utils/notifications");
 
 const { IMPL } = Change;
 
@@ -171,6 +172,16 @@ async function decideChange(req, res) {
     details: decision,
   });
 
+  // Architecture Phase 4 follow-up — "phase movement" notification.
+  // requestedBy is a free-text display name (not a User reference), same
+  // best-effort exact-name match as incidentController's engineer/reporter
+  // notifications — silently finds no one if it doesn't match a real login.
+  notifyUser({
+    name: change.requestedBy,
+    message: `Your change ${change.changeId} — ${change.title} was ${decision.toLowerCase()} by CAB.`,
+    link: `/changes/${change._id}`,
+  });
+
   res.redirect(`/changes/${change._id}`);
 }
 
@@ -187,6 +198,13 @@ async function bulkDecideChanges(req, res) {
     update.closedDate = new Date();
   }
 
+  // Fetched before the update so the bulk-decision notifications below know
+  // which changes were actually still PENDING (the same filter the update
+  // itself uses) — same pattern as serviceRequestController's bulkDecideRequests.
+  const affected = await Change.find({ _id: { $in: ids }, cabStatus: APPROVAL.PENDING })
+    .select("_id changeId title requestedBy")
+    .lean();
+
   const result = await Change.updateMany(
     { _id: { $in: ids }, cabStatus: APPROVAL.PENDING },
     { $set: update }
@@ -199,6 +217,14 @@ async function bulkDecideChanges(req, res) {
     details: `${result.modifiedCount} of ${ids.length} change(s) ${decision.toLowerCase()}.`,
   });
 
+  affected.forEach((c) => {
+    notifyUser({
+      name: c.requestedBy,
+      message: `Your change ${c.changeId} — ${c.title} was ${decision.toLowerCase()} by CAB.`,
+      link: `/changes/${c._id}`,
+    });
+  });
+
   res.redirect("/changes");
 }
 
@@ -207,6 +233,8 @@ async function updateImplementationStatus(req, res) {
     const { implementationStatus, rootCause, correctiveAction, lessonsLearned } = req.body;
     const change = await Change.findById(req.params.id);
     if (!change) return res.status(404).render("errors/404");
+
+    const previousImplementationStatus = change.implementationStatus;
 
     if (change.cabStatus !== APPROVAL.APPROVED) {
       throw new Error("This change has not been approved by CAB yet.");
@@ -257,6 +285,17 @@ async function updateImplementationStatus(req, res) {
 
     await recordAutomationRun(automationResult, { entityType: "Change", entityId: change._id, userId: req.user._id });
 
+    // Architecture Phase 4 follow-up — "phase movement" notification: the
+    // requester hears about it the moment implementation status actually
+    // moves (In Progress, Implemented, Rolled Back), not just at CAB decision.
+    if (change.implementationStatus !== previousImplementationStatus) {
+      notifyUser({
+        name: change.requestedBy,
+        message: `Your change ${change.changeId} — ${change.title} is now ${change.implementationStatus}.`,
+        link: `/changes/${change._id}`,
+      });
+    }
+
     res.redirect(`/changes/${change._id}`);
   } catch (err) {
     res.status(400).send(err.message);
@@ -279,6 +318,12 @@ async function closeChangeWithPIR(req, res) {
     entityType: "Change",
     entityId: change._id,
     details: pirNotes || "",
+  });
+
+  notifyUser({
+    name: change.requestedBy,
+    message: `Your change ${change.changeId} — ${change.title} is now Implemented.`,
+    link: `/changes/${change._id}`,
   });
 
   res.redirect(`/changes/${change._id}`);

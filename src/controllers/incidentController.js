@@ -165,6 +165,7 @@ async function updateIncident(req, res) {
     if (!incident) return res.status(404).render("errors/404");
 
     const previousEngineer = incident.engineer;
+    const previousStatus = incident.status;
 
     incident.employeeName = data.employeeName;
     incident.department = data.department;
@@ -204,6 +205,22 @@ async function updateIncident(req, res) {
       notifyUser({
         name: data.engineer,
         message: `You were assigned to incident ${incident.incidentId} — ${incident.subject}`,
+        link: `/incidents/${incident._id}`,
+      });
+    }
+
+    // Architecture Phase 4 follow-up — "phase movement" notification: the
+    // reporting employee hears about it the moment the incident's status
+    // actually moves (In Progress, Resolved, Closed, etc.), not just when
+    // an engineer gets assigned. employeeName is a free-text display name
+    // (a spreadsheet-migration leftover, not a User reference — same
+    // best-effort exact-name match as the engineer notification above),
+    // so this silently finds no one if it doesn't match a real login,
+    // same safe fallback resolveRecipient() always uses.
+    if (incident.status !== previousStatus) {
+      notifyUser({
+        name: incident.employeeName,
+        message: `Your incident ${incident.incidentId} — ${incident.subject} is now ${incident.status}.`,
         link: `/incidents/${incident._id}`,
       });
     }
