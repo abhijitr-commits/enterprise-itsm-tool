@@ -35,6 +35,7 @@
       <% if (announcements.length === 0) { %><tr><td colspan="7" class="empty-row">No maintenance announcements yet.</td></tr><% } %>
     </tbody>
   </table>
+  <%- include('../partials/pagination', { pageInfo }) %>
 </div>
 
 <%- include('../partials/footer') %>
