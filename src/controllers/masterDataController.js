@@ -21,6 +21,7 @@ const Holiday = require("../models/Holiday");
 const ChangeFreezeWindow = require("../models/ChangeFreezeWindow");
 const { PRIORITY } = require("../config/constants");
 const { logAudit } = require("../utils/auditLog");
+const { paginate } = require("../utils/pagination");
 
 // The Holiday model already existed (src/models/Holiday.js) and is
 // already read by the SLA business-hours calculator and the Earned
@@ -140,7 +141,7 @@ async function listRows(req, res) {
   const table = getTableOr404(req, res);
   if (!table) return;
 
-  const rows = await table.model.find().sort({ _id: -1 }).lean();
+  const { rows, pageInfo } = await paginate(table.model, {}, { _id: -1 }, req.query);
 
   res.render("masterdata/list", {
     tableKey: req.params.table,
@@ -149,6 +150,7 @@ async function listRows(req, res) {
     tables: tableNav(),
     message: req.query.message || null,
     error: req.query.error || null,
+    pageInfo,
   });
 }
 
