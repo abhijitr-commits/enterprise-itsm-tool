@@ -43,6 +43,7 @@
       <% if (ecrs.length === 0) { %><tr><td colspan="<%= canDecide ? 8 : 7 %>" class="empty-row">No engineering change requests yet.</td></tr><% } %>
     </tbody>
   </table>
+  <%- include('../partials/pagination', { pageInfo }) %>
 </div>
 
 <%- include('../partials/footer') %>
