@@ -584,6 +584,7 @@ a:hover { color: var(--primary-dark); }
 .badge-status-closed { background: #e5e7eb; color: #374151; }
 .badge-status-cancelled { background: #fee2e2; color: #991b1b; }
 .badge-approval-pending-approval { background: #fef3c7; color: #92400e; }
+.badge-approval-pending-second-approval { background: #fed7aa; color: #9a3412; }
 .badge-approval-approved { background: #dcfce7; color: #15803d; }
 .badge-approval-rejected { background: #fee2e2; color: #991b1b; }
 .badge-role { background: #ede9fe; color: #5b21b6; }
