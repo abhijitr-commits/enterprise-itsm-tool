@@ -486,7 +486,10 @@ async function start() {
     if (req.originalUrl.startsWith("/api/")) {
       return res.status(500).json({ success: false, message: "Internal server error." });
     }
-    res.status(500).render("errors/500", { message: null });
+    // TEMP DEBUG (task #103 live troubleshooting) — surfaces err.message so
+    // the failing route can be diagnosed without direct DB/log access.
+    // Reverted back to `message: null` immediately after diagnosis.
+    res.status(500).render("errors/500", { message: `[debug] ${err.message}` });
   });
 
   app.listen(PORT, () => {
