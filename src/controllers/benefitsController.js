@@ -19,10 +19,11 @@
 const BenefitEnrollment = require("../models/BenefitEnrollment");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { paginate } = require("../utils/pagination");
 
 async function listBenefits(req, res) {
-  const enrollments = await BenefitEnrollment.find().sort({ enrollmentDate: -1 }).lean();
-  res.render("benefits/list", { enrollments, message: req.query.message || null });
+  const { rows: enrollments, pageInfo } = await paginate(BenefitEnrollment, {}, { enrollmentDate: -1 }, req.query);
+  res.render("benefits/list", { enrollments, message: req.query.message || null, pageInfo });
 }
 
 function showNewForm(req, res) {
