@@ -7,6 +7,21 @@
   </div>
 </div>
 
+<% if ((activeMajorIncidents || []).length > 0) { %>
+  <div class="alert alert-error" style="margin-bottom: 18px;">
+    <strong>🚨 <%= activeMajorIncidents.length %> active Major Incident<%= activeMajorIncidents.length === 1 ? '' : 's' %></strong>
+    <ul style="margin: 6px 0 0 18px;">
+      <% activeMajorIncidents.forEach(function(mi) { %>
+        <li><a href="/incidents/<%= mi._id %>"><%= mi.incidentId %></a> — <%= mi.subject %>
+          <span class="badge badge-priority-<%= mi.priority.toLowerCase() %>"><%= mi.priority %></span>
+          <% if (mi.engineer) { %>· <%= mi.engineer %><% } %>
+        </li>
+      <% }) %>
+    </ul>
+    <a href="/incidents/major">View the war room board →</a>
+  </div>
+<% } %>
+
 <%
   var dOpen = open, dProg = inProgress, dHold = onHold, dRes = resolved;
   var dTotal = dOpen + dProg + dHold + dRes;
