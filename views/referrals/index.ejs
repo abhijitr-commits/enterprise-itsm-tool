@@ -2,7 +2,10 @@
 
 <div class="page-header">
   <h1>Employee Referrals</h1>
-  <a class="btn btn-primary" href="/referrals/new">+ Refer a Candidate</a>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/hr">← HR Hub</a>
+    <a class="btn btn-primary" href="/referrals/new">+ Refer a Candidate</a>
+  </div>
 </div>
 
 <%- include('../partials/csvActions', { moduleKey: 'referral' }) %>
