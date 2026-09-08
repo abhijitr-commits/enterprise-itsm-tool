@@ -2,7 +2,8 @@
 
 <div class="page-header">
   <h1>Stock / Inventory</h1>
-  <div style="display:flex; gap:8px;">
+  <div class="header-actions" style="display:flex; gap:8px;">
+    <a class="btn btn-secondary" href="/operations">← Operations Hub</a>
     <a class="btn btn-secondary" href="/stock<%= lowStockOnly ? '' : '?lowStock=1' %>"><%= lowStockOnly ? 'Show All Items' : 'Show Low Stock Only' %></a>
     <a class="btn btn-primary" href="/stock/new">+ Add Stock Item</a>
   </div>
