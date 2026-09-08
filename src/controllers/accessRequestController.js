@@ -14,6 +14,7 @@ const AccessRequest = require("../models/AccessRequest");
 const { ACCESS_REQUEST_TYPE, ACCESS_REQUEST_STATUS } = AccessRequest;
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { paginate } = require("../utils/pagination");
 
 function showNewForm(req, res) {
   res.render("access-requests/new", { error: null, form: {}, ACCESS_REQUEST_TYPE });
@@ -54,8 +55,8 @@ async function myAccessRequests(req, res) {
 }
 
 async function listAccessRequests(req, res) {
-  const requests = await AccessRequest.find().sort({ requestedDate: -1 }).lean();
-  res.render("access-requests/list", { requests, ACCESS_REQUEST_STATUS, message: req.query.message || null });
+  const { rows: requests, pageInfo } = await paginate(AccessRequest, {}, { requestedDate: -1 }, req.query);
+  res.render("access-requests/list", { requests, ACCESS_REQUEST_STATUS, message: req.query.message || null, pageInfo });
 }
 
 async function updateStatus(req, res) {
