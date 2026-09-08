@@ -37,4 +37,6 @@
 <% }) %>
 <% if (policies.length === 0) { %><div class="panel"><p class="empty-row">No active policies published yet.</p></div><% } %>
 
+<%- include('../partials/pagination', { pageInfo }) %>
+
 <%- include('../partials/footer') %>
