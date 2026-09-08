@@ -1,6 +1,27 @@
     </main>
   </div>
   <script>
+    // Stamps the CSRF token (see the <meta name="csrf-token"> tag in
+    // partials/header.ejs, and utils/csrf.js for the server-side check)
+    // into every rendered <form method="post"> as a hidden _csrf field.
+    // Done here, once, instead of hand-editing every form across ~115
+    // view files — a form added later needs no special handling either,
+    // as long as it's a real <form method="post">.
+    (function () {
+      var meta = document.querySelector('meta[name="csrf-token"]');
+      var token = meta ? meta.getAttribute("content") : "";
+      if (!token) return; // anonymous pages (login, /support) never get one — by design, see utils/csrf.js
+      document.querySelectorAll("form").forEach(function (f) {
+        if ((f.getAttribute("method") || "get").toLowerCase() !== "post") return;
+        if (f.querySelector('input[name="_csrf"]')) return;
+        var input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "_csrf";
+        input.value = token;
+        f.appendChild(input);
+      });
+    })();
+
     // Each hub lives under one dropdown button in the top bar (see
     // partials/header.ejs's .nav-dropdown <details> elements) — this is
     // the only JS needed to make that feel like a normal menu: close any

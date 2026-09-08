@@ -4,6 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title><%= typeof title !== "undefined" ? title + " · Peppermint Robotics" : "Peppermint Robotics" %></title>
+  <% if (typeof csrfToken !== "undefined" && csrfToken) { %>
+    <!-- Read by partials/footer.ejs's injection script, which stamps this
+         value into every rendered <form method="post"> as a hidden _csrf
+         field — see utils/csrf.js for why this lives here instead of a
+         hand-edit of every one of this app's view files. -->
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+  <% } %>
   <link rel="icon" href="/images/logo-mark.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
