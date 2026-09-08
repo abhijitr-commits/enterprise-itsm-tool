@@ -29,17 +29,30 @@ async function login(req, res) {
   }
 
   await user.registerSuccessfulLogin();
-  req.session.userId = user._id.toString();
 
-  await logAudit({
-    user: user._id,
-    action: "Login",
-    entityType: "User",
-    entityId: user._id,
-    ipAddress: req.ip,
+  // Regenerate the session ID on every successful login rather than reusing
+  // whatever session ID the browser walked in with — otherwise a session ID
+  // an attacker set on the victim's browser BEFORE they logged in (a
+  // "session fixation" attack) would become a valid authenticated session
+  // the moment they sign in.
+  req.session.regenerate((err) => {
+    if (err) {
+      console.error("[auth] session regenerate failed:", err);
+      return res.render("login", { error: "Something went wrong signing you in. Please try again." });
+    }
+
+    req.session.userId = user._id.toString();
+
+    logAudit({
+      user: user._id,
+      action: "Login",
+      entityType: "User",
+      entityId: user._id,
+      ipAddress: req.ip,
+    }).catch((auditErr) => console.error("[auth] logAudit failed after login (non-fatal):", auditErr));
+
+    res.redirect("/");
   });
-
-  res.redirect("/");
 }
 
 function logout(req, res) {

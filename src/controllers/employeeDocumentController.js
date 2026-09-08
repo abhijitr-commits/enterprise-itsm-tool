@@ -17,6 +17,7 @@ const Employee = require("../models/Employee");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { isHRTeam } = require("../utils/teamAccess");
+const { isAllowedFileName, safeServingHeaders, ALLOWED_TYPES_MESSAGE } = require("../utils/safeFileTypes");
 
 const MAX_FILE_BYTES = 3 * 1024 * 1024; // 3MB — see models/EmployeeDocument.js for why this is tighter than the original's 10MB
 
@@ -71,6 +72,7 @@ function uploadDocument(req, res) {
         throw uploadErr;
       }
       if (!req.file) throw new Error("No file was selected.");
+      if (!isAllowedFileName(req.file.originalname)) throw new Error(ALLOWED_TYPES_MESSAGE);
 
       const isOwn = employeeName.trim().toLowerCase() === myEmployeeName(req).trim().toLowerCase();
       if (!isOwn && !isHRTeam(req.user)) {
@@ -107,8 +109,13 @@ async function downloadDocument(req, res) {
     return res.status(403).render("errors/403", { action: "view this document" });
   }
 
-  res.set("Content-Type", doc.mimeType || "application/octet-stream");
-  res.set("Content-Disposition", `inline; filename="${doc.fileName.replace(/"/g, "")}"`);
+  // Never trust the client-supplied mimeType stored on the record for what
+  // we serve it back as — always re-derive safe serving headers from the
+  // file's own extension, see utils/safeFileTypes.js.
+  const { contentType, disposition, safeFileName } = safeServingHeaders(doc.fileName);
+
+  res.set("Content-Type", contentType);
+  res.set("Content-Disposition", `${disposition}; filename="${safeFileName}"`);
   res.send(doc.data);
 }
 

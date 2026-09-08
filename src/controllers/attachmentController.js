@@ -14,6 +14,7 @@ const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
 const { isAdminTeam, isHRTeam, isITTeam } = require("../utils/teamAccess");
+const { isAllowedFileName, safeServingHeaders, ALLOWED_TYPES_MESSAGE } = require("../utils/safeFileTypes");
 
 const MAX_FILE_BYTES = 3 * 1024 * 1024; // 3MB — same shared-Atlas-tier reason as EmployeeDocument
 
@@ -123,6 +124,7 @@ function uploadAttachment(req, res) {
         throw uploadErr;
       }
       if (!req.file) throw new Error("No file was selected.");
+      if (!isAllowedFileName(req.file.originalname)) throw new Error(ALLOWED_TYPES_MESSAGE);
 
       const allowed = await canUploadToModule(req.user, moduleKey);
       if (!allowed) throw new Error(`You don't have permission to attach files to ${config.label} records.`);
@@ -158,8 +160,14 @@ async function downloadAttachment(req, res) {
   const attachment = await Attachment.findOne({ attachmentId: req.params.attachmentId });
   if (!attachment) return res.status(404).render("errors/404");
 
-  res.set("Content-Type", attachment.mimeType || "application/octet-stream");
-  res.set("Content-Disposition", `inline; filename="${attachment.fileName.replace(/"/g, "")}"`);
+  // Never trust the client-supplied mimeType stored on the record for what
+  // we serve it back as (a pre-hardening upload could still have one on
+  // file) — always re-derive safe serving headers from the file's own
+  // extension, see utils/safeFileTypes.js.
+  const { contentType, disposition, safeFileName } = safeServingHeaders(attachment.fileName);
+
+  res.set("Content-Type", contentType);
+  res.set("Content-Disposition", `${disposition}; filename="${safeFileName}"`);
   res.send(attachment.data);
 }
 
