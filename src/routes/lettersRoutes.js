@@ -16,6 +16,8 @@ router.get("/appointment/new", requireHRTeam, lettersController.showAppointmentF
 router.post("/appointment", requireHRTeam, lettersController.generateAppointmentLetter);
 router.get("/relieving/new", requireHRTeam, lettersController.showRelievingForm);
 router.post("/relieving", requireHRTeam, lettersController.generateRelievingLetter);
+router.get("/experience/new", requireHRTeam, lettersController.showExperienceForm);
+router.post("/experience", requireHRTeam, lettersController.generateExperienceLetter);
 
 // Viewing one letter is self-or-HR-team, checked inside the controller
 // (the recipient can view/print their own copy) — not HR-team gated here.
