@@ -8,14 +8,15 @@ const VendorServiceLog = require("../models/VendorServiceLog");
 const Vendor = require("../models/Vendor");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { paginate } = require("../utils/pagination");
 
 async function listLogs(req, res) {
-  const [logs, vendors] = await Promise.all([
-    VendorServiceLog.find().sort({ raisedDate: -1 }).lean(),
+  const [{ rows: logs, pageInfo }, vendors] = await Promise.all([
+    paginate(VendorServiceLog, {}, { raisedDate: -1 }, req.query),
     Vendor.find({ status: "Active" }).sort({ name: 1 }).lean(),
   ]);
 
-  res.render("vendor-service/list", { logs, vendors, message: req.query.message || null });
+  res.render("vendor-service/list", { logs, vendors, message: req.query.message || null, pageInfo });
 }
 
 async function logIssue(req, res) {
