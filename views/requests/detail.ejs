@@ -4,21 +4,31 @@
   <h1><%= request.requestId %> — <%= request.catalogItem %></h1>
   <div class="header-actions">
     <%
-      // Audit backlog — approval routing: hide the decision buttons
-      // client-side when this catalog item is routed to a specific role
-      // the current user doesn't have — decideRequest enforces the same
-      // rule server-side regardless, this just avoids a dead-end click.
-      var canDecideThis = !catalogEntry || !catalogEntry.approverRole || catalogEntry.approverRole === currentUser.role;
+      // Audit backlog — multi-level approval chains: a PENDING request is
+      // the first step (routed by catalogEntry.approverRole); a
+      // PENDING_SECOND request is the second, distinct step (routed by
+      // catalogEntry.secondApproverRole) — see decideRequest. Hiding the
+      // buttons client-side when the role or segregation-of-duties rule
+      // wouldn't allow it just avoids a dead-end click; decideRequest
+      // enforces both rules server-side regardless.
+      var isSecondStep = request.approvalStatus === APPROVAL.PENDING_SECOND;
+      var requiredRole = isSecondStep ? (catalogEntry && catalogEntry.secondApproverRole) : (catalogEntry && catalogEntry.approverRole);
+      var roleOk = !requiredRole || requiredRole === currentUser.role;
+      var sameApproverAsFirstStep = isSecondStep && request.approver === currentUser.email;
+      var canDecideThis = roleOk && !sameApproverAsFirstStep;
     %>
-    <% if (request.approvalStatus === APPROVAL.PENDING && canDecideThis) { %>
-      <form method="post" action="/requests/<%= request._id %>/decide" onsubmit="return confirm('Approve this request?')">
+    <% if ((request.approvalStatus === APPROVAL.PENDING || isSecondStep) && canDecideThis) { %>
+      <form method="post" action="/requests/<%= request._id %>/decide" onsubmit="return confirm('<%= isSecondStep ? "Give second-level approval to" : "Approve" %> this request?')">
         <input type="hidden" name="decision" value="Approved" />
-        <button class="btn btn-primary" type="submit">Approve</button>
+        <button class="btn btn-primary" type="submit"><%= isSecondStep ? 'Give Second Approval' : 'Approve' %></button>
       </form>
       <form method="post" action="/requests/<%= request._id %>/decide" onsubmit="return confirm('Reject this request?')">
         <input type="hidden" name="decision" value="Rejected" />
         <button class="btn btn-danger" type="submit">Reject</button>
       </form>
+    <% } %>
+    <% if (isSecondStep && sameApproverAsFirstStep) { %>
+      <span class="hint" style="align-self:center;">Awaiting a second approval from someone other than you (you gave the first).</span>
     <% } %>
     <% if (request.fulfillmentStatus !== 'Closed') { %>
       <form method="post" action="/requests/<%= request._id %>/close" onsubmit="return confirm('Close this request?')">
@@ -64,9 +74,15 @@
       <dt>Created</dt><dd><%= new Date(request.createdDate).toLocaleString() %></dd>
       <dt>Created By</dt><dd><%= request.createdBy %></dd>
       <dt>Approval Status</dt><dd><span class="badge badge-approval-<%= request.approvalStatus.toLowerCase().replace(/ /g,'-') %>"><%= request.approvalStatus %></span></dd>
-      <dt>Approver</dt><dd><%= request.approver || '—' %></dd>
+      <dt>Approver <% if (catalogEntry && catalogEntry.secondApproverRole) { %>(1st)<% } %></dt><dd><%= request.approver || '—' %></dd>
+      <% if (catalogEntry && catalogEntry.secondApproverRole) { %>
+        <dt>Approver (2nd)</dt><dd><%= request.secondApprover || '—' %></dd>
+      <% } %>
       <% if (catalogEntry && catalogEntry.approverRole) { %>
-        <dt>Approval Routing</dt><dd>Requires the <strong><%= catalogEntry.approverRole %></strong> role</dd>
+        <dt>Approval Routing</dt><dd>1st approval requires the <strong><%= catalogEntry.approverRole %></strong> role</dd>
+      <% } %>
+      <% if (catalogEntry && catalogEntry.secondApproverRole) { %>
+        <dt>Approval Routing</dt><dd>2nd approval requires the <strong><%= catalogEntry.secondApproverRole %></strong> role, from someone other than the 1st approver</dd>
       <% } %>
       <% if (catalogEntry && catalogEntry.requiresApproval === false) { %>
         <dt>Approval Routing</dt><dd>This catalog item doesn't require approval</dd>

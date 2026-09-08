@@ -42,7 +42,9 @@
       <tbody>
         <% requests.forEach(function(r) { %>
           <tr>
-            <td onclick="event.stopPropagation()"><input type="checkbox" name="ids" value="<%= r._id %>" /></td>
+            <td onclick="event.stopPropagation()">
+              <input type="checkbox" name="ids" value="<%= r._id %>" <%= r.approvalStatus !== APPROVAL.PENDING ? 'disabled title="Needs individual review — see the request\'s own page"' : '' %> />
+            </td>
             <td onclick="location.href='/requests/<%= r._id %>'"><%= r.requestId %></td>
             <td onclick="location.href='/requests/<%= r._id %>'"><%= r.requester %></td>
             <td onclick="location.href='/requests/<%= r._id %>'"><%= r.department %></td>
