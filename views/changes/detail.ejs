@@ -42,12 +42,44 @@
       <label>Description
         <textarea name="description" rows="4" required <%= change.cabStatus !== APPROVAL.PENDING ? 'disabled' : '' %>><%= change.description %></textarea>
       </label>
+      <div class="form-grid">
+        <label>Linked Problem (optional)
+          <input type="text" name="linkedProblem" list="problemCodeList" value="<%= change.linkedProblemId ? change.linkedProblemId.problemId : '' %>" <%= change.cabStatus !== APPROVAL.PENDING ? 'disabled' : '' %> />
+          <datalist id="problemCodeList">
+            <% problemCodes.forEach(function(c) { %><option value="<%= c %>"><% }) %>
+          </datalist>
+        </label>
+        <label>Related Incidents (optional)
+          <input type="text" name="linkedIncidents" list="incidentCodeList" value="<%= (change.linkedIncidentIds || []).map(function(i){ return i.incidentId; }).join(', ') %>" <%= change.cabStatus !== APPROVAL.PENDING ? 'disabled' : '' %> />
+          <datalist id="incidentCodeList">
+            <% incidentCodes.forEach(function(c) { %><option value="<%= c %>"><% }) %>
+          </datalist>
+        </label>
+      </div>
       <% if (change.cabStatus === APPROVAL.PENDING) { %>
         <div class="form-actions">
           <button type="submit" class="btn btn-primary">Save Changes</button>
         </div>
       <% } %>
     </form>
+
+    <div class="panel">
+      <div class="panel-header"><h2>Linked Records</h2></div>
+      <% if (change.linkedProblemId) { %>
+        <p><strong>Problem:</strong> <a href="/problems/<%= change.linkedProblemId._id %>"><%= change.linkedProblemId.problemId %></a> — <%= change.linkedProblemId.title %></p>
+      <% } %>
+      <% if ((change.linkedIncidentIds || []).length > 0) { %>
+        <p style="margin-bottom:4px;"><strong>Incidents:</strong></p>
+        <% change.linkedIncidentIds.forEach(function(inc) { %>
+          <p style="margin:2px 0;"><a href="/incidents/<%= inc._id %>"><%= inc.incidentId %></a> — <%= inc.subject %>
+            <span class="badge badge-status-<%= inc.status.toLowerCase().replace(/ /g,'-') %>"><%= inc.status %></span>
+          </p>
+        <% }) %>
+      <% } %>
+      <% if (!change.linkedProblemId && (change.linkedIncidentIds || []).length === 0) { %>
+        <p class="empty-row">No linked Problem or Incidents.</p>
+      <% } %>
+    </div>
 
     <% if (change.cabStatus === APPROVAL.APPROVED) { %>
       <div class="panel form-panel">

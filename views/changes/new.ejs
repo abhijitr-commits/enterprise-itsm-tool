@@ -32,6 +32,20 @@
   <label>Description
     <textarea name="description" rows="5" required><%= form.description || '' %></textarea>
   </label>
+  <div class="form-grid">
+    <label>Linked Problem (optional)
+      <input type="text" name="linkedProblem" list="problemCodeList" value="<%= form.linkedProblem || '' %>" placeholder="e.g. PRB-2026-000004" />
+      <datalist id="problemCodeList">
+        <% problemCodes.forEach(function(c) { %><option value="<%= c %>"><% }) %>
+      </datalist>
+    </label>
+    <label>Related Incidents (optional)
+      <input type="text" name="linkedIncidents" list="incidentCodeList" value="<%= form.linkedIncidents || '' %>" placeholder="e.g. INC-2026-000012, INC-2026-000015" />
+      <datalist id="incidentCodeList">
+        <% incidentCodes.forEach(function(c) { %><option value="<%= c %>"><% }) %>
+      </datalist>
+    </label>
+  </div>
   <div class="form-actions">
     <a class="btn btn-secondary" href="/changes">Cancel</a>
     <button type="submit" class="btn btn-primary">Submit for CAB Approval</button>
