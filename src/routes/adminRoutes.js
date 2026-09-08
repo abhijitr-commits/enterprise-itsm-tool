@@ -32,6 +32,8 @@ router.post("/permissions", guard("admin_manage_settings"), adminController.upda
 router.get("/integrations", guard("admin_manage_settings"), adminController.showIntegrationSettings);
 router.post("/integrations", guard("admin_manage_settings"), adminController.saveIntegrationSettings);
 router.post("/integrations/test", guard("admin_manage_settings"), adminController.sendTestNotification);
+router.post("/integrations/api-key/generate", guard("admin_manage_settings"), adminController.generateApiKey);
+router.post("/integrations/api-key/revoke", guard("admin_manage_settings"), adminController.revokeApiKey);
 router.post("/integrations/send-digest", guard("admin_manage_settings"), adminController.sendExpiryDigest);
 
 module.exports = router;

@@ -18,6 +18,7 @@ router.get("/", cmdbController.listCIs);
 router.get("/new", guard("cmdb_create"), cmdbController.showNewForm);
 router.post("/", guard("cmdb_create"), cmdbController.createCI);
 router.get("/:id", cmdbController.showCI);
+router.get("/:id/impact", cmdbController.showImpact);
 router.post("/:id", guard("cmdb_edit"), cmdbController.updateCI);
 router.post("/:id/delete", guard("cmdb_delete"), cmdbController.deleteCI);
 
