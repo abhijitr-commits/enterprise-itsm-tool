@@ -75,6 +75,7 @@
       <% if (requirements.length === 0) { %><tr><td colspan="8" class="empty-row">No requirement requests yet.</td></tr><% } %>
     </tbody>
   </table>
+  <%- include('../partials/pagination', { pageInfo }) %>
 </div>
 
 <%- include('../partials/footer') %>
