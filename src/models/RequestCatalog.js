@@ -55,6 +55,14 @@ const requestCatalogSchema = new mongoose.Schema(
     //    bulkDecideRequests. Empty string ("") means no extra restriction.
     requiresApproval: { type: Boolean, default: true },
     approverRole: { type: String, trim: true, default: "" },
+    // Audit backlog — "Multi-level / conditional approval chains." When
+    // set, a request for this catalog item needs a SECOND, distinct
+    // approver (in this role) after the first Approved decision, before
+    // it's genuinely Approved — see ServiceRequest.APPROVAL.PENDING_SECOND
+    // and serviceRequestController.decideRequest. Empty string (the
+    // default) means single-level approval, same as before this existed.
+    // Only meaningful when requiresApproval is true.
+    secondApproverRole: { type: String, trim: true, default: "" },
   },
   { timestamps: true }
 );
