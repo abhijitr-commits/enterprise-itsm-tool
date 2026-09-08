@@ -10,10 +10,11 @@ const AdminAsset = require("../models/AdminAsset");
 const { ADMIN_ASSET_STATUS } = AdminAsset;
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { paginate } = require("../utils/pagination");
 
 async function listAssets(req, res) {
-  const assets = await AdminAsset.find().sort({ createdDate: -1 }).lean();
-  res.render("admin-assets/list", { assets, ADMIN_ASSET_STATUS, message: req.query.message || null });
+  const { rows: assets, pageInfo } = await paginate(AdminAsset, {}, { createdDate: -1 }, req.query);
+  res.render("admin-assets/list", { assets, ADMIN_ASSET_STATUS, message: req.query.message || null, pageInfo });
 }
 
 function showNewForm(req, res) {
