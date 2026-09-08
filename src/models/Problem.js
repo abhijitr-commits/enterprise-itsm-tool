@@ -39,6 +39,11 @@ const problemSchema = new mongoose.Schema(
     workaround: { type: String, trim: true },
     status: { type: String, enum: Object.values(STATUS), default: STATUS.OPEN },
     owner: { type: String, trim: true },
+    // Task #102 (audit backlog) — real reference alongside `owner`,
+    // resolved server-side when the typed name matches a User exactly
+    // (see utils/userDirectory.js). Additive — see Incident.engineerRef's
+    // doc comment for the full rationale, same pattern here.
+    ownerRef: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
     closedDate: { type: Date },
     createdBy: { type: String, trim: true },

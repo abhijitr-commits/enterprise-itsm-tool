@@ -25,6 +25,12 @@ const incidentSchema = new mongoose.Schema(
     description: { type: String, required: true, trim: true },
     status: { type: String, enum: Object.values(STATUS), default: STATUS.OPEN },
     engineer: { type: String, trim: true }, // assigned engineer's display name
+    // Task #102 (audit backlog) — real reference alongside the display
+    // name above, resolved server-side whenever `engineer` matches a
+    // real User account (see utils/userDirectory.js). Additive: legacy
+    // and free-typed rows just leave this unset and keep working off
+    // `engineer` exactly as before.
+    engineerRef: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
     slaDue: { type: Date },
     // Audit backlog addition — set the moment a breach on this incident is
@@ -57,6 +63,7 @@ const incidentSchema = new mongoose.Schema(
 
 incidentSchema.index({ status: 1, priority: 1 });
 incidentSchema.index({ engineer: 1, status: 1 });
+incidentSchema.index({ engineerRef: 1, status: 1 });
 
 module.exports = mongoose.model("Incident", incidentSchema);
 module.exports.PREFIX = ID_PREFIX.INCIDENT;

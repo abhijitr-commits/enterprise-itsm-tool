@@ -33,6 +33,9 @@ const safetyIncidentSchema = new mongoose.Schema(
 
     status: { type: String, enum: Object.values(SAFETY_STATUS), default: SAFETY_STATUS.OPEN },
     assignedTo: { type: String, trim: true },
+    // Task #102 (audit backlog) — additive real reference, same pattern
+    // as Incident.engineerRef (see utils/userDirectory.js).
+    assignedToRef: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     closedDate: { type: Date },
   },
   { timestamps: { createdAt: "createdDate", updatedAt: false } }

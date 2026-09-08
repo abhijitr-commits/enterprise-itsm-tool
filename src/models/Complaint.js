@@ -25,6 +25,9 @@ const complaintSchema = new mongoose.Schema(
     description: { type: String, required: true, trim: true },
     status: { type: String, enum: Object.values(COMPLAINT_STATUS), default: COMPLAINT_STATUS.OPEN },
     assignedTo: { type: String, trim: true },
+    // Task #102 (audit backlog) — additive real reference, same pattern
+    // as Incident.engineerRef (see utils/userDirectory.js).
+    assignedToRef: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     resolvedDate: { type: Date },
     resolutionNotes: { type: String, trim: true },
   },

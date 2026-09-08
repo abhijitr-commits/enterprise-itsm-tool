@@ -32,6 +32,13 @@ const workOrderSchema = new mongoose.Schema(
     quantity: { type: Number, default: 1 },
     status: { type: String, enum: Object.values(WORK_ORDER_STATUS), default: WORK_ORDER_STATUS.NOT_STARTED },
     assignedTo: { type: String, trim: true },
+    // Task #102 (audit backlog) — real reference alongside `assignedTo`,
+    // resolved server-side when the typed name matches a User exactly
+    // (see utils/userDirectory.js). Additive, same pattern as
+    // Incident.engineerRef — unset for names that don't match a real
+    // login (e.g. shop-floor staff with no ITSM account), no different
+    // from today's behavior for those rows.
+    assignedToRef: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     startDate: { type: Date },
     targetCompletionDate: { type: Date },
     completedDate: { type: Date },
