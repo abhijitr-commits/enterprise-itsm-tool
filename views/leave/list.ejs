@@ -59,6 +59,7 @@
         <% } %>
       </tbody>
     </table>
+    <%- include('../partials/pagination', { pageInfo }) %>
     <% if (canApprove) { %>
       <div class="form-actions">
         <button type="submit" name="decision" value="Approved" class="btn btn-secondary">Bulk Approve Selected</button>
