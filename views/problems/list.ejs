@@ -2,7 +2,10 @@
 
 <div class="page-header">
   <h1>Problem Register</h1>
-  <a class="btn btn-primary" href="/problems/new">+ New Problem</a>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/itsm">← ITSM Hub</a>
+    <a class="btn btn-primary" href="/problems/new">+ New Problem</a>
+  </div>
 </div>
 
 <%- include('../partials/csvActions', { moduleKey: 'problem' }) %>
