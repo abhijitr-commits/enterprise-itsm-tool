@@ -21,6 +21,7 @@ const { logAudit } = require("../utils/auditLog");
 const { createChecklistIfMissing } = require("../utils/checklists");
 const { CHECKLIST_TYPE } = require("../models/Checklist");
 const { provisionUserAccess, deactivateUserAccess } = require("../utils/provisioning");
+const { paginate } = require("../utils/pagination");
 
 const ONBOARDING_REQUEST_TASKS = [
   "Provision Laptop/Workstation",
@@ -93,7 +94,7 @@ async function listEmployees(req, res) {
     filter.$or = ["employeeId", "name", "email", "department", "designation"].map((f) => ({ [f]: rx }));
   }
 
-  const employees = await Employee.find(filter).sort({ name: 1 }).lean();
+  const { rows: employees, pageInfo } = await paginate(Employee, filter, { name: 1 }, req.query);
 
   // One-time temp-credential notice from a just-completed provisioning —
   // see utils/provisioning.js for why this exists instead of an email.
@@ -107,6 +108,7 @@ async function listEmployees(req, res) {
     EMPLOYEE_STATUS: Employee.EMPLOYEE_STATUS,
     tempCredential,
     message: req.query.message || null,
+    pageInfo,
   });
 }
 
