@@ -82,6 +82,7 @@ const csvRoutes = require("./routes/csvRoutes");
 const adminAttachmentsRoutes = require("./routes/adminAttachmentsRoutes");
 const automationRoutes = require("./routes/automationRoutes");
 const portalRoutes = require("./routes/portalRoutes");
+const apiRoutes = require("./routes/apiRoutes");
 
 /*************************************************************
  * Auto-seed on boot — runs automatically every time the server
@@ -395,8 +396,18 @@ async function start() {
   // a search-first storefront combining the Request Catalog + Knowledge Base,
   // open to every signed-in user. See routes/portalRoutes.js.
   app.use("/portal", portalRoutes);
+  // Integration API — Architecture Phase 4 (see itsm_architecture_comparison.md):
+  // token-gated (not session-gated) REST endpoints for Incidents/Requests/
+  // Problems/Changes, so an external system can create or read tickets
+  // without a human logging in. See utils/apiAuth.js / routes/apiRoutes.js.
+  app.use("/api/v1", apiRoutes);
 
-  app.use((req, res) => res.status(404).render("errors/404"));
+  app.use((req, res) => {
+    if (req.originalUrl.startsWith("/api/")) {
+      return res.status(404).json({ success: false, message: "No such API endpoint." });
+    }
+    res.status(404).render("errors/404");
+  });
 
   // eslint-disable-next-line no-unused-vars
   app.use((err, req, res, next) => {
@@ -406,6 +417,9 @@ async function start() {
     // could leak internal details (a Mongo validation string, a file
     // path, etc.) into the page.
     console.error(err);
+    if (req.originalUrl.startsWith("/api/")) {
+      return res.status(500).json({ success: false, message: "Internal server error." });
+    }
     res.status(500).render("errors/500", { message: null });
   });
 
