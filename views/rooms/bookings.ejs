@@ -2,7 +2,8 @@
 
 <div class="page-header">
   <h1>Room Bookings</h1>
-  <div style="display:flex; gap:8px;">
+  <div class="header-actions" style="display:flex; gap:8px;">
+    <a class="btn btn-secondary" href="/operations">← Operations Hub</a>
     <% if (canManageRooms) { %><a class="btn btn-secondary" href="/rooms">Manage Rooms</a><% } %>
     <a class="btn btn-primary" href="/rooms/bookings/new">+ Book a Room</a>
   </div>
