@@ -3,7 +3,14 @@
 <div class="page-header">
   <h1><%= request.requestId %> — <%= request.catalogItem %></h1>
   <div class="header-actions">
-    <% if (request.approvalStatus === APPROVAL.PENDING) { %>
+    <%
+      // Audit backlog — approval routing: hide the decision buttons
+      // client-side when this catalog item is routed to a specific role
+      // the current user doesn't have — decideRequest enforces the same
+      // rule server-side regardless, this just avoids a dead-end click.
+      var canDecideThis = !catalogEntry || !catalogEntry.approverRole || catalogEntry.approverRole === currentUser.role;
+    %>
+    <% if (request.approvalStatus === APPROVAL.PENDING && canDecideThis) { %>
       <form method="post" action="/requests/<%= request._id %>/decide" onsubmit="return confirm('Approve this request?')">
         <input type="hidden" name="decision" value="Approved" />
         <button class="btn btn-primary" type="submit">Approve</button>
@@ -58,6 +65,12 @@
       <dt>Created By</dt><dd><%= request.createdBy %></dd>
       <dt>Approval Status</dt><dd><span class="badge badge-approval-<%= request.approvalStatus.toLowerCase().replace(/ /g,'-') %>"><%= request.approvalStatus %></span></dd>
       <dt>Approver</dt><dd><%= request.approver || '—' %></dd>
+      <% if (catalogEntry && catalogEntry.approverRole) { %>
+        <dt>Approval Routing</dt><dd>Requires the <strong><%= catalogEntry.approverRole %></strong> role</dd>
+      <% } %>
+      <% if (catalogEntry && catalogEntry.requiresApproval === false) { %>
+        <dt>Approval Routing</dt><dd>This catalog item doesn't require approval</dd>
+      <% } %>
       <dt>Closed</dt><dd><%= request.closedDate ? new Date(request.closedDate).toLocaleString() : '—' %></dd>
     </dl>
 

@@ -23,6 +23,17 @@
       <label>Category
         <input type="text" name="category" value="<%= form.category || '' %>" placeholder="e.g. Hardware" />
       </label>
+      <label>Approver Role <span class="hint">(optional — leave blank to allow any approver)</span>
+        <select name="approverRole">
+          <option value="">Any approver</option>
+          <% Object.values(ROLE).forEach(function(r) { %>
+            <option value="<%= r %>" <%= form.approverRole === r ? 'selected' : '' %>><%= r %></option>
+          <% }) %>
+        </select>
+      </label>
+      <label class="checkbox-label" style="align-self: end; padding-bottom: 10px;">
+        <input type="checkbox" name="requiresApproval" checked /> Requires approval
+      </label>
     </div>
     <label>Description
       <textarea name="description" rows="2" placeholder="Shown to whoever's picking a catalog item (optional)."><%= form.description || '' %></textarea>
@@ -42,6 +53,8 @@
           <th>Name</th>
           <th>Category</th>
           <th>Description</th>
+          <th>Requires Approval</th>
+          <th>Approver Role</th>
           <th>Source</th>
           <th>Times Used</th>
           <th>Active</th>
@@ -55,6 +68,15 @@
             <td><input type="text" name="name" form="<%= fid %>" value="<%= e.name %>" required style="width: 160px;" /></td>
             <td><input type="text" name="category" form="<%= fid %>" value="<%= e.category || '' %>" style="width: 120px;" /></td>
             <td><input type="text" name="description" form="<%= fid %>" value="<%= e.description || '' %>" style="width: 220px;" /></td>
+            <td><label class="checkbox-label"><input type="checkbox" name="requiresApproval" form="<%= fid %>" <%= e.requiresApproval !== false ? 'checked' : '' %> /></label></td>
+            <td>
+              <select name="approverRole" form="<%= fid %>" style="width: 140px;">
+                <option value="">Any approver</option>
+                <% Object.values(ROLE).forEach(function(r) { %>
+                  <option value="<%= r %>" <%= e.approverRole === r ? 'selected' : '' %>><%= r %></option>
+                <% }) %>
+              </select>
+            </td>
             <td><span class="badge <%= e.source === 'auto' ? 'badge-status-in-progress' : 'badge-status-resolved' %>"><%= e.source === 'auto' ? 'Auto' : 'Manual' %></span></td>
             <td><%= e.requestCount || 0 %></td>
             <td><label class="checkbox-label"><input type="checkbox" name="active" form="<%= fid %>" <%= e.active !== false ? 'checked' : '' %> /></label></td>
@@ -62,7 +84,7 @@
           </tr>
         <% }) %>
         <% if (entries.length === 0) { %>
-          <tr><td colspan="7" class="empty-row">No catalog items yet — add one above, or one will appear the first time someone types a new Catalog Item on a request.</td></tr>
+          <tr><td colspan="9" class="empty-row">No catalog items yet — add one above, or one will appear the first time someone types a new Catalog Item on a request.</td></tr>
         <% } %>
       </tbody>
     </table>

@@ -9,6 +9,8 @@
   </div>
 </div>
 
+<% if (typeof warning !== "undefined" && warning) { %><div class="alert alert-warning"><%= warning %></div><% } %>
+
 <%- include('../partials/csvActions', { moduleKey: 'serviceRequest' }) %>
 
 <form class="filter-bar" method="get" action="/requests">
