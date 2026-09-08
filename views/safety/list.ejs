@@ -44,6 +44,7 @@
       <% if (incidents.length === 0) { %><tr><td colspan="<%= canManage ? 10 : 9 %>" class="empty-row">No safety incidents reported.</td></tr><% } %>
     </tbody>
   </table>
+  <%- include('../partials/pagination', { pageInfo }) %>
 </div>
 
 <%- include('../partials/footer') %>
