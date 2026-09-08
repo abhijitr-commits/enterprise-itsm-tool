@@ -1,0 +1,125 @@
+<%
+  const r = rule || {};
+  const conditions = r.conditions || [];
+  const actions = r.actions || [];
+  const isEditing = !!r._id;
+%>
+<%- include('../partials/header', { title: isEditing ? 'Edit Automation Rule' : 'New Automation Rule' }) %>
+
+<div class="page-header">
+  <h1><%= isEditing ? 'Edit Automation Rule' : 'New Automation Rule' %></h1>
+  <a class="btn btn-secondary" href="/automation">Back to Automation Rules</a>
+</div>
+
+<% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+<datalist id="automationFieldSuggestions">
+  <% FIELD_SUGGESTIONS.forEach(function(f) { %><option value="<%= f %>"></option><% }) %>
+</datalist>
+
+<form class="panel form-panel" method="post" action="<%= isEditing ? ('/automation/' + r._id) : '/automation' %>">
+  <div class="form-grid">
+    <label>Rule Name
+      <input type="text" name="name" value="<%= r.name || '' %>" required placeholder="e.g. Auto-escalate critical robotics incidents" />
+    </label>
+    <label>Module
+      <select name="module" required>
+        <option value="">-- Select --</option>
+        <% MODULE_OPTIONS.forEach(function(m) { %>
+          <option value="<%= m %>" <%= r.module === m ? 'selected' : '' %>><%= m %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Trigger
+      <select name="trigger" required>
+        <option value="">-- Select --</option>
+        <option value="onCreate" <%= r.trigger === 'onCreate' ? 'selected' : '' %>>On Create</option>
+        <option value="onUpdate" <%= r.trigger === 'onUpdate' ? 'selected' : '' %>>On Update</option>
+      </select>
+    </label>
+    <label>Order <span class="hint">(lower runs first)</span>
+      <input type="number" name="order" value="<%= r.order || 0 %>" />
+    </label>
+  </div>
+
+  <label class="checkbox-label"><input type="checkbox" name="enabled" <%= (r.enabled === undefined || r.enabled) ? 'checked' : '' %> /> Enabled</label>
+
+  <div class="panel-header" style="margin-top: 18px;"><h2>Conditions</h2></div>
+  <p class="hint">Leave a row's Field blank to skip it. If more than one condition is filled in, choose whether ALL must match (AND) or ANY (OR). No conditions at all means the rule always fires on its trigger.</p>
+
+  <label style="max-width: 220px;">Match
+    <select name="conditionLogic">
+      <option value="AND" <%= r.conditionLogic !== 'OR' ? 'selected' : '' %>>ALL conditions (AND)</option>
+      <option value="OR" <%= r.conditionLogic === 'OR' ? 'selected' : '' %>>ANY condition (OR)</option>
+    </select>
+  </label>
+
+  <% for (let i = 0; i < CONDITION_ROWS; i++) { const c = conditions[i] || {}; %>
+    <div class="form-grid" style="border-top: 1px solid var(--border-color, #e5e7eb); padding-top: 10px; margin-top: 10px;">
+      <label>Field
+        <input type="text" name="cond_field_<%= i %>" value="<%= c.field || '' %>" list="automationFieldSuggestions" placeholder="e.g. priority" />
+      </label>
+      <label>Operator
+        <select name="cond_operator_<%= i %>">
+          <option value="equals" <%= (!c.operator || c.operator === 'equals') ? 'selected' : '' %>>Equals</option>
+          <option value="notEquals" <%= c.operator === 'notEquals' ? 'selected' : '' %>>Not Equals</option>
+          <option value="contains" <%= c.operator === 'contains' ? 'selected' : '' %>>Contains</option>
+          <option value="isEmpty" <%= c.operator === 'isEmpty' ? 'selected' : '' %>>Is Empty</option>
+          <option value="isNotEmpty" <%= c.operator === 'isNotEmpty' ? 'selected' : '' %>>Is Not Empty</option>
+        </select>
+      </label>
+      <label>Value
+        <input type="text" name="cond_value_<%= i %>" value="<%= c.value || '' %>" placeholder="e.g. Critical" />
+      </label>
+    </div>
+  <% } %>
+
+  <div class="panel-header" style="margin-top: 18px;"><h2>Actions</h2></div>
+  <p class="hint">
+    Leave a row's Action Type blank to skip it. At least one action is required.
+    <strong>Set Field</strong> uses Field + Value. <strong>Escalate Priority</strong> uses neither (bumps the record's own Priority/Risk Level one level up).
+    <strong>Notify User</strong> uses Target (+ Email when Target is "Specific Email") and Message. <strong>Notify Slack/Teams</strong> uses Message only,
+    and silently does nothing until a webhook URL is set at Admin Console -&gt; Integration Settings.
+    Message supports <code>{{recordId}}</code>, <code>{{summary}}</code>, <code>{{status}}</code>, <code>{{priority}}</code> placeholders.
+  </p>
+
+  <% for (let i = 0; i < ACTION_ROWS; i++) { const a = actions[i] || {}; %>
+    <div class="form-grid" style="border-top: 1px solid var(--border-color, #e5e7eb); padding-top: 10px; margin-top: 10px;">
+      <label>Action Type
+        <select name="action_type_<%= i %>">
+          <option value="" <%= !a.type ? 'selected' : '' %>>-- None --</option>
+          <option value="setField" <%= a.type === 'setField' ? 'selected' : '' %>>Set Field</option>
+          <option value="escalatePriority" <%= a.type === 'escalatePriority' ? 'selected' : '' %>>Escalate Priority</option>
+          <option value="notifyUser" <%= a.type === 'notifyUser' ? 'selected' : '' %>>Notify User (in-app)</option>
+          <option value="notifyChannel" <%= a.type === 'notifyChannel' ? 'selected' : '' %>>Notify Slack/Teams</option>
+        </select>
+      </label>
+      <label>Field <span class="hint">(Set Field)</span>
+        <input type="text" name="action_field_<%= i %>" value="<%= a.field || '' %>" list="automationFieldSuggestions" placeholder="e.g. category" />
+      </label>
+      <label>Value <span class="hint">(Set Field)</span>
+        <input type="text" name="action_value_<%= i %>" value="<%= a.value || '' %>" placeholder="e.g. Robotics/Equipment" />
+      </label>
+      <label>Target <span class="hint">(Notify User)</span>
+        <select name="action_target_<%= i %>">
+          <option value="reporter" <%= (!a.target || a.target === 'reporter') ? 'selected' : '' %>>Reporter/Creator</option>
+          <option value="assignee" <%= a.target === 'assignee' ? 'selected' : '' %>>Assignee/Owner</option>
+          <option value="requester" <%= a.target === 'requester' ? 'selected' : '' %>>Requester</option>
+          <option value="specific" <%= a.target === 'specific' ? 'selected' : '' %>>Specific Email</option>
+        </select>
+      </label>
+      <label>Email <span class="hint">(Target = Specific)</span>
+        <input type="email" name="action_email_<%= i %>" value="<%= a.email || '' %>" placeholder="name@company.com" />
+      </label>
+      <label>Message <span class="hint">(Notify actions)</span>
+        <input type="text" name="action_message_<%= i %>" value="<%= a.message || '' %>" placeholder="e.g. {{recordId}} was just escalated to {{priority}}" />
+      </label>
+    </div>
+  <% } %>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary"><%= isEditing ? 'Save Changes' : 'Create Rule' %></button>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

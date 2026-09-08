@@ -1,0 +1,65 @@
+<%- include('../partials/header', { title: 'Automation Rules' }) %>
+
+<div class="page-header">
+  <h1>Automation Rules</h1>
+  <div class="header-actions">
+    <a href="/automation/new" class="btn btn-primary">+ New Rule</a>
+  </div>
+</div>
+
+<p class="hint" style="margin-bottom: 18px;">
+  Define "when this happens on a module, do that" rules here instead of asking for a code change — the same idea
+  behind ServiceNow's Flow Designer, BMC's Process Designer, Freshservice's Workflow Automator, and Jira Service
+  Management's Automation rules. Rules run automatically every time a matching record is created or updated.
+</p>
+
+<% if (message) { %><div class="alert alert-success"><%= message %></div><% } %>
+
+<div class="panel">
+  <div class="table-scroll">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Module</th>
+          <th>Trigger</th>
+          <th>Conditions</th>
+          <th>Actions</th>
+          <th>Status</th>
+          <th>Fired</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% rules.forEach(function(r) { %>
+          <tr>
+            <td><a href="/automation/<%= r._id %>/edit"><%= r.name %></a></td>
+            <td><%= r.module %></td>
+            <td><%= r.trigger %></td>
+            <td><%= (r.conditions || []).length %> condition(s)<% if ((r.conditions || []).length > 1) { %> (<%= r.conditionLogic %>)<% } %></td>
+            <td><%= (r.actions || []).length %> action(s)</td>
+            <td>
+              <span class="badge <%= r.enabled ? 'badge-approval-approved' : 'badge-approval-rejected' %>">
+                <%= r.enabled ? 'Enabled' : 'Disabled' %>
+              </span>
+            </td>
+            <td><%= r.runCount || 0 %>x<% if (r.lastRunAt) { %> · <%= new Date(r.lastRunAt).toLocaleString() %><% } %></td>
+            <td class="row-actions">
+              <form method="post" action="/automation/<%= r._id %>/toggle" style="display:inline">
+                <button type="submit" class="btn btn-secondary btn-sm"><%= r.enabled ? 'Disable' : 'Enable' %></button>
+              </form>
+              <form method="post" action="/automation/<%= r._id %>/delete" style="display:inline" onsubmit="return confirm('Delete this automation rule?')">
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+        <% if (rules.length === 0) { %>
+          <tr><td colspan="8" class="empty-row">No automation rules yet — create one to auto-assign, auto-notify, or auto-escalate without touching code.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
