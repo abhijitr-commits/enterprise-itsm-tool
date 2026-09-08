@@ -78,12 +78,6 @@ async function attachUser(req, res, next) {
     // can render the Export link for a given moduleKey without every
     // controller having to pass it in.
     res.locals.csvModuleMeta = csvUiMeta;
-    // Whether the current user may IMPORT into each CSV-registered
-    // module — resolved once here (permission checks are async; EJS
-    // can't await mid-render) via utils/csvAccess.js, the exact same
-    // logic csvController.js itself enforces at request time. Cheap:
-    // hasPermission() caches the whole Permission map in-process.
-    res.locals.csvCanImport = await resolveCsvImportAccess(req.user);
     // Shared inline-SVG icon helper (src/utils/icons.js) — available on
     // every page, signed in or not, so header.ejs/login.ejs/etc. can call
     // `<%- icon('home') %>` instead of hardcoding emoji or markup per view.
@@ -101,23 +95,62 @@ async function attachUser(req, res, next) {
     // every other active filter/search param intact — no controller
     // has to pass this in separately, same trick as currentPath above.
     res.locals.currentQuery = req.query || {};
-    // Same "don't make every controller pass this in" trick, for the
-    // Department datalist every "Department" field in the app now uses.
-    res.locals.departmentList = req.user ? await getDepartmentNames() : [];
-    // Same trick again for Employee/Location/Asset name suggestions —
-    // see header.ejs for the <datalist> markup these feed.
-    res.locals.employeeList = req.user ? await getEmployeeNames() : [];
-    res.locals.locationList = req.user ? await getLocationNames() : [];
-    res.locals.assetNameList = req.user ? await getAssetNames() : [];
-    // Task #102 — real User accounts for the engineer/assignee suggestion
-    // list (see utils/userDirectory.js), same cached/global pattern as
-    // the lists above. A separate list from employeeList on purpose: an
-    // assignee is someone who logs into THIS app and works tickets, not
-    // just anyone in the HR employee directory.
-    res.locals.assignableUsers = req.user ? await getAssignableUsers() : [];
-    // Unread in-app notification count for the bell icon (partials/header.ejs)
-    // — cheap (one indexed count query) and only run for signed-in users.
-    res.locals.unreadNotifications = req.user ? await unreadCount(req.user._id) : 0;
+
+    // Task #105 — everything below was previously seven separate
+    // sequential `await`s (csvCanImport, department/employee/location/
+    // asset name lists, assignable users, unread count). None of them
+    // depend on each other's result — every one only needs req.user,
+    // which is already resolved by this point — so running them one
+    // after another meant this middleware (which runs on EVERY request,
+    // page or API) paid for seven round trips end-to-end when one would
+    // do. Promise.all runs them concurrently instead; the per-source
+    // 60s in-memory caches (getDepartmentNames etc.) mean most of these
+    // resolve instantly anyway once warm, but the first request after a
+    // cold start (or right after a cache expiry) now pays for the
+    // slowest of the seven instead of the sum of all seven.
+    const [
+      csvCanImport,
+      departmentList,
+      employeeList,
+      locationList,
+      assetNameList,
+      assignableUsers,
+      unreadNotifications,
+    ] = await Promise.all([
+      // Whether the current user may IMPORT into each CSV-registered
+      // module — resolved once here (permission checks are async; EJS
+      // can't await mid-render) via utils/csvAccess.js, the exact same
+      // logic csvController.js itself enforces at request time. Cheap:
+      // hasPermission() caches the whole Permission map in-process, and
+      // resolveCsvImportAccess() itself returns {} immediately for a
+      // signed-out user without touching the DB.
+      resolveCsvImportAccess(req.user),
+      // Same "don't make every controller pass this in" trick, for the
+      // Department datalist every "Department" field in the app now uses.
+      req.user ? getDepartmentNames() : [],
+      // Same trick again for Employee/Location/Asset name suggestions —
+      // see header.ejs for the <datalist> markup these feed.
+      req.user ? getEmployeeNames() : [],
+      req.user ? getLocationNames() : [],
+      req.user ? getAssetNames() : [],
+      // Task #102 — real User accounts for the engineer/assignee suggestion
+      // list (see utils/userDirectory.js), same cached/global pattern as
+      // the lists above. A separate list from employeeList on purpose: an
+      // assignee is someone who logs into THIS app and works tickets, not
+      // just anyone in the HR employee directory.
+      req.user ? getAssignableUsers() : [],
+      // Unread in-app notification count for the bell icon (partials/header.ejs)
+      // — cheap (one indexed count query) and only run for signed-in users.
+      req.user ? unreadCount(req.user._id) : 0,
+    ]);
+    res.locals.csvCanImport = csvCanImport;
+    res.locals.departmentList = departmentList;
+    res.locals.employeeList = employeeList;
+    res.locals.locationList = locationList;
+    res.locals.assetNameList = assetNameList;
+    res.locals.assignableUsers = assignableUsers;
+    res.locals.unreadNotifications = unreadNotifications;
+
     next();
   } catch (err) {
     next(err);
