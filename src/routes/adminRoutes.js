@@ -35,5 +35,6 @@ router.post("/integrations/test", guard("admin_manage_settings"), adminControlle
 router.post("/integrations/api-key/generate", guard("admin_manage_settings"), adminController.generateApiKey);
 router.post("/integrations/api-key/revoke", guard("admin_manage_settings"), adminController.revokeApiKey);
 router.post("/integrations/send-digest", guard("admin_manage_settings"), adminController.sendExpiryDigest);
+router.post("/integrations/check-sla-breaches", guard("admin_manage_settings"), adminController.checkSlaBreaches);
 
 module.exports = router;
