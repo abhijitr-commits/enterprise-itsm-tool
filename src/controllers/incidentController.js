@@ -16,7 +16,7 @@ const { calculateSLADue, slaStatusOf } = require("../utils/sla");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
 const { getAttachmentsForRecord, getAuditTrailForRecord } = require("../utils/recordExtras");
-const { notifyUser } = require("../utils/notifications");
+const { notifyUser, notifyChannels } = require("../utils/notifications");
 const { paginate } = require("../utils/pagination");
 const { suggestKnownErrorsFor } = require("../utils/knownErrors");
 const { applyAutomation, recordAutomationRun } = require("../utils/automationEngine");
@@ -151,7 +151,7 @@ async function showIncident(req, res) {
 
   incident.slaStatus = slaStatusOf(incident);
 
-  const [attachments, auditEntries, canUpload, assetNames, categories, linkedProblems, linkedChanges, relatedKnownErrors] = await Promise.all([
+  const [attachments, auditEntries, canUpload, assetNames, categories, linkedProblems, linkedChanges, relatedKnownErrors, canManageMajorIncident] = await Promise.all([
     getAttachmentsForRecord("incidents", incident._id),
     getAuditTrailForRecord(incident._id),
     hasPermission(req.user.role, "incidents_edit"),
@@ -165,6 +165,10 @@ async function showIncident(req, res) {
     // Audit backlog — KEDB: best-effort "you might already have a
     // workaround for this" suggestions, see utils/knownErrors.js.
     suggestKnownErrorsFor(incident),
+    // Task #103 — same role set as the (previously unused) incidents_assign
+    // permission: declaring/standing-down a Major Incident is an
+    // assignment-adjacent call, not everyday ticket editing.
+    hasPermission(req.user.role, "incidents_assign"),
   ]);
 
   res.render("incidents/detail", {
@@ -172,9 +176,11 @@ async function showIncident(req, res) {
     STATUS,
     PRIORITY,
     justCreated: req.query.created === "1",
+    message: req.query.message || null,
     attachments,
     auditEntries,
     canUpload,
+    canManageMajorIncident,
     moduleKey: "incidents",
     assetNames,
     categories,
@@ -208,6 +214,11 @@ async function updateIncident(req, res) {
     incident.engineerRef = incident.engineer ? await resolveAssigneeRef(incident.engineer) : null;
     incident.remarks = data.remarks || "";
     incident.relatedAsset = data.relatedAsset || "";
+    // Task #103 — the PIR field only renders on the form once this
+    // incident is a Major Incident (see incidents/detail.ejs), so a
+    // regular incident's submit never carries it — leave it untouched
+    // rather than resetting it to "" for those.
+    if (data.pirNotes !== undefined) incident.pirNotes = data.pirNotes;
 
     if (incident.status === STATUS.CLOSED && !incident.closedDate) {
       incident.closedDate = new Date();
@@ -342,6 +353,102 @@ async function addComment(req, res) {
   res.redirect(`/incidents/${incident._id}`);
 }
 
+/*************************************************************
+ * Task #103 — Major Incident Management workflow.
+ *************************************************************/
+
+/** The "war room board" — every Incident ever declared a Major Incident, active ones (not yet stood down) first. */
+async function listMajorIncidents(req, res) {
+  const majorIncidents = await Incident.find({ isMajorIncident: true }).sort({ majorIncidentStoodDownAt: 1, majorIncidentDeclaredAt: -1 }).lean();
+  majorIncidents.forEach((inc) => {
+    inc.slaStatus = slaStatusOf(inc);
+  });
+  const active = majorIncidents.filter((i) => !i.majorIncidentStoodDownAt);
+  const stoodDown = majorIncidents.filter((i) => i.majorIncidentStoodDownAt);
+  res.render("incidents/major", { active, stoodDown });
+}
+
+/**
+ * Declares this incident a Major Incident — broadcasts to Slack/Teams
+ * (same notifyChannels() used by the SLA breach alert, see
+ * adminController.checkSlaBreaches) so the wider team hears about it
+ * immediately, not just whoever happens to open this ticket. A manual
+ * action, not automatic on Critical priority — priority is about SLA
+ * timing, declaring a Major Incident is a judgment call about scale/
+ * visibility a human makes.
+ */
+async function declareMajorIncident(req, res) {
+  const incident = await Incident.findById(req.params.id);
+  if (!incident) return res.status(404).render("errors/404");
+  if (incident.isMajorIncident) return res.redirect(`/incidents/${incident._id}`);
+
+  incident.isMajorIncident = true;
+  incident.majorIncidentDeclaredAt = new Date();
+  incident.majorIncidentDeclaredBy = req.user.email;
+  incident.history.push({
+    field: "isMajorIncident",
+    oldValue: "No",
+    newValue: "Declared Major Incident",
+    changedBy: req.user._id,
+  });
+  await incident.save();
+
+  await logAudit({
+    user: req.user._id,
+    action: "Declare Major Incident",
+    entityType: "Incident",
+    entityId: incident._id,
+    details: incident.subject,
+  });
+
+  const result = await notifyChannels(
+    "🚨 Major Incident Declared",
+    `${incident.incidentId} — ${incident.subject}\nPriority: ${incident.priority} | Engineer: ${incident.engineer || "Unassigned"} | Reported by: ${incident.employeeName}\nDeclared by: ${req.user.name} (${req.user.email})\nDetails: ${incident.description}`.trim()
+  );
+
+  const parts = ["Major Incident declared."];
+  parts.push(result.slack.sent ? "Slack: sent." : `Slack: ${result.slack.reason}`);
+  parts.push(result.teams.sent ? "Teams: sent." : `Teams: ${result.teams.reason}`);
+
+  res.redirect(`/incidents/${incident._id}?message=${encodeURIComponent(parts.join(" "))}`);
+}
+
+/** Closes out the "war room" — the situation is stable/handed off, independent of the ticket's own status/resolution. */
+async function standDownMajorIncident(req, res) {
+  const incident = await Incident.findById(req.params.id);
+  if (!incident) return res.status(404).render("errors/404");
+  if (!incident.isMajorIncident || incident.majorIncidentStoodDownAt) return res.redirect(`/incidents/${incident._id}`);
+
+  incident.majorIncidentStoodDownAt = new Date();
+  incident.majorIncidentStoodDownBy = req.user.email;
+  incident.history.push({
+    field: "isMajorIncident",
+    oldValue: "Active",
+    newValue: "Stood Down",
+    changedBy: req.user._id,
+  });
+  await incident.save();
+
+  await logAudit({
+    user: req.user._id,
+    action: "Stand Down Major Incident",
+    entityType: "Incident",
+    entityId: incident._id,
+    details: incident.subject,
+  });
+
+  const result = await notifyChannels(
+    "✅ Major Incident Stood Down",
+    `${incident.incidentId} — ${incident.subject}\nStood down by: ${req.user.name} (${req.user.email})\nA Post-Incident Review is still expected before this ticket is closed.`
+  );
+
+  const parts = ["Major Incident stood down."];
+  parts.push(result.slack.sent ? "Slack: sent." : `Slack: ${result.slack.reason}`);
+  parts.push(result.teams.sent ? "Teams: sent." : `Teams: ${result.teams.reason}`);
+
+  res.redirect(`/incidents/${incident._id}?message=${encodeURIComponent(parts.join(" "))}`);
+}
+
 module.exports = {
   listIncidents,
   showNewForm,
@@ -352,4 +459,7 @@ module.exports = {
   deleteIncident,
   bulkCloseIncidents,
   addComment,
+  listMajorIncidents,
+  declareMajorIncident,
+  standDownMajorIncident,
 };
