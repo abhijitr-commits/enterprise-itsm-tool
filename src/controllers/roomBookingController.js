@@ -12,10 +12,11 @@ const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { isHRTeam } = require("../utils/teamAccess");
 const { hasPermission } = require("../utils/permissions");
+const { paginate } = require("../utils/pagination");
 
 async function listRooms(req, res) {
-  const rooms = await Room.find({ status: "Active" }).sort({ resourceType: 1, roomName: 1 }).lean();
-  res.render("rooms/list", { rooms, RESOURCE_TYPE, message: req.query.message || null });
+  const { rows: rooms, pageInfo } = await paginate(Room, { status: "Active" }, { resourceType: 1, roomName: 1 }, req.query);
+  res.render("rooms/list", { rooms, RESOURCE_TYPE, message: req.query.message || null, pageInfo });
 }
 
 async function createRoom(req, res) {
