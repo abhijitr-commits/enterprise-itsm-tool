@@ -11,12 +11,13 @@ const { ECR_STATUS } = EngineeringChangeRequest;
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
+const { paginate } = require("../utils/pagination");
 
 async function listECRs(req, res) {
-  const ecrs = await EngineeringChangeRequest.find().sort({ requestedDate: -1 }).lean();
+  const { rows: ecrs, pageInfo } = await paginate(EngineeringChangeRequest, {}, { requestedDate: -1 }, req.query);
   const canDecide = await hasPermission(req.user.role, "ecr_decide");
 
-  res.render("engineering-changes/list", { ecrs, canDecide, ECR_STATUS, message: req.query.message || null });
+  res.render("engineering-changes/list", { ecrs, canDecide, ECR_STATUS, message: req.query.message || null, pageInfo });
 }
 
 function showNewForm(req, res) {
