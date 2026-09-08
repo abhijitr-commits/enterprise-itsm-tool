@@ -5,10 +5,11 @@ const SoftwareLicense = require("../models/SoftwareLicense");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { positiveNumber } = require("../utils/validation");
+const { paginate } = require("../utils/pagination");
 
 async function listLicenses(req, res) {
-  const licenses = await SoftwareLicense.find().sort({ softwareName: 1 }).lean();
-  res.render("licenses/list", { licenses, message: req.query.message || null });
+  const { rows: licenses, pageInfo } = await paginate(SoftwareLicense, {}, { softwareName: 1 }, req.query);
+  res.render("licenses/list", { licenses, message: req.query.message || null, pageInfo });
 }
 
 function showNewForm(req, res) {
