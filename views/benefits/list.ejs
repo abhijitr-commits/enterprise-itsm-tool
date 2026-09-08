@@ -40,6 +40,7 @@
       <% if (enrollments.length === 0) { %><tr><td colspan="9" class="empty-row">No benefit enrollments yet.</td></tr><% } %>
     </tbody>
   </table>
+  <%- include('../partials/pagination', { pageInfo }) %>
 </div>
 
 <%- include('../partials/footer') %>
