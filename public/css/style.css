@@ -587,6 +587,10 @@ a:hover { color: var(--primary-dark); }
 .badge-approval-approved { background: #dcfce7; color: #15803d; }
 .badge-approval-rejected { background: #fee2e2; color: #991b1b; }
 .badge-role { background: #ede9fe; color: #5b21b6; }
+.badge-sla-breached { background: #7f1d1d; color: #fff; }
+.badge-sla-at-risk { background: #fef3c7; color: #92400e; }
+.badge-sla-met { background: #dcfce7; color: #15803d; }
+.badge-sla-on-track { background: #f3f4f6; color: #4b5563; }
 
 .btn {
   display: inline-flex;
