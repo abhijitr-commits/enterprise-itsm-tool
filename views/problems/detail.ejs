@@ -49,6 +49,9 @@
     <label>Root Cause
       <textarea name="rootCause" rows="4" placeholder="Root cause analysis…"><%= problem.rootCause || '' %></textarea>
     </label>
+    <label>Workaround <span class="hint">(the temporary fix a Service Desk agent can use right now, while the root cause above is still being worked)</span>
+      <textarea name="workaround" rows="3" placeholder="e.g. Restart the VPN client and reconnect — resolves the symptom until the concentrator firmware is patched."><%= problem.workaround || '' %></textarea>
+    </label>
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">Save Changes</button>
     </div>

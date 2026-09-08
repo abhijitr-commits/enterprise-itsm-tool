@@ -1,0 +1,41 @@
+<%- include('../partials/header', { title: 'Known Error Database' }) %>
+
+<div class="page-header">
+  <h1>Known Error Database</h1>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/problems">← Problem Register</a>
+  </div>
+</div>
+
+<p class="hint" style="margin-bottom:16px;">
+  Every Problem marked "Known Error" — a diagnosed issue with a documented workaround, even though the permanent fix
+  (Root Cause) is still in progress. Search here first when a new Incident looks familiar.
+</p>
+
+<form class="filter-bar" method="get" action="/problems/kedb">
+  <input type="text" name="q" placeholder="Search known errors (title, root cause, workaround, incident IDs)…" value="<%= query.q %>" />
+  <button type="submit" class="btn btn-secondary">Search</button>
+</form>
+
+<div class="panel">
+  <% if (knownErrors.length === 0) { %>
+    <p class="empty-row">No known errors match your search.</p>
+  <% } else { %>
+    <% knownErrors.forEach(function(p) { %>
+      <div style="padding: 14px 0; border-bottom: 1px solid var(--border);">
+        <p style="margin: 0 0 6px;">
+          <a href="/problems/<%= p._id %>" style="font-weight: 750;"><%= p.problemId %> — <%= p.title %></a>
+          <span class="badge badge-status-<%= p.status.toLowerCase().replace(/ /g,'-') %>"><%= p.status %></span>
+        </p>
+        <p style="margin: 0 0 4px;"><strong>Root Cause:</strong> <%= p.rootCause || '—' %></p>
+        <p style="margin: 0;"><strong>Workaround:</strong> <%= p.workaround || '—' %></p>
+        <% if (p.linkedIncidents) { %>
+          <p style="margin: 4px 0 0;" class="hint">Linked Incidents: <%= p.linkedIncidents %></p>
+        <% } %>
+      </div>
+    <% }) %>
+  <% } %>
+  <%- include('../partials/pagination', { pageInfo }) %>
+</div>
+
+<%- include('../partials/footer') %>
