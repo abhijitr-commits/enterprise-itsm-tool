@@ -30,7 +30,7 @@
 <div class="panel">
   <table class="table">
     <thead>
-      <tr><th>ID</th><th>Subject</th><th>Employee</th><th>Priority</th><th>Status</th><th>SLA Due</th><th>Engineer</th></tr>
+      <tr><th>ID</th><th>Subject</th><th>Employee</th><th>Priority</th><th>Status</th><th>SLA Due</th><th>SLA</th><th>Engineer</th></tr>
     </thead>
     <tbody>
       <% incidents.forEach(function(inc) { %>
@@ -41,13 +41,15 @@
           <td><span class="badge badge-priority-<%= inc.priority.toLowerCase() %>"><%= inc.priority %></span></td>
           <td><span class="badge badge-status-<%= inc.status.toLowerCase().replace(/ /g,'-') %>"><%= inc.status %></span></td>
           <td><%= inc.slaDue ? new Date(inc.slaDue).toLocaleString() : '—' %></td>
+          <% var incSlaStatus = inc.slaStatus || 'On Track'; %>
+          <td><span class="badge badge-sla-<%= incSlaStatus.toLowerCase().replace(/ /g,'-') %>"><%= incSlaStatus %></span></td>
           <td>
             <% if (inc.engineer) { %><span class="avatar avatar-xs"><%= initials(inc.engineer) %></span> <%= inc.engineer %><% } else { %>—<% } %>
           </td>
         </tr>
       <% }) %>
       <% if (incidents.length === 0) { %>
-        <tr><td colspan="7" class="empty-row">No incidents match your filters.</td></tr>
+        <tr><td colspan="8" class="empty-row">No incidents match your filters.</td></tr>
       <% } %>
     </tbody>
   </table>

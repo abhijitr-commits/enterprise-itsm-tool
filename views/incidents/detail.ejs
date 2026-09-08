@@ -77,9 +77,29 @@
     <dl class="meta-list">
       <dt>Created</dt><dd><%= new Date(incident.createdDate).toLocaleString() %></dd>
       <dt>Created By</dt><dd><%= incident.createdBy %></dd>
-      <dt>SLA Due</dt><dd><%= incident.slaDue ? new Date(incident.slaDue).toLocaleString() : '—' %></dd>
+      <dt>SLA Due</dt><dd>
+        <%= incident.slaDue ? new Date(incident.slaDue).toLocaleString() : '—' %>
+        <% var slaStatus = incident.slaStatus || 'On Track'; %>
+        <span class="badge badge-sla-<%= slaStatus.toLowerCase().replace(/ /g,'-') %>"><%= slaStatus %></span>
+      </dd>
       <dt>Closed</dt><dd><%= incident.closedDate ? new Date(incident.closedDate).toLocaleString() : '—' %></dd>
     </dl>
+
+    <% if ((linkedProblems || []).length > 0 || (linkedChanges || []).length > 0) { %>
+      <div class="panel-header"><h2>Linked Records</h2></div>
+      <div class="meta-list">
+        <% linkedProblems.forEach(function(p) { %>
+          <p style="margin:2px 0;"><a href="/problems/<%= p._id %>"><%= p.problemId %></a> — <%= p.title %>
+            <span class="badge badge-status-<%= p.status.toLowerCase().replace(/ /g,'-') %>"><%= p.status %></span>
+          </p>
+        <% }) %>
+        <% linkedChanges.forEach(function(c) { %>
+          <p style="margin:2px 0;"><a href="/changes/<%= c._id %>"><%= c.changeId %></a> — <%= c.title %>
+            <span class="badge badge-approval-<%= c.cabStatus.toLowerCase().replace(/ /g,'-') %>"><%= c.cabStatus %></span>
+          </p>
+        <% }) %>
+      </div>
+    <% } %>
 
     <div class="panel-header"><h2>Comments</h2></div>
     <div class="comment-list">
