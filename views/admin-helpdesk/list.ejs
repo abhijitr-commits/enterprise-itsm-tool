@@ -47,6 +47,7 @@
       <% if (complaints.length === 0) { %><tr><td colspan="<%= canManage ? 9 : 8 %>" class="empty-row">No facility requests yet.</td></tr><% } %>
     </tbody>
   </table>
+  <%- include('../partials/pagination', { pageInfo }) %>
   </div>
 </div>
 
