@@ -9,6 +9,7 @@ const { WORK_ORDER_STATUS } = WorkOrder;
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { resolveAssigneeRef } = require("../utils/userDirectory");
+const { paginate } = require("../utils/pagination");
 
 async function listWorkOrders(req, res) {
   const { department, status } = req.query;
@@ -17,8 +18,8 @@ async function listWorkOrders(req, res) {
   if (department) filter.department = department;
   if (status) filter.status = status;
 
-  const orders = await WorkOrder.find(filter).sort({ createdDate: -1 }).lean();
-  res.render("work-orders/list", { orders, WORK_ORDER_STATUS, query: { department: department || "", status: status || "" }, message: req.query.message || null });
+  const { rows: orders, pageInfo } = await paginate(WorkOrder, filter, { createdDate: -1 }, req.query);
+  res.render("work-orders/list", { orders, WORK_ORDER_STATUS, query: { department: department || "", status: status || "" }, message: req.query.message || null, pageInfo });
 }
 
 function showNewForm(req, res) {
