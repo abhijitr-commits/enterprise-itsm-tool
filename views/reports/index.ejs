@@ -4,6 +4,178 @@
   <h1>Reports</h1>
 </div>
 
+<%
+  // ---- BI Dashboard (Architecture Phase 3) ----
+  // Same inline-SVG/CSS-conic-gradient charting technique already used on
+  // the main Dashboard (views/dashboard.ejs) — no charting library, just
+  // plain math + SVG, so this stays free and dependency-free.
+  var biVolTotal = biVolumeTrend.reduce(function (s, m) { return s + m.total; }, 0);
+  var biVolMax = Math.max.apply(null, biVolumeTrend.map(function (m) { return m.total; }).concat([1]));
+  var biChartW = 600, biChartH = 110;
+  var biVolStepX = biChartW / (biVolumeTrend.length - 1);
+  var biVolPoints = biVolumeTrend.map(function (m, i) {
+    return { x: i * biVolStepX, y: (biChartH - 8) * (1 - m.total / biVolMax) + 4, count: m.total, label: m.month };
+  });
+  var biVolLine = biVolPoints.map(function (p, i) { return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ' ' + p.y.toFixed(1); }).join(' ');
+  var biVolArea = biVolLine + ' L ' + biVolPoints[biVolPoints.length - 1].x.toFixed(1) + ' ' + biChartH + ' L 0 ' + biChartH + ' Z';
+
+  var biMttrMax = Math.max.apply(null, biMttr.trend.map(function (m) { return m.avgHours; }).concat([1]));
+  var biMttrStepX = biChartW / (biMttr.trend.length - 1);
+  var biMttrPoints = biMttr.trend.map(function (m, i) {
+    return { x: i * biMttrStepX, y: (biChartH - 8) * (1 - m.avgHours / biMttrMax) + 4, avgHours: m.avgHours, label: m.month };
+  });
+  var biMttrLine = biMttrPoints.map(function (p, i) { return (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ' ' + p.y.toFixed(1); }).join(' ');
+  var biMttrArea = biMttrLine + ' L ' + biMttrPoints[biMttrPoints.length - 1].x.toFixed(1) + ' ' + biChartH + ' L 0 ' + biChartH + ' Z';
+
+  var biSlaTotal = biSlaSummary.Met + biSlaSummary.Breached + biSlaSummary["At Risk"] + biSlaSummary["On Track"];
+  var biSlaSegs = [
+    { label: 'Met', value: biSlaSummary.Met, color: 'var(--success)' },
+    { label: 'Breached', value: biSlaSummary.Breached, color: 'var(--danger, #dc2626)' },
+    { label: 'At Risk', value: biSlaSummary["At Risk"], color: 'var(--warning)' },
+    { label: 'On Track', value: biSlaSummary["On Track"], color: 'var(--info)' },
+  ];
+  var biSlaCum = 0, biSlaParts = [];
+  biSlaSegs.forEach(function (s) {
+    if (biSlaTotal > 0 && s.value > 0) {
+      var start = (biSlaCum / biSlaTotal) * 100;
+      biSlaCum += s.value;
+      var end = (biSlaCum / biSlaTotal) * 100;
+      biSlaParts.push(s.color + ' ' + start.toFixed(2) + '% ' + end.toFixed(2) + '%');
+    }
+  });
+  var biSlaDonutStyle = biSlaTotal > 0 ? ('background: conic-gradient(' + biSlaParts.join(', ') + ');') : '';
+%>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-card-body">
+      <div class="stat-value"><%= biMttr.overallAvg !== null ? biMttr.overallAvg + 'h' : '—' %></div>
+      <div class="stat-label">MTTR (avg resolution time)</div>
+    </div>
+    <span class="stat-icon"><%- icon('clock') %></span>
+  </div>
+  <div class="stat-card stat-success">
+    <div class="stat-card-body">
+      <div class="stat-value"><%= biSlaSummary.compliancePct !== null ? biSlaSummary.compliancePct + '%' : '—' %></div>
+      <div class="stat-label">SLA Compliance</div>
+    </div>
+    <span class="stat-icon"><%- icon('check-circle') %></span>
+  </div>
+  <div class="stat-card stat-danger">
+    <div class="stat-card-body">
+      <div class="stat-value"><%= biChangeFailureRate.failureRatePct !== null ? biChangeFailureRate.failureRatePct + '%' : '—' %></div>
+      <div class="stat-label">Change Failure Rate</div>
+    </div>
+    <span class="stat-icon"><%- icon('alert-triangle') %></span>
+  </div>
+  <div class="stat-card stat-info">
+    <div class="stat-card-body">
+      <div class="stat-value"><%= biVolTotal %></div>
+      <div class="stat-label">Tickets (last 6 months)</div>
+    </div>
+    <span class="stat-icon"><%- icon('layers') %></span>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Ticket Volume Trend — Incidents + Requests + Problems + Changes</h2></div>
+  <div class="trend-chart-head">
+    <span class="trend-chart-value"><%= biVolTotal %></span>
+    <span class="trend-chart-sub">tickets across all four modules, last 6 months</span>
+  </div>
+  <svg class="trend-chart-svg" viewBox="0 0 <%= biChartW %> <%= biChartH %>">
+    <defs>
+      <linearGradient id="biVolGradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#6366f1" stop-opacity="0.32"/>
+        <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path class="trend-area" d="<%= biVolArea %>" fill="url(#biVolGradient)"></path>
+    <path class="trend-line" d="<%= biVolLine %>"></path>
+    <% biVolPoints.forEach(function(p) { %>
+      <circle class="trend-dot" cx="<%= p.x.toFixed(1) %>" cy="<%= p.y.toFixed(1) %>" r="2.5"></circle>
+    <% }) %>
+  </svg>
+  <div class="hint" style="margin-top: 6px;">
+    <% biVolumeTrend.forEach(function(m, i) { %><%= m.month %><% if (i < biVolumeTrend.length - 1) { %> · <% } %><% }) %>
+  </div>
+</div>
+
+<div class="dashboard-grid">
+  <div class="panel">
+    <div class="panel-header"><h2>SLA Compliance Breakdown</h2></div>
+    <% if (biSlaTotal === 0) { %>
+      <p class="donut-empty">No incidents with an SLA status yet.</p>
+    <% } else { %>
+      <div class="donut-wrap">
+        <div class="donut" style="<%= biSlaDonutStyle %>">
+          <div class="donut-center">
+            <div class="donut-center-value"><%= biSlaTotal %></div>
+            <div class="donut-center-label">Incidents</div>
+          </div>
+        </div>
+        <div class="donut-legend">
+          <% biSlaSegs.forEach(function(s) { %>
+            <% if (s.value > 0) { %>
+            <div class="donut-legend-item">
+              <span class="donut-legend-dot" style="background: <%= s.color %>"></span>
+              <span class="donut-legend-label"><%= s.label %></span>
+              <span class="donut-legend-value"><%= s.value %></span>
+            </div>
+            <% } %>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>Change Failure Rate</h2></div>
+    <% if (biChangeFailureRate.completed === 0) { %>
+      <p class="donut-empty">No changes have reached Implemented or Rolled Back yet.</p>
+    <% } else { %>
+      <div class="breakdown-bars">
+        <div class="breakdown-bar-row">
+          <div class="breakdown-bar-label"><span>Implemented</span><span><%= biChangeFailureRate.implemented %></span></div>
+          <div class="breakdown-bar-track"><div class="breakdown-bar-fill" style="width: <%= (biChangeFailureRate.implemented / biChangeFailureRate.completed * 100).toFixed(1) %>%; background: var(--success);"></div></div>
+        </div>
+        <div class="breakdown-bar-row">
+          <div class="breakdown-bar-label"><span>Rolled Back</span><span><%= biChangeFailureRate.rolledBack %></span></div>
+          <div class="breakdown-bar-track"><div class="breakdown-bar-fill" style="width: <%= (biChangeFailureRate.rolledBack / biChangeFailureRate.completed * 100).toFixed(1) %>%; background: var(--danger, #dc2626);"></div></div>
+        </div>
+      </div>
+      <p class="hint" style="margin-top: 10px;">
+        <%= biChangeFailureRate.failureRatePct %>% of completed changes (<%= biChangeFailureRate.completed %> total) had to be rolled back —
+        see each one's root cause / corrective action / lessons learned on its Change record for why.
+      </p>
+    <% } %>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Mean Time To Resolve (MTTR) Trend — Incidents</h2></div>
+  <div class="trend-chart-head">
+    <span class="trend-chart-value"><%= biMttr.overallAvg !== null ? biMttr.overallAvg + 'h' : '—' %></span>
+    <span class="trend-chart-sub">average resolution time across <%= biMttr.resolvedCount %> resolved incident(s)</span>
+  </div>
+  <svg class="trend-chart-svg" viewBox="0 0 <%= biChartW %> <%= biChartH %>">
+    <defs>
+      <linearGradient id="biMttrGradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.32"/>
+        <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path class="trend-area" d="<%= biMttrArea %>" fill="url(#biMttrGradient)"></path>
+    <path class="trend-line" d="<%= biMttrLine %>" style="stroke: #0ea5e9;"></path>
+    <% biMttrPoints.forEach(function(p) { %>
+      <circle class="trend-dot" cx="<%= p.x.toFixed(1) %>" cy="<%= p.y.toFixed(1) %>" r="2.5" style="fill: #0ea5e9;"></circle>
+    <% }) %>
+  </svg>
+  <div class="hint" style="margin-top: 6px;">
+    <% biMttr.trend.forEach(function(m, i) { %><%= m.month %> (<%= m.avgHours %>h)<% if (i < biMttr.trend.length - 1) { %> · <% } %><% }) %>
+  </div>
+</div>
+
 <div class="panel">
   <div class="panel-header"><h2>SLA Compliance (Incidents)</h2></div>
   <table class="table">
