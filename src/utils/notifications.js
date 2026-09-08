@@ -176,4 +176,9 @@ module.exports = {
   listForUser,
   markAllRead,
   markOneRead,
+  // Exported for utils/userDirectory.js (task #102) — the exact same
+  // "does this typed name match exactly one real account" resolution
+  // notifyUser has always used internally, now reused to populate the
+  // engineer/assignee *Ref fields instead of duplicating the lookup.
+  resolveRecipient,
 };
