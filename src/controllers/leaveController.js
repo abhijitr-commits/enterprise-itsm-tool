@@ -21,9 +21,10 @@ const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
 const { isDelegatedApprover } = require("../utils/delegation");
+const { paginate } = require("../utils/pagination");
 
 async function listLeave(req, res) {
-  const leaveRequests = await LeaveRequest.find().sort({ appliedDate: -1 }).lean();
+  const { rows: leaveRequests, pageInfo } = await paginate(LeaveRequest, {}, { appliedDate: -1 }, req.query);
   const canApprove = (await hasPermission(req.user.role, "leave_approve")) || (await isDelegatedApprover(req.user, "leave_approve"));
 
   res.render("leave/list", {
@@ -31,6 +32,7 @@ async function listLeave(req, res) {
     canApprove,
     LEAVE_TYPE,
     message: req.query.message || null,
+    pageInfo,
   });
 }
 
