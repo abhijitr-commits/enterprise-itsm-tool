@@ -8,10 +8,11 @@ const AdminFacilityTask = require("../models/AdminFacilityTask");
 const { FACILITY_TASK_FREQUENCY, FACILITY_TASK_STATUS } = AdminFacilityTask;
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { paginate } = require("../utils/pagination");
 
 async function listTasks(req, res) {
-  const tasks = await AdminFacilityTask.find().sort({ scheduledDate: 1 }).lean();
-  res.render("admin-facility/list", { tasks, FACILITY_TASK_FREQUENCY, message: req.query.message || null });
+  const { rows: tasks, pageInfo } = await paginate(AdminFacilityTask, {}, { scheduledDate: 1 }, req.query);
+  res.render("admin-facility/list", { tasks, FACILITY_TASK_FREQUENCY, message: req.query.message || null, pageInfo });
 }
 
 function showNewForm(req, res) {
