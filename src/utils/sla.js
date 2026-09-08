@@ -9,6 +9,7 @@
  *************************************************************/
 const Holiday = require("../models/Holiday");
 const SLAMatrix = require("../models/SLAMatrix");
+const { STATUS } = require("../config/constants");
 
 let holidayCache = { dates: null, expiresAt: 0 };
 
@@ -63,4 +64,31 @@ async function calculateSLADue(module, createdDate, priority) {
   return addBusinessHours(createdDate, hours);
 }
 
-module.exports = { addBusinessHours, calculateSLADue, getHolidaySet };
+/**
+ * Audit backlog item: "SLA due dates are calculated, but nothing
+ * actively flags or escalates a ticket once it breaches — it's a
+ * passive field today, not a trigger." This is the single shared
+ * definition of what "Breached"/"At Risk"/"On Track"/"Met" means for a
+ * ticket, so the live badge on the Incident list/detail pages, the
+ * Reports page's SLA Compliance report, and the SLA breach alert
+ * (adminController.checkSlaBreaches) can never quietly drift apart —
+ * previously this exact logic was only inline inside
+ * reportController.js's slaComplianceReport().
+ */
+function slaStatusOf(doc, now = new Date()) {
+  const slaDue = doc.slaDue ? new Date(doc.slaDue) : null;
+  const closedDate = doc.closedDate ? new Date(doc.closedDate) : null;
+  const isTerminal = doc.status === STATUS.CLOSED || doc.status === STATUS.RESOLVED;
+
+  if (isTerminal) {
+    return slaDue && closedDate ? (closedDate <= slaDue ? "Met" : "Breached") : "Met";
+  }
+  if (!slaDue) return "On Track";
+
+  const hoursRemaining = (slaDue.getTime() - now.getTime()) / (1000 * 60 * 60);
+  if (hoursRemaining < 0) return "Breached";
+  if (hoursRemaining <= 4) return "At Risk";
+  return "On Track";
+}
+
+module.exports = { addBusinessHours, calculateSLADue, getHolidaySet, slaStatusOf };
