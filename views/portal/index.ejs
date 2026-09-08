@@ -1,0 +1,124 @@
+<%- include('../partials/header', { title: 'Service Portal' }) %>
+
+<div class="page-header">
+  <h1>Service Portal</h1>
+</div>
+
+<div class="panel form-panel">
+  <p class="hint" style="margin-bottom: 12px;">
+    Search first — a Knowledge Base article might solve it faster than filing a ticket. Can't find it? Jump straight
+    to a request or an incident below.
+  </p>
+  <form method="get" action="/portal" class="form-grid" style="grid-template-columns: 1fr auto;">
+    <label style="grid-column: span 1;">
+      <input type="text" name="q" value="<%= q %>" placeholder="What do you need help with? e.g. VPN, new laptop, password reset…" />
+    </label>
+    <div class="form-actions" style="margin: 0;">
+      <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+  </form>
+</div>
+
+<% if (searched) { %>
+  <div class="panel">
+    <div class="panel-header"><h2>Knowledge Base — "<%= q %>"</h2></div>
+    <% if (kbResults.length === 0) { %>
+      <p class="empty-row">No articles matched. Try a different search, or file a ticket below.</p>
+    <% } else { %>
+      <div class="table-scroll">
+        <table class="table">
+          <thead><tr><th>Article</th><th>Category</th><th></th></tr></thead>
+          <tbody>
+            <% kbResults.forEach(function(a) { %>
+              <tr>
+                <td><a href="/knowledge/<%= a._id %>"><%= a.title %></a></td>
+                <td><%= a.category || '—' %></td>
+                <td><a class="btn btn-secondary btn-sm" href="/knowledge/<%= a._id %>">Read</a></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>Catalog Items — "<%= q %>"</h2></div>
+    <% if (catalogResults.length === 0) { %>
+      <p class="empty-row">No catalog items matched — you can still type anything you need on the New Service Request form.</p>
+    <% } else { %>
+      <div class="table-scroll">
+        <table class="table">
+          <thead><tr><th>Item</th><th>Category</th><th>Description</th><th></th></tr></thead>
+          <tbody>
+            <% catalogResults.forEach(function(c) { %>
+              <tr>
+                <td><%= c.name %></td>
+                <td><%= c.category || '—' %></td>
+                <td><%= c.description || '—' %></td>
+                <td><a class="btn btn-primary btn-sm" href="/requests/new?catalogItem=<%= encodeURIComponent(c.name) %>">Request This</a></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+<% } %>
+
+<div class="panel">
+  <div class="panel-header"><h2>Quick Actions</h2></div>
+  <div class="admin-tile-grid">
+    <a class="admin-tile" href="/incidents/new">
+      <div class="admin-tile-title">Report an Incident</div>
+      <div class="admin-tile-sub">Something's broken or not working as expected.</div>
+    </a>
+    <a class="admin-tile" href="/requests/new">
+      <div class="admin-tile-title">Submit a Service Request</div>
+      <div class="admin-tile-sub">Ask for something — new hardware, access, software, and more.</div>
+    </a>
+    <a class="admin-tile" href="/knowledge">
+      <div class="admin-tile-title">Browse Knowledge Base</div>
+      <div class="admin-tile-sub">Self-help articles across every module.</div>
+    </a>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Popular Requests</h2></div>
+  <% if (popularCatalogItems.length === 0) { %>
+    <p class="empty-row">No catalog items yet — the first few requests filed will show up here.</p>
+  <% } else { %>
+    <div class="admin-tile-grid">
+      <% popularCatalogItems.forEach(function(c) { %>
+        <a class="admin-tile" href="/requests/new?catalogItem=<%= encodeURIComponent(c.name) %>">
+          <div class="admin-tile-title"><%= c.name %></div>
+          <div class="admin-tile-sub"><%= c.category || 'General' %><% if (c.requestCount) { %> · requested <%= c.requestCount %>x<% } %></div>
+        </a>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<div class="panel">
+  <div class="panel-header"><h2>Recently Updated Knowledge Articles</h2></div>
+  <% if (recentArticles.length === 0) { %>
+    <p class="empty-row">No published articles yet.</p>
+  <% } else { %>
+    <div class="table-scroll">
+      <table class="table">
+        <thead><tr><th>Article</th><th>Category</th></tr></thead>
+        <tbody>
+          <% recentArticles.forEach(function(a) { %>
+            <tr>
+              <td><a href="/knowledge/<%= a._id %>"><%= a.title %></a></td>
+              <td><%= a.category || '—' %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>
