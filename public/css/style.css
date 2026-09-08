@@ -587,6 +587,16 @@ a:hover { color: var(--primary-dark); }
 .badge-approval-pending-second-approval { background: #fed7aa; color: #9a3412; }
 .badge-approval-approved { background: #dcfce7; color: #15803d; }
 .badge-approval-rejected { background: #fee2e2; color: #991b1b; }
+.badge-status-active { background: #dcfce7; color: #15803d; }
+.badge-status-inactive { background: #f3f4f6; color: #4b5563; }
+.badge-status-decommissioned { background: #fee2e2; color: #991b1b; }
+
+/* CMDB Graph View — task #101 */
+.cmdb-graph-svg { width: 100%; height: auto; max-height: 720px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; }
+.cmdb-graph-svg text { font-size: 11px; fill: #1f2937; }
+.cmdb-graph-legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 4px 0 16px; font-size: 13px; color: #4b5563; }
+.cmdb-graph-legend-item { display: flex; align-items: center; gap: 6px; }
+.cmdb-graph-legend-swatch { width: 18px; height: 3px; display: inline-block; }
 .badge-role { background: #ede9fe; color: #5b21b6; }
 .badge-sla-breached { background: #7f1d1d; color: #fff; }
 .badge-sla-at-risk { background: #fef3c7; color: #92400e; }
