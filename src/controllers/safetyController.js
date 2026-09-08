@@ -13,12 +13,13 @@ const { logAudit } = require("../utils/auditLog");
 const { hasPermission } = require("../utils/permissions");
 const { notifyChannels } = require("../utils/notifications");
 const { resolveAssigneeRef } = require("../utils/userDirectory");
+const { paginate } = require("../utils/pagination");
 
 async function listSafetyIncidents(req, res) {
-  const incidents = await SafetyIncident.find().sort({ createdDate: -1 }).lean();
+  const { rows: incidents, pageInfo } = await paginate(SafetyIncident, {}, { createdDate: -1 }, req.query);
   const canManage = await hasPermission(req.user.role, "safety_manage");
 
-  res.render("safety/list", { incidents, canManage, SAFETY_SEVERITY, SAFETY_STATUS, message: req.query.message || null });
+  res.render("safety/list", { incidents, canManage, SAFETY_SEVERITY, SAFETY_STATUS, message: req.query.message || null, pageInfo });
 }
 
 async function mySafetyIncidents(req, res) {
