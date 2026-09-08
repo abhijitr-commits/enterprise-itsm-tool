@@ -1,0 +1,63 @@
+<%- include('../partials/header', { title: 'Change Calendar' }) %>
+
+<div class="page-header">
+  <h1>Change Calendar — <%= monthLabel %></h1>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/changes">← Change Register</a>
+    <a class="btn btn-primary" href="/changes/new">+ New Change</a>
+  </div>
+</div>
+
+<div class="filter-bar" style="justify-content: space-between;">
+  <a class="btn btn-secondary" href="/changes/calendar?year=<%= prevYear %>&month=<%= prevMonth %>">← Previous Month</a>
+  <a class="btn btn-secondary" href="/changes/calendar"><%= monthLabel %></a>
+  <a class="btn btn-secondary" href="/changes/calendar?year=<%= nextYear %>&month=<%= nextMonth %>">Next Month →</a>
+</div>
+
+<% if (freezeWindows.length > 0) { %>
+  <div class="panel">
+    <div class="panel-header"><h2>Freeze Windows This Month</h2></div>
+    <% freezeWindows.forEach(function(fw) { %>
+      <p style="margin:4px 0;">
+        <span class="badge badge-sla-breached">Frozen</span>
+        <strong><%= fw.title %></strong> — <%= new Date(fw.startDate).toLocaleDateString() %> to <%= new Date(fw.endDate).toLocaleDateString() %>
+        <% if (fw.reason) { %> — <%= fw.reason %><% } %>
+      </p>
+    <% }) %>
+  </div>
+<% } %>
+
+<div class="panel">
+  <p class="hint" style="margin-bottom:12px;">❄ = inside a freeze window (non-emergency changes are blocked from being planned that day). ⚠ = more than one change already planned that day — worth a second look, not blocked.</p>
+  <div style="overflow-x:auto;">
+    <table class="calendar-table">
+      <thead>
+        <tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>
+      </thead>
+      <tbody>
+        <% weeks.forEach(function(week) { %>
+          <tr>
+            <% week.forEach(function(cell) { %>
+              <% if (!cell) { %>
+                <td class="calendar-cell calendar-cell-empty"></td>
+              <% } else { %>
+                <td class="calendar-cell <%= cell.freezeWindow ? 'calendar-cell-frozen' : '' %> <%= cell.isToday ? 'calendar-cell-today' : '' %>">
+                  <div class="calendar-day-num">
+                    <%= cell.day %>
+                    <% if (cell.freezeWindow) { %><span title="Freeze: <%= cell.freezeWindow.title %>">❄</span><% } %>
+                    <% if (cell.conflict) { %><span title="Multiple changes planned this day">⚠</span><% } %>
+                  </div>
+                  <% cell.changes.forEach(function(c) { %>
+                    <a class="calendar-change-pill badge-priority-<%= c.riskLevel.toLowerCase() %>" href="/changes/<%= c._id %>" title="<%= c.changeId %> — <%= c.title %> (<%= c.cabStatus %>)"><%= c.changeId %></a>
+                  <% }) %>
+                </td>
+              <% } %>
+            <% }) %>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
