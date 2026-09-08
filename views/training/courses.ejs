@@ -2,9 +2,12 @@
 
 <div class="page-header">
   <h1>Training Catalog</h1>
-  <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
-    <a class="btn btn-primary" href="/training/courses/new">+ Add Course</a>
-  <% } %>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/hr">← HR Hub</a>
+    <% if (currentUser.role === 'Administrator' || currentUser.role === 'Manager') { %>
+      <a class="btn btn-primary" href="/training/courses/new">+ Add Course</a>
+    <% } %>
+  </div>
 </div>
 
 <%- include('../partials/csvActions', { moduleKey: 'course' }) %>
