@@ -9,7 +9,7 @@ const { STATUS } = require("../config/constants");
 const { APPROVAL } = require("../models/ServiceRequest");
 
 router.get("/", requireLogin, async (req, res) => {
-  const [open, inProgress, onHold, resolved, breached, closedToday, pendingRequests, pendingChanges, pendingLeave] = await Promise.all([
+  const [open, inProgress, onHold, resolved, breached, closedToday, pendingRequests, pendingChanges, pendingLeave, activeMajorIncidents] = await Promise.all([
     Incident.countDocuments({ status: STATUS.OPEN }),
     Incident.countDocuments({ status: STATUS.IN_PROGRESS }),
     Incident.countDocuments({ status: STATUS.ON_HOLD }),
@@ -22,6 +22,13 @@ router.get("/", requireLogin, async (req, res) => {
     ServiceRequest.countDocuments({ approvalStatus: APPROVAL.PENDING }),
     Change.countDocuments({ cabStatus: APPROVAL.PENDING }),
     LeaveRequest.countDocuments({ status: APPROVAL.PENDING }),
+    // Task #103 — Major Incident war-room banner: every currently-active
+    // (declared, not yet stood down) Major Incident, so it's impossible
+    // to load the Dashboard without seeing one is in progress.
+    Incident.find({ isMajorIncident: true, majorIncidentStoodDownAt: null })
+      .select("incidentId subject priority engineer majorIncidentDeclaredAt")
+      .sort({ majorIncidentDeclaredAt: -1 })
+      .lean(),
   ]);
 
   const recent = await Incident.find().sort({ createdDate: -1 }).limit(8).lean();
@@ -56,6 +63,7 @@ router.get("/", requireLogin, async (req, res) => {
     pendingApprovals: pendingRequests + pendingChanges + pendingLeave,
     recent,
     trend,
+    activeMajorIncidents,
   });
 });
 

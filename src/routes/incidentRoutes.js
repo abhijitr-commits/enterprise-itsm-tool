@@ -19,13 +19,16 @@ function guard(action) {
 router.use(requireLogin);
 
 router.get("/", incidentController.listIncidents);
+router.get("/major", incidentController.listMajorIncidents);
 router.get("/new", guard("incidents_create"), incidentController.showNewForm);
 router.post("/", guard("incidents_create"), incidentController.createIncident);
+router.post("/bulk-close", guard("incidents_close"), incidentController.bulkCloseIncidents);
 router.get("/:id", incidentController.showIncident);
 router.post("/:id", guard("incidents_edit"), incidentController.updateIncident);
 router.post("/:id/close", guard("incidents_close"), incidentController.closeIncident);
 router.post("/:id/delete", guard("incidents_delete"), incidentController.deleteIncident);
-router.post("/bulk-close", guard("incidents_close"), incidentController.bulkCloseIncidents);
 router.post("/:id/comments", incidentController.addComment);
+router.post("/:id/declare-major", guard("incidents_assign"), incidentController.declareMajorIncident);
+router.post("/:id/stand-down-major", guard("incidents_assign"), incidentController.standDownMajorIncident);
 
 module.exports = router;
