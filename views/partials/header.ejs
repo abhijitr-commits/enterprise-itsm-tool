@@ -108,3 +108,9 @@
           <% assetNameList.forEach(function(a) { %><option value="<%= a %>"><% }) %>
         </datalist>
       <% } %>
+      <% if (typeof assignableUsers !== "undefined" && assignableUsers.length) { %>
+        <!-- Task #102 — engineer/assignee fields suggest real User accounts (utils/userDirectory.js) -->
+        <datalist id="assignableUsersList">
+          <% assignableUsers.forEach(function(u) { %><option value="<%= u.name %>"><% }) %>
+        </datalist>
+      <% } %>
