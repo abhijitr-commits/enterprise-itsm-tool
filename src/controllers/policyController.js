@@ -25,9 +25,10 @@ const PolicyAcknowledgment = require("../models/PolicyAcknowledgment");
 const Employee = require("../models/Employee");
 const { generateSequentialId } = require("../utils/idGenerator");
 const { logAudit } = require("../utils/auditLog");
+const { paginate } = require("../utils/pagination");
 
 async function listPolicies(req, res) {
-  const policies = await Policy.find({ active: true }).sort({ createdDate: -1 }).lean();
+  const { rows: policies, pageInfo } = await paginate(Policy, { active: true }, { createdDate: -1 }, req.query);
 
   const me = await Employee.findOne({ email: req.user.email.toLowerCase().trim() }).lean();
   let ackedPolicyIds = [];
@@ -36,7 +37,7 @@ async function listPolicies(req, res) {
     ackedPolicyIds = acks.map((a) => a.policyId);
   }
 
-  res.render("policies/list", { policies, ackedPolicyIds, linked: !!me, message: req.query.message || null });
+  res.render("policies/list", { policies, ackedPolicyIds, linked: !!me, message: req.query.message || null, pageInfo });
 }
 
 function showNewForm(req, res) {
