@@ -2,7 +2,10 @@
 
 <div class="page-header">
   <h1>Engineering Change Requests</h1>
-  <a href="/engineering-changes/new" class="btn btn-primary">New ECR</a>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/operations">← Operations Hub</a>
+    <a href="/engineering-changes/new" class="btn btn-primary">New ECR</a>
+  </div>
 </div>
 
 <%- include('../partials/csvActions', { moduleKey: 'engineeringChangeRequest' }) %>
