@@ -2,9 +2,12 @@
 
 <div class="page-header">
   <h1>IT Policies</h1>
-  <% if (currentUser.role === 'Administrator' || (currentUser.role === 'Manager' && String(currentUser.department||'').trim().toLowerCase() === 'it')) { %>
-    <a class="btn btn-primary" href="/policies/new">+ New Policy</a>
-  <% } %>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/hr">← HR Hub</a>
+    <% if (currentUser.role === 'Administrator' || (currentUser.role === 'Manager' && String(currentUser.department||'').trim().toLowerCase() === 'it')) { %>
+      <a class="btn btn-primary" href="/policies/new">+ New Policy</a>
+    <% } %>
+  </div>
 </div>
 
 <%- include('../partials/csvActions', { moduleKey: 'policy' }) %>
