@@ -2,7 +2,10 @@
 
 <div class="page-header">
   <h1>Performance Goals</h1>
-  <% if (isHR) { %><a class="btn btn-primary" href="/performance/goals/new">+ Set a Goal</a><% } %>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/hr">← HR Hub</a>
+    <% if (isHR) { %><a class="btn btn-primary" href="/performance/goals/new">+ Set a Goal</a><% } %>
+  </div>
 </div>
 
 <%- include('../partials/csvActions', { moduleKey: 'goal' }) %>
