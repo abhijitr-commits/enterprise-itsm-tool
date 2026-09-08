@@ -19,6 +19,7 @@ const LETTER_TYPE = {
   APPOINTMENT: "Appointment Letter",
   NO_DUES: "No Dues Certificate",
   RELIEVING: "Relieving Letter",
+  EXPERIENCE: "Experience Letter",
 };
 
 const letterSchema = new mongoose.Schema(

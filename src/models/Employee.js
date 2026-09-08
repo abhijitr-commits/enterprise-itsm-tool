@@ -31,6 +31,12 @@ const employeeSchema = new mongoose.Schema(
     designation: { type: String, trim: true },
     status: { type: String, enum: Object.values(EMPLOYEE_STATUS), default: EMPLOYEE_STATUS.NEW },
     employmentType: { type: String, enum: Object.values(EMPLOYMENT_TYPE), default: EMPLOYMENT_TYPE.ON_ROLL },
+    // Real tenure-start date, distinct from createdDate (record-creation
+    // timestamp, which for a data-migrated or backdated record can be well
+    // after the person actually joined). Optional — legacy records without
+    // it fall back to createdDate wherever a joining date is needed (see
+    // lettersController.js's Relieving/Experience letter generation).
+    dateOfJoining: { type: Date },
     contractEndDate: { type: Date },
     reportsTo: { type: String, trim: true }, // another employee's Name, blank = top-level
 
