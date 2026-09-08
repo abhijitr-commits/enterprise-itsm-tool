@@ -15,6 +15,7 @@ function guard(action) {
 router.use(requireLogin);
 
 router.get("/", problemController.listProblems);
+router.get("/kedb", problemController.listKnownErrors);
 router.get("/new", guard("problems_create"), problemController.showNewForm);
 router.post("/", guard("problems_create"), problemController.createProblem);
 router.get("/:id", problemController.showProblem);
