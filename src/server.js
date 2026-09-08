@@ -1,4 +1,25 @@
 require("dotenv").config();
+// Must load before any route file below — see asyncSafety.js's own header
+// comment for exactly why. Side-effect-only: patches Express's route-
+// registration methods so an uncaught error in any controller/middleware
+// reaches the error handler instead of crashing the whole process.
+require("./utils/asyncSafety");
+
+// Last-resort net for anything outside the Express request lifecycle that
+// asyncSafety.js can't cover (a bug in a background/fire-and-forget call,
+// a stray timer, etc.). Deliberately does NOT process.exit() — for this
+// internal tool, staying up and logging loudly beats a hard crash on
+// every concurrent user; Node's normal advice to always restart after
+// uncaughtException assumes state might be corrupted, but nothing here
+// holds in-process state that an isolated bug in one request could
+// corrupt for the others (everything durable lives in MongoDB).
+process.on("unhandledRejection", (reason) => {
+  console.error("[process] Unhandled promise rejection (recovered, not crashing):", reason);
+});
+process.on("uncaughtException", (err) => {
+  console.error("[process] Uncaught exception (recovered, not crashing):", err);
+});
+
 const path = require("path");
 const express = require("express");
 const helmet = require("helmet");
@@ -6,10 +27,12 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
+const crypto = require("crypto");
 
 const connectDB = require("./config/db");
 const { attachUser } = require("./middleware/auth");
 const { attachModuleVisibility } = require("./middleware/moduleVisibility");
+const { attachCsrfToken, verifyCsrfToken } = require("./utils/csrf");
 const authRoutes = require("./routes/authRoutes");
 const incidentRoutes = require("./routes/incidentRoutes");
 const requestRoutes = require("./routes/requestRoutes");
@@ -291,18 +314,61 @@ async function start() {
   await connectDB();
   await autoSeed();
 
+  // Render terminates TLS in front of this app and forwards over plain
+  // HTTP with an X-Forwarded-Proto header — without `trust proxy`,
+  // Express (and therefore the `cookie.secure` flag below) can't tell
+  // the request was actually HTTPS, which would silently break every
+  // cookie-setting response. `1` trusts exactly one hop (Render's own
+  // proxy), same as Express's documented recommendation for a
+  // single-reverse-proxy host.
+  app.set("trust proxy", 1);
+
+  // A hardcoded, publicly-known fallback secret here would let anyone
+  // forge a valid session cookie if SESSION_SECRET was ever left unset
+  // in the hosting environment. A missing env var still shouldn't take
+  // the whole app down on boot (this project would rather stay up than
+  // hard-fail on a config gap with no one able to log in and fix it
+  // remotely) — so the fallback is now a fresh random secret generated
+  // once per process instead, with a loud warning so it gets noticed
+  // and fixed properly. Sessions just won't survive a restart/redeploy
+  // while running on the fallback, which is a much safer failure mode
+  // than a guessable secret.
+  let sessionSecret = process.env.SESSION_SECRET;
+  if (!sessionSecret) {
+    sessionSecret = crypto.randomBytes(32).toString("hex");
+    console.warn(
+      "[server] SESSION_SECRET is not set — using a random secret generated for this process only. " +
+        "Everyone will be signed out on the next restart/redeploy. Set SESSION_SECRET in your hosting " +
+        "environment's variables to fix this permanently."
+    );
+  }
+
+  // Only force Secure cookies when actually running on Render (which sets
+  // RENDER=true) or an explicit production NODE_ENV — plain `npm run dev`
+  // on a developer's own machine has no HTTPS in front of it, and a
+  // Secure cookie is simply never sent by the browser over http://, which
+  // would silently break "stay logged in" locally with no visible error.
+  const isHostedProd = process.env.RENDER === "true" || process.env.NODE_ENV === "production";
+
   app.use(
     session({
-      secret: process.env.SESSION_SECRET || "change-me-in-.env",
+      secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
       store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
-      cookie: { maxAge: 1000 * 60 * 60 * 8 }, // 8 hours
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 8, // 8 hours
+        httpOnly: true,
+        secure: isHostedProd, // see `trust proxy` above — safe once that's in effect
+        sameSite: "lax",
+      },
     })
   );
 
   app.use(attachUser);
   app.use(attachModuleVisibility);
+  app.use(attachCsrfToken);
+  app.use(verifyCsrfToken);
 
   app.use("/", authRoutes);
   app.use("/", dashboardRoutes);
