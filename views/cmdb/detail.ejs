@@ -3,6 +3,7 @@
 <div class="page-header">
   <h1><%= ci.ciId %> — <%= ci.ciName %></h1>
   <div class="header-actions">
+    <a class="btn btn-secondary" href="/cmdb/<%= ci._id %>/impact"><%- icon('layers', {size:15}) %> Impact Analysis</a>
     <form method="post" action="/cmdb/<%= ci._id %>/delete" onsubmit="return confirm('Delete this configuration item permanently?')">
       <button class="btn btn-danger" type="submit">Delete</button>
     </form>

@@ -1,0 +1,78 @@
+<%- include('../partials/header', { title: 'Impact Analysis — ' + ci.ciId }) %>
+
+<div class="page-header">
+  <h1>Impact Analysis — <%= ci.ciId %> (<%= ci.ciName %>)</h1>
+  <div class="header-actions">
+    <a class="btn btn-secondary" href="/cmdb/<%= ci._id %>">← Back to CI</a>
+  </div>
+</div>
+
+<p class="admin-tile-sub" style="margin-bottom:16px;">
+  Traces the <strong>Dependencies</strong> field across the whole CMDB, up to 3 hops out in each direction. Built
+  from whatever CI IDs are typed into that field today — nothing to configure, but only as complete as the
+  Dependencies data entered on each CI.
+</p>
+
+<div class="dashboard-grid">
+  <div class="panel">
+    <div class="panel-header">
+      <h2><%- icon('alert-triangle', {size:18}) %> If this goes down, these are affected</h2>
+    </div>
+    <% if (upstream.length === 0) { %>
+      <p class="donut-empty">Nothing in the CMDB lists <%= ci.ciId %> as a dependency.</p>
+    <% } else { %>
+      <% upstream.forEach(function(level) { %>
+        <div class="admin-tile-sub" style="margin: 12px 0 6px; font-weight:600;">Hop <%= level.depth %> — <%= level.nodes.length %> item(s)</div>
+        <table class="table">
+          <thead><tr><th>CI ID</th><th>Name</th><th>Type</th><th>Status</th></tr></thead>
+          <tbody>
+            <% level.nodes.forEach(function(n) { %>
+              <% if (n.unknown) { %>
+                <tr><td><%= n.ciId %></td><td colspan="3" class="empty-row">Referenced but not found in the CMDB (typo, or since deleted).</td></tr>
+              <% } else { %>
+                <tr onclick="location.href='/cmdb?q=<%= encodeURIComponent(n.ciId) %>'">
+                  <td><%= n.ciId %></td>
+                  <td><%= n.ciName %></td>
+                  <td><%= n.type %></td>
+                  <td><span class="badge badge-status-<%= n.status.toLowerCase() %>"><%= n.status %></span></td>
+                </tr>
+              <% } %>
+            <% }) %>
+          </tbody>
+        </table>
+      <% }) %>
+    <% } %>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h2><%- icon('layers', {size:18}) %> What this CI depends on</h2>
+    </div>
+    <% if (downstream.length === 0) { %>
+      <p class="donut-empty"><%= ci.ciId %> lists no dependencies of its own.</p>
+    <% } else { %>
+      <% downstream.forEach(function(level) { %>
+        <div class="admin-tile-sub" style="margin: 12px 0 6px; font-weight:600;">Hop <%= level.depth %> — <%= level.nodes.length %> item(s)</div>
+        <table class="table">
+          <thead><tr><th>CI ID</th><th>Name</th><th>Type</th><th>Status</th></tr></thead>
+          <tbody>
+            <% level.nodes.forEach(function(n) { %>
+              <% if (n.unknown) { %>
+                <tr><td><%= n.ciId %></td><td colspan="3" class="empty-row">Referenced but not found in the CMDB (typo, or since deleted).</td></tr>
+              <% } else { %>
+                <tr onclick="location.href='/cmdb?q=<%= encodeURIComponent(n.ciId) %>'">
+                  <td><%= n.ciId %></td>
+                  <td><%= n.ciName %></td>
+                  <td><%= n.type %></td>
+                  <td><span class="badge badge-status-<%= n.status.toLowerCase() %>"><%= n.status %></span></td>
+                </tr>
+              <% } %>
+            <% }) %>
+          </tbody>
+        </table>
+      <% }) %>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
